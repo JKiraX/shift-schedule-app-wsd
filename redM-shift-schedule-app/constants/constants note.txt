@@ -1,0 +1,1 @@
+Includes constant copy texts or strings like placeholders, UI texts, screen names, event names, etc.

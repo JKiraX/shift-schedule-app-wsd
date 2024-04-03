@@ -1,0 +1,3 @@
+Contains all files and folders for reusable components
+
+This directory is for tags, cards etc.

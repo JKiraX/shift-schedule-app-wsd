@@ -1,0 +1,4 @@
+This directory contains utility functions and helper methods that are used across your application. 
+
+These utility functions perform common tasks or operations that are not directly related to rendering UI components 
+or managing application state, but are still essential for the functionality of your application.
