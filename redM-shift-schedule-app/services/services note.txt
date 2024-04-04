@@ -1,0 +1,2 @@
+(Frontend) This directory is for handling communication with the server,
+sending requests to the appropriate routes defined in server.js, and processing responses.

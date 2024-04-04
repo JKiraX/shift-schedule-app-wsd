@@ -1,0 +1,2 @@
+This directory provides a centralized store to manage the entire state of your application,  
+making it easier to track changes and manage interactions between different parts of the application.

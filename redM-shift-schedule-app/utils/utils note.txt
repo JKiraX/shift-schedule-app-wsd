@@ -1,0 +1,2 @@
+This directory has some utility functions that are used within the server-side code (e.g., for data validation, error handling, etc.), 
+and imported into the server.js
