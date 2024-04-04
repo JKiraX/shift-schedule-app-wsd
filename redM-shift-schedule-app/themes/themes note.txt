@@ -1,2 +1,0 @@
-This directory is for global or shared styles that are used across multiple components/screens
-i.e. colors.js, fonts.js etc.
