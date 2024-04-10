@@ -1,3 +1,0 @@
-(Frontend): Navigation setup using React Navigation or any other navigation library
-
-This directory is for handling the navigation bars for the user and admin
