@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
 export default function ContinueButton({ text, onPress }) {
   return (
@@ -16,13 +16,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 120,
-    backgroundColor: '#3D5A80'
+    backgroundColor: "#3D5A80",
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'semi-bold',
-    textTransform: 'uppercase',
+    color: "white",
+    fontWeight: "semi-bold",
+    textTransform: "uppercase",
     fontSize: 16,
-    textAlign: 'center'
-  }
+    textAlign: "center",
+  },
 });
