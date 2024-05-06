@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
-import CalendarStrip from 'react-native-calendar-strip';
-import moment from 'moment';
+import React, { useState } from "react";
+import { SafeAreaView, StyleSheet, View } from "react-native";
+import CalendarStrip from "react-native-calendar-strip";
+import moment from "moment";
 
 export default function UserHomeScreen({ navigation }) {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -11,16 +11,19 @@ export default function UserHomeScreen({ navigation }) {
   };
 
   const markedDatesFunc = (date) => {
-    const currentDate = moment().startOf('day');
-    const selectedMoment = moment(selectedDate).startOf('day');
-    const dateMoment = moment(date).startOf('day');
+    const currentDate = moment().startOf("day");
+    const selectedMoment = moment(selectedDate).startOf("day");
+    const dateMoment = moment(date).startOf("day");
 
     if (dateMoment.isSame(currentDate)) {
       return {
         dots: [
           {
-            color: selectedMoment && dateMoment.isSame(selectedMoment) ? '#E6F2FF' : 'red',
-            selectedColor: '#E6F2FF',
+            color:
+              selectedMoment && dateMoment.isSame(selectedMoment)
+                ? "#E6F2FF"
+                : "red",
+            selectedColor: "#E6F2FF",
           },
         ],
       };
@@ -30,11 +33,11 @@ export default function UserHomeScreen({ navigation }) {
       return {
         style: {
           container: {
-            backgroundColor: '#E6F2FF',
+            backgroundColor: "#E6F2FF",
           },
           text: {
-            color: 'black',
-            fontWeight: 'bold',
+            color: "black",
+            fontWeight: "bold",
           },
         },
       };
@@ -44,8 +47,8 @@ export default function UserHomeScreen({ navigation }) {
   };
 
   const canScrollToDate = (date) => {
-    const currentDate = moment().startOf('day');
-    const dateMoment = moment(date).startOf('day');
+    const currentDate = moment().startOf("day");
+    const dateMoment = moment(date).startOf("day");
     return dateMoment.isSameOrAfter(currentDate);
   };
 
@@ -56,7 +59,7 @@ export default function UserHomeScreen({ navigation }) {
           scrollable
           style={styles.calendarStrip}
           calendarHeaderStyle={styles.calendarHeader}
-          calendarColor={'white'}
+          calendarColor={"white"}
           dateNumberStyle={styles.dateNumber}
           dateNameStyle={styles.dateName}
           iconContainer={styles.iconContainer}
@@ -74,7 +77,7 @@ export default function UserHomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   calendarStrip: {
     height: 150,
@@ -82,17 +85,17 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   calendarHeader: {
-    color: 'black',
+    color: "black",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   dateNumber: {
-    color: 'black',
+    color: "black",
     fontSize: 20,
-    fontWeight: 'normal',
+    fontWeight: "normal",
   },
   dateName: {
-    color: 'black',
+    color: "black",
     fontSize: 14,
     marginTop: 5,
   },
@@ -100,7 +103,7 @@ const styles = StyleSheet.create({
     flex: 0.1,
   },
   dayContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
+    flexDirection: "column",
+    alignItems: "center",
   },
 });
