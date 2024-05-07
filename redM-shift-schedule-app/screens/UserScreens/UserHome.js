@@ -1,12 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
-import CalendarStrip from 'react-native-calendar-strip';
-import ShiftCard from '../../components/Cards/ShiftCard';
+import React, { useState, useEffect } from "react";
+import { Text, View, StyleSheet, SafeAreaView, ScrollView } from "react-native";
+import CalendarStrip from "react-native-calendar-strip";
+import ShiftCard from "../../components/Cards/ShiftCard";
 import moment from "moment";
 
 const UserHomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [shiftData, setShiftData] = useState([]);
+  const canScrollToDate = (date) => {
+    const currentDate = moment().startOf("day");
+    const dateMoment = moment(date).startOf("day");
+    return dateMoment.isSameOrAfter(currentDate);
+  };
+  const markedDates =[{
+    date: new Date(),
+    dots:[{
+      color: '#EE6C4D',
+        selectedDotColor: '#EE6C4D',
+    }]
+  }]
 
   useEffect(() => {
     // Fetch shift data from the database
@@ -75,8 +87,10 @@ const UserHomeScreen = ({ navigation }) => {
         iconContainer={{ flex: 0.1 }}
         selectedDate={selectedDate}
         onDateSelected={onDateSelected}
+        datesBlacklist={(date) => !canScrollToDate(date)}
+        markedDates={markedDates}
       />
-      
+
       {/* Render Shift Cards */}
       <ScrollView>
         <View style={styles.shiftCardsContainer}>
@@ -93,7 +107,7 @@ const UserHomeScreen = ({ navigation }) => {
       </ScrollView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   shiftCardsContainer: {
