@@ -1,6 +1,8 @@
-import React, { useState } from "react";
-import { SafeAreaView } from "react-native";
-import CalendarStrip from "react-native-calendar-strip";
+import React, { useState, useEffect } from 'react';
+import { Text, View, StyleSheet, SafeAreaView } from 'react-native';
+import CalendarStrip from 'react-native-calendar-strip';
+import ShiftCard from '../../components/Cards/ShiftCard';
+import moment from "moment";
 
 const UserHomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -27,10 +29,22 @@ const UserHomeScreen = ({ navigation }) => {
           assignedUsers: ['User 1', 'User 2'],
         },
         {
+          shiftName: '8am Shift',
+          startTime: '08:00',
+          endTime: '16:00',
+          assignedUsers: ['User 3', 'User 4'],
+        },
+        {
           shiftName: '2pm Shift',
           startTime: '14:00',
           endTime: '22:00',
-          assignedUsers: ['User 3', 'User 4'],
+          assignedUsers: ['User 1', 'User 2'],
+        },
+        {
+          shiftName: '10pm Shift',
+          startTime: '22:00',
+          endTime: '06:00',
+          assignedUsers: ['User 1', 'User 2'],
         },
         // Add more shift data objects as needed
       ];
@@ -39,6 +53,48 @@ const UserHomeScreen = ({ navigation }) => {
     } catch (error) {
       console.error('Error fetching shift data:', error);
     }
+  };
+
+  const markedDatesFunc = (date) => {
+    const currentDate = moment().startOf("day");
+    const selectedMoment = moment(selectedDate).startOf("day");
+    const dateMoment = moment(date).startOf("day");
+
+    if (dateMoment.isSame(currentDate)) {
+      return {
+        dots: [
+          {
+            color:
+              selectedMoment && dateMoment.isSame(selectedMoment)
+                ? "#E6F2FF"
+                : "red",
+            selectedColor: "#E6F2FF",
+          },
+        ],
+      };
+    }
+
+    if (selectedMoment && dateMoment.isSame(selectedMoment)) {
+      return {
+        style: {
+          container: {
+            backgroundColor: "#E6F2FF",
+          },
+          text: {
+            color: "black",
+            fontWeight: "bold",
+          },
+        },
+      };
+    }
+
+    return {};
+  };
+
+  const canScrollToDate = (date) => {
+    const currentDate = moment().startOf("day");
+    const dateMoment = moment(date).startOf("day");
+    return dateMoment.isSameOrAfter(currentDate);
   };
 
   return (
@@ -65,3 +121,5 @@ const UserHomeScreen = ({ navigation }) => {
     </SafeAreaView>
   );
 }
+
+export default UserHomeScreen;
