@@ -98,74 +98,28 @@ const UserHomeScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.innerContainer}>
-        <CalendarStrip
-          scrollable
-          style={styles.calendarStrip}
-          calendarHeaderStyle={styles.calendarHeader}
-          calendarColor={"white"}
-          dateNumberStyle={styles.dateNumber}
-          dateNameStyle={styles.dateName}
-          iconContainer={styles.iconContainer}
-          selectedDate={selectedDate}
-          onDateSelected={onDateSelected}
-          markedDatesFunc={markedDatesFunc}
-          datesBlacklist={(date) => !canScrollToDate(date)}
-          dayContainerStyle={styles.dayContainer}
-        />
-        {shiftData.map((shift, index) => (
-          <ShiftCard
-            key={index}
-            shiftName={shift.shiftName}
-            startTime={shift.startTime}
-            endTime={shift.endTime}
-            assignedUsers={shift.assignedUsers}
-          />
-        ))}
-      </View>
+    <SafeAreaView style={{ flex: 1 }}>
+      <CalendarStrip
+        scrollable
+        style={{ height: 120, paddingTop: 20, paddingBottom: 10 }}
+        calendarHeaderStyle={{
+          color: "#9098B1",
+          fontSize: 18,
+          fontWeight: "bold",
+        }}
+        calendarColor={"white"}
+        dateNumberStyle={{
+          color: "#98C1D9",
+          fontSize: 20,
+          fontWeight: "normal",
+        }}
+        dateNameStyle={{ color: "#98C1D9", fontSize: 12, marginTop: 5 }}
+        iconContainer={{ flex: 0.1 }}
+        selectedDate={selectedDate}
+        onDateSelected={onDateSelected}
+      />
     </SafeAreaView>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  innerContainer: {
-    flex: 1,
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  calendarStrip: {
-    height: 150,
-    paddingTop: 20,
-    paddingBottom: 10,
-  },
-  calendarHeader: {
-    color: "black",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  dateNumber: {
-    color: "black",
-    fontSize: 20,
-    fontWeight: "normal",
-  },
-  dateName: {
-    color: "black",
-    fontSize: 14,
-    marginTop: 5,
-  },
-  iconContainer: {
-    flex: 0.1,
-  },
-  dayContainer: {
-    flexDirection: "column",
-    alignItems: "center",
-  },
-});
+}
 
 export default UserHomeScreen;
