@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, SafeAreaView } from "react-native";
-import CalendarStrip from "react-native-calendar-strip";
-import ShiftCard from "../../components/Cards/ShiftCard";
+import React, { useState, useEffect } from 'react';
+import { Text, View, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import CalendarStrip from 'react-native-calendar-strip';
+import ShiftCard from '../../components/Cards/ShiftCard';
+import moment from "moment";
 
 const UserHomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -53,30 +54,51 @@ const UserHomeScreen = ({ navigation }) => {
       console.error("Error fetching shift data:", error);
     }
   };
-};
 
-return (
-  <SafeAreaView style={{ flex: 1 }}>
-    <CalendarStrip
-      scrollable
-      style={{ height: 120, paddingTop: 20, paddingBottom: 10 }}
-      calendarHeaderStyle={{
-        color: "#9098B1",
-        fontSize: 18,
-        fontWeight: "bold",
-      }}
-      calendarColor={"white"}
-      dateNumberStyle={{
-        color: "#98C1D9",
-        fontSize: 20,
-        fontWeight: "normal",
-      }}
-      dateNameStyle={{ color: "#98C1D9", fontSize: 12, marginTop: 5 }}
-      iconContainer={{ flex: 0.1 }}
-      selectedDate={selectedDate}
-      onDateSelected={onDateSelected}
-    />
-  </SafeAreaView>
-);
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <CalendarStrip
+        scrollable
+        style={{ height: 120, paddingTop: 20, paddingBottom: 10 }}
+        calendarHeaderStyle={{
+          color: "#9098B1",
+          fontSize: 18,
+          fontWeight: "bold",
+        }}
+        calendarColor={"white"}
+        dateNumberStyle={{
+          color: "#98C1D9",
+          fontSize: 20,
+          fontWeight: "normal",
+        }}
+        dateNameStyle={{ color: "#98C1D9", fontSize: 12, marginTop: 5 }}
+        iconContainer={{ flex: 0.1 }}
+        selectedDate={selectedDate}
+        onDateSelected={onDateSelected}
+      />
+      
+      {/* Render Shift Cards */}
+      <ScrollView>
+        <View style={styles.shiftCardsContainer}>
+          {shiftData.map((shift, index) => (
+            <ShiftCard
+              key={index}
+              shiftName={shift.shiftName}
+              startTime={shift.startTime}
+              endTime={shift.endTime}
+              assignedUsers={shift.assignedUsers}
+            />
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  shiftCardsContainer: {
+    padding: 20,
+  },
+});
 
 export default UserHomeScreen;
