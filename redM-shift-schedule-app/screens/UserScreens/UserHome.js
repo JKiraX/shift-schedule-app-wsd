@@ -1,12 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
-import CalendarStrip from 'react-native-calendar-strip';
-import ShiftCard from '../../components/Cards/ShiftCard';
+import React, { useState, useEffect } from "react";
+import { Text, View, StyleSheet, SafeAreaView, ScrollView } from "react-native";
+import CalendarStrip from "react-native-calendar-strip";
+import ShiftCard from "../../components/Cards/ShiftCard";
 import moment from "moment";
 
 const UserHomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [shiftData, setShiftData] = useState([]);
+  const canScrollToDate = (date) => {
+    const currentDate = moment().startOf("day");
+    const dateMoment = moment(date).startOf("day");
+    return dateMoment.isSameOrAfter(currentDate);
+  };
+  const markedDates =[{
+    date: new Date(),
+    dots:[{
+      color: '#EE6C4D',
+        selectedDotColor: '#EE6C4D',
+    }]
+  }]
 
   useEffect(() => {
     // Fetch shift data from the database
@@ -23,35 +35,35 @@ const UserHomeScreen = ({ navigation }) => {
       // Replace this with your actual database query logic
       const data = [
         {
-          shiftName: '6am Shift',
-          startTime: '06:00',
-          endTime: '14:00',
-          assignedUsers: ['User 1', 'User 2'],
+          shiftName: "6am Shift",
+          startTime: "06:00",
+          endTime: "14:00",
+          assignedUsers: ["User 1", "User 2"],
         },
         {
-          shiftName: '8am Shift',
-          startTime: '08:00',
-          endTime: '16:00',
-          assignedUsers: ['User 3', 'User 4'],
+          shiftName: "8am Shift",
+          startTime: "08:00",
+          endTime: "16:00",
+          assignedUsers: ["User 3", "User 4"],
         },
         {
-          shiftName: '2pm Shift',
-          startTime: '14:00',
-          endTime: '22:00',
-          assignedUsers: ['User 1', 'User 2'],
+          shiftName: "2pm Shift",
+          startTime: "14:00",
+          endTime: "22:00",
+          assignedUsers: ["User 1", "User 2"],
         },
         {
-          shiftName: '10pm Shift',
-          startTime: '22:00',
-          endTime: '06:00',
-          assignedUsers: ['User 1', 'User 2'],
+          shiftName: "10pm Shift",
+          startTime: "22:00",
+          endTime: "06:00",
+          assignedUsers: ["User 1", "User 2"],
         },
         // Add more shift data objects as needed
       ];
 
       setShiftData(data);
     } catch (error) {
-      console.error('Error fetching shift data:', error);
+      console.error("Error fetching shift data:", error);
     }
   };
 
@@ -75,8 +87,10 @@ const UserHomeScreen = ({ navigation }) => {
         iconContainer={{ flex: 0.1 }}
         selectedDate={selectedDate}
         onDateSelected={onDateSelected}
+        datesBlacklist={(date) => !canScrollToDate(date)}
+        markedDates={markedDates}
       />
-      
+
       {/* Render Shift Cards */}
       <ScrollView>
         <View style={styles.shiftCardsContainer}>
@@ -93,7 +107,7 @@ const UserHomeScreen = ({ navigation }) => {
       </ScrollView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   shiftCardsContainer: {
