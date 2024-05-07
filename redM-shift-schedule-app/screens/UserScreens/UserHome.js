@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, SafeAreaView } from 'react-native';
+import { Text, View, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import CalendarStrip from 'react-native-calendar-strip';
 import ShiftCard from '../../components/Cards/ShiftCard';
 import moment from "moment";
@@ -55,48 +55,6 @@ const UserHomeScreen = ({ navigation }) => {
     }
   };
 
-  const markedDatesFunc = (date) => {
-    const currentDate = moment().startOf("day");
-    const selectedMoment = moment(selectedDate).startOf("day");
-    const dateMoment = moment(date).startOf("day");
-
-    if (dateMoment.isSame(currentDate)) {
-      return {
-        dots: [
-          {
-            color:
-              selectedMoment && dateMoment.isSame(selectedMoment)
-                ? "#E6F2FF"
-                : "red",
-            selectedColor: "#E6F2FF",
-          },
-        ],
-      };
-    }
-
-    if (selectedMoment && dateMoment.isSame(selectedMoment)) {
-      return {
-        style: {
-          container: {
-            backgroundColor: "#E6F2FF",
-          },
-          text: {
-            color: "black",
-            fontWeight: "bold",
-          },
-        },
-      };
-    }
-
-    return {};
-  };
-
-  const canScrollToDate = (date) => {
-    const currentDate = moment().startOf("day");
-    const dateMoment = moment(date).startOf("day");
-    return dateMoment.isSameOrAfter(currentDate);
-  };
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <CalendarStrip
@@ -118,8 +76,29 @@ const UserHomeScreen = ({ navigation }) => {
         selectedDate={selectedDate}
         onDateSelected={onDateSelected}
       />
+      
+      {/* Render Shift Cards */}
+      <ScrollView>
+        <View style={styles.shiftCardsContainer}>
+          {shiftData.map((shift, index) => (
+            <ShiftCard
+              key={index}
+              shiftName={shift.shiftName}
+              startTime={shift.startTime}
+              endTime={shift.endTime}
+              assignedUsers={shift.assignedUsers}
+            />
+          ))}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  shiftCardsContainer: {
+    padding: 20,
+  },
+});
 
 export default UserHomeScreen;
