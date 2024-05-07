@@ -2,11 +2,43 @@ import React, { useState } from "react";
 import { SafeAreaView } from "react-native";
 import CalendarStrip from "react-native-calendar-strip";
 
-export default function UserHomeScreen({ navigation }) {
+const UserHomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [shiftData, setShiftData] = useState([]);
+
+  useEffect(() => {
+    // Fetch shift data from the database
+    fetchShiftData();
+  }, []);
 
   const onDateSelected = (date) => {
     setSelectedDate(date);
+    // You can fetch shift data for the selected date here if needed
+  };
+
+  const fetchShiftData = async () => {
+    try {
+      // Replace this with your actual database query logic
+      const data = [
+        {
+          shiftName: '6am Shift',
+          startTime: '06:00',
+          endTime: '14:00',
+          assignedUsers: ['User 1', 'User 2'],
+        },
+        {
+          shiftName: '2pm Shift',
+          startTime: '14:00',
+          endTime: '22:00',
+          assignedUsers: ['User 3', 'User 4'],
+        },
+        // Add more shift data objects as needed
+      ];
+
+      setShiftData(data);
+    } catch (error) {
+      console.error('Error fetching shift data:', error);
+    }
   };
 
   return (
