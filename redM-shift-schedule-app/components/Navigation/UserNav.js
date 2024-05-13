@@ -1,12 +1,14 @@
 import * as React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 //Screens
 import UserHomeScreen from "../../screens/UserScreens/UserHome";
 import UserScheduleScreen from "../../screens/UserScreens/UserSchedule";
 import UserRequestLeaveScreen from "../../screens/UserScreens/UserRequestLeave";
 import UserProfileScreen from "../../screens/UserScreens/UserProfile";
+import NotificationsScreen from "../../screens/notifications";
 
 //Screen names
 const UserHome = "Home";
@@ -14,7 +16,9 @@ const UserSchedule = "Schedule";
 const UserRequestLeave = "Request Leave";
 const UserProfile = "Profile";
 
+
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 function UserNav() {
   return (
@@ -46,22 +50,22 @@ function UserNav() {
       <Tab.Screen
         name={UserHome}
         component={UserHomeScreen}
-        options={{ headerTintColor: "#3D5A80" }}
+        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
       />
       <Tab.Screen
         name={UserSchedule}
         component={UserScheduleScreen}
-        options={{ headerTintColor: "#3D5A80" }}
+        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
       />
       <Tab.Screen
         name={UserRequestLeave}
         component={UserRequestLeaveScreen}
-        options={{ headerTintColor: "#3D5A80" }}
+        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
       />
       <Tab.Screen
         name={UserProfile}
         component={UserProfileScreen}
-        options={{ headerTintColor: "#3D5A80" }}
+        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
       />
     </Tab.Navigator>
   );
