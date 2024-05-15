@@ -8948,10 +8948,10 @@ react-native-otp-entry@^1.6.1:
   resolved "https://registry.npmjs.org/react-native-otp-entry/-/react-native-otp-entry-1.6.1.tgz"
   integrity sha512-a6nJu9lnezUyCsUU/HEJzmw+Sk/hX7WtqU1vW825DhPuAdHv1GcO28xOf69oIYEnkUAKyxpelA2u1k6hyScPcA==
 
-react-native-reanimated@~3.10.1:
-  version "3.10.1"
-  resolved "https://registry.npmjs.org/react-native-reanimated/-/react-native-reanimated-3.10.1.tgz"
-  integrity sha512-sfxg6vYphrDc/g4jf/7iJ7NRi+26z2+BszPmvmk0Vnrz6FL7HYljJqTf531F1x6tFmsf+FEAmuCtTUIXFLVo9w==
+react-native-reanimated@3.10.0:
+  version "3.10.0"
+  resolved "https://registry.npmjs.org/react-native-reanimated/-/react-native-reanimated-3.10.0.tgz"
+  integrity sha512-oiQiO+iJ8HTXTli94+Cl5R7nd+TzZf+3MYnMKWtnVDDCxFsqBgpkKO2Xp2ZhZyseXY/JDdH0//E7LlPQRRxpXg==
   dependencies:
     "@babel/plugin-transform-arrow-functions" "^7.0.0-0"
     "@babel/plugin-transform-nullish-coalescing-operator" "^7.0.0-0"
@@ -8985,7 +8985,7 @@ react-native-toggle-calendar@^1.0.3:
     prop-types "^15.5.10"
     xdate "^0.8.0"
 
-react-native@*, "react-native@>= 0.30.0", react-native@>=0.57, react-native@0.74.1:
+react-native@*, react-native@^0.74.1, "react-native@>= 0.30.0", react-native@>=0.57:
   version "0.74.1"
   resolved "https://registry.npmjs.org/react-native/-/react-native-0.74.1.tgz"
   integrity sha512-0H2XpmghwOtfPpM2LKqHIN7gxy+7G/r1hwJHKLV6uoyXGC/gCojRtoo5NqyKrWpFC8cqyT6wTYCLuG7CxEKilg==
