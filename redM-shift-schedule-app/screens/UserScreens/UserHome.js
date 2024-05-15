@@ -12,13 +12,17 @@ const UserHomeScreen = ({ navigation }) => {
     const dateMoment = moment(date).startOf("day");
     return dateMoment.isSameOrAfter(currentDate);
   };
-  const markedDates =[{
-    date: new Date(),
-    dots:[{
-      color: '#EE6C4D',
-        selectedDotColor: '#EE6C4D',
-    }]
-  }]
+  const markedDates = [
+    {
+      date: new Date(),
+      dots: [
+        {
+          color: "#EE6C4D",
+          selectedDotColor: "#EE6C4D",
+        },
+      ],
+    },
+  ];
 
   useEffect(() => {
     // Fetch shift data from the database
