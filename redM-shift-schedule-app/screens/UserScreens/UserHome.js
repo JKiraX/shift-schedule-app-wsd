@@ -75,7 +75,7 @@ const UserHomeScreen = ({ navigation }) => {
     <SafeAreaView style={{ flex: 1 }}>
       <CalendarStrip
         scrollable
-        style={{ height: 120, paddingTop: 20, paddingBottom: 10 }}
+        style={{ height: 120, paddingTop: 20, paddingBottom: 10}}
         calendarHeaderStyle={{
           color: "#9098B1",
           fontSize: 18,
