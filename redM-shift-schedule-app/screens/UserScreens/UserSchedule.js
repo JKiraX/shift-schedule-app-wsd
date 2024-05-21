@@ -2,8 +2,7 @@ import * as React from "react";
 import { Text, TouchableOpacity, View, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
-import {Calendar} from "react-native-calendars" 
-
+import { Calendar } from "react-native-calendars";
 
 export default function UserScheduleScreen({ navigation }) {
   //data for the DropdownComponent
@@ -18,16 +17,15 @@ export default function UserScheduleScreen({ navigation }) {
   const handleSelect = (selected) => {
     console.log(selected);
   };
-
+  
   // Switch Button
   const [selectedTab, setSelectedTab] = React.useState(0);
 
   return (
     <SafeAreaView style={{ flex: 1, alignItems: "center" }}>
-    
-    {/* dropdown */}
+      {/* dropdown */}
       <DropdownComponent data={data} onSelect={handleSelect} />
-    {/* switch and shift buttons */}
+      {/* switch and shift buttons */}
       <View
         style={{
           width: 350,
@@ -73,18 +71,21 @@ export default function UserScheduleScreen({ navigation }) {
       {/* Switch between shift and leave calander "pages"*/}
       {selectedTab == 0 ? (
         // Shifts Page
-        <ScrollView style={{flex: 1, alignItems: "center", paddingTop: 10}}>
-          <Calendar
-            style = {{width: 350, borderRadius:15}}
-            enableSwipeMonths = {true}
-            markingType= "period"
-          />
+        <ScrollView>
+          <View style={{ flex: 1, alignItems: "center", paddingTop: 10 }}>
+            <Calendar
+              style={{ width: 350, borderRadius: 15 }}
+              enableSwipeMonths={true}
+              
+            />
+          </View>
         </ScrollView>
       ) : (
         // Leave Page
-        <ScrollView >
-          <View style={{flex: 1, alignItems: "center", paddingTop: 10}}>
-          </View>
+        <ScrollView>
+          <View
+            style={{ flex: 1, alignItems: "center", paddingTop: 10 }}
+          ></View>
         </ScrollView>
       )}
     </SafeAreaView>
