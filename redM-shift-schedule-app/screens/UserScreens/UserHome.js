@@ -34,6 +34,28 @@ const UserHomeScreen = ({ navigation }) => {
     // You can fetch shift data for the selected date here if needed
   };
 
+  const generateSchedule = async () => {
+    try {
+      // Call your server API endpoint to generate the schedule for the current month
+      const currentMonth = new Date().getMonth() + 1; // Get the current month (1-12)
+      const currentYear = new Date().getFullYear(); // Get the current year
+      const response = await fetch(`/api/generate-schedule?month=${currentMonth}&year=${currentYear}`, {
+        method: 'POST',
+        // Add any additional headers or body if required
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        // Update the shiftData state with the generated schedule data
+        setShiftData(data);
+      } else {
+        console.error('Error generating schedule:', response.status);
+      }
+    } catch (error) {
+      console.error('Error generating schedule:', error);
+    }
+  };
+
   const fetchShiftData = async () => {
     try {
       // Replace this with your actual database query logic
