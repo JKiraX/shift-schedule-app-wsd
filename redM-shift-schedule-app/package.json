@@ -8,7 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
-  "dependencies": {
+  "dependencies": { 
     "expo": "~50.0.14",
     "expo-status-bar": "~1.11.1",
     "express": "^4.19.2",
