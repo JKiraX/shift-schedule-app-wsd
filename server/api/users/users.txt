@@ -1,1 +1,0 @@
-Directory for retrieving user list and creating a new user
