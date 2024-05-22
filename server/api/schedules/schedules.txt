@@ -1,1 +1,0 @@
-Directory for retrieving schedule lists and generating new schedules
