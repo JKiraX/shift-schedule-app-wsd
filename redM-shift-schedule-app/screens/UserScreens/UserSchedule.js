@@ -3,7 +3,7 @@ import { Text, TouchableOpacity, View, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import { Calendar } from "react-native-calendars";
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 
 export default function UserScheduleScreen({ navigation }) {
   //data for the DropdownComponent
@@ -34,15 +34,23 @@ export default function UserScheduleScreen({ navigation }) {
       const endDate = dayjs(end);
 
       while (currentDate.isBefore(endDate) || currentDate.isSame(endDate)) {
-        const dateString = currentDate.format('YYYY-MM-DD');
+        const dateString = currentDate.format("YYYY-MM-DD");
         if (dateString === start) {
-          dateRange[dateString] = { startingDay: true, color: '#3D5A80', textColor: 'white' };
+          dateRange[dateString] = {
+            startingDay: true,
+            color: "#3D5A80",
+            textColor: "white",
+          };
         } else if (dateString === end) {
-          dateRange[dateString] = { endingDay: true, color: '#3D5A80', textColor: 'white' };
+          dateRange[dateString] = {
+            endingDay: true,
+            color: "#3D5A80",
+            textColor: "white",
+          };
         } else {
-          dateRange[dateString] = { color: '#3D5A80', textColor: 'white' };
+          dateRange[dateString] = { color: "#3D5A80", textColor: "white" };
         }
-        currentDate = currentDate.add(1, 'day');
+        currentDate = currentDate.add(1, "day");
       }
 
       return dateRange;
@@ -52,11 +60,23 @@ export default function UserScheduleScreen({ navigation }) {
       if (!startDate) {
         setStartDate(day.dateString);
         setEndDate(null);
-        setMarkedDates({ [day.dateString]: { startingDay: true, color: "#3D5A80", textColor: "white" } });
+        setMarkedDates({
+          [day.dateString]: {
+            startingDay: true,
+            color: "#3D5A80",
+            textColor: "white",
+          },
+        });
       } else if (day.dateString < startDate) {
         setStartDate(day.dateString);
         setEndDate(null);
-        setMarkedDates({ [day.dateString]: { startingDay: true, color: "#3D5A80", textColor: "white" } });
+        setMarkedDates({
+          [day.dateString]: {
+            startingDay: true,
+            color: "#3D5A80",
+            textColor: "white",
+          },
+        });
       } else {
         setEndDate(day.dateString);
         setMarkedDates(generateMarkedDates(startDate, day.dateString));
@@ -128,15 +148,17 @@ export default function UserScheduleScreen({ navigation }) {
         ) : (
           // Leave Page
           <ScrollView>
-            <View style={{ flex: 1, alignItems: "center", paddingTop: 10 }}></View>
+            <View
+              style={{ flex: 1, alignItems: "center", paddingTop: 10 }}
+            ></View>
             <Calendar
-                style={{ width: 350, borderRadius: 15 }}
-                enableSwipeMonths={true}
-                hideExtraDays={true}
-                markingType="period"
-                markedDates={markedDates}
-                onDayPress={handleDayPress}
-              />
+              style={{ width: 350, borderRadius: 15 }}
+              enableSwipeMonths={true}
+              hideExtraDays={true}
+              markingType="period"
+              markedDates={markedDates}
+              onDayPress={handleDayPress}
+            />
           </ScrollView>
         )}
       </SafeAreaView>

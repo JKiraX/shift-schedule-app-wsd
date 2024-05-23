@@ -45,6 +45,7 @@ function UserNav() {
         tabBarInactiveTintColor: "#D3D3D3",
         tabBarLabelStyle: { paddingBottom: 10, fontSize: 10 },
         tabBarStyle: { padding: 10, height: 77, backgroundColor: "#3D5A80" },
+        tabBarHideOnKeyboard: true,
       })}
     >
       <Tab.Screen
