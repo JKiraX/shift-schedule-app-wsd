@@ -1,7 +1,13 @@
 // UserScheduleScreen.js
 
 import React, { useState, useEffect } from "react";
-import { Text, TouchableOpacity, View, ScrollView, StyleSheet } from "react-native";
+import {
+  Text,
+  TouchableOpacity,
+  View,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import { Calendar } from "react-native-calendars";
@@ -20,41 +26,41 @@ const ShiftCardsContainer = () => {
       // Replace this with your actual database query logic
       const data = [
         {
-          shiftName: '6am Shift',
-          startTime: '06:00',
-          endTime: '14:00',
-          assignedUsers: ['User 1', 'User 2'],
+          shiftName: "6am Shift",
+          startTime: "06:00",
+          endTime: "14:00",
+          assignedUsers: ["User 1", "User 2"],
         },
         {
-          shiftName: '8am Shift',
-          startTime: '08:00',
-          endTime: '16:00',
-          assignedUsers: ['User 3', 'User 4'],
+          shiftName: "8am Shift",
+          startTime: "08:00",
+          endTime: "16:00",
+          assignedUsers: ["User 3", "User 4"],
         },
         {
-          shiftName: '2pm Shift',
-          startTime: '14:00',
-          endTime: '22:00',
-          assignedUsers: ['User 1', 'User 2'],
+          shiftName: "2pm Shift",
+          startTime: "14:00",
+          endTime: "22:00",
+          assignedUsers: ["User 1", "User 2"],
         },
         {
-          shiftName: '10pm Shift',
-          startTime: '22:00',
-          endTime: '06:00',
-          assignedUsers: ['User 1', 'User 2'],
+          shiftName: "10pm Shift",
+          startTime: "22:00",
+          endTime: "06:00",
+          assignedUsers: ["User 1", "User 2"],
         },
         // Add more shift data objects as needed
       ];
 
       setShiftData(data);
     } catch (error) {
-      console.error('Error fetching shift data:', error);
+      console.error("Error fetching shift data:", error);
     }
   };
 
   return (
     <ScrollView>
-      <View style={{padding:20, minWidth:350}}>
+      <View style={{ padding: 20, minWidth: 350 }}>
         {shiftData.map((shift, index) => (
           <ShiftCard
             key={index}
@@ -206,7 +212,7 @@ export default function UserScheduleScreen({ navigation }) {
                 markedDates={markedDates}
                 onDayPress={handleDayPress}
               />
-              <ShiftCardsContainer/>
+              <ShiftCardsContainer />
             </View>
           </ScrollView>
         ) : (
@@ -221,7 +227,7 @@ export default function UserScheduleScreen({ navigation }) {
                 markedDates={markedDates}
                 onDayPress={handleDayPress}
               />
-              <ShiftCardsContainer/>
+              <ShiftCardsContainer />
             </View>
           </ScrollView>
         )}
