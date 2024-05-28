@@ -11,9 +11,9 @@ app.get('/schedules', async (req, res) => {
   try {
     const schedules = await db.any(`
       SELECT s.schedules_id, u.user_name AS user_name, sh.name AS shift_name, sh.start_time, sh.end_time 
-      FROM schedules s
-      JOIN users u ON s.user_id = u.user_id
-      JOIN shifts sh ON s.shift_id = sh.shift_id
+      FROM public1.schedules s
+      JOIN public1.users u ON s.user_id = u.user_id
+      JOIN public1.shifts sh ON s.shift_id = sh.shift_id
       WHERE s.date = $1
     `, [date]);
     console.log(`Schedules found: ${schedules.length}`); // Debug log
@@ -30,12 +30,12 @@ app.get('/schedules', async (req, res) => {
 app.post('/criteria', async (req, res) => {
   const { user_id, day_of_week, max_shifts_per_week } = req.body;
   try {
-    const userExists = await db.oneOrNone('SELECT 1 FROM users WHERE user_id = $1', [user_id]);
+    const userExists = await db.oneOrNone('SELECT 1 FROM public1.users WHERE user_id = $1', [user_id]);
     if (!userExists) {
       return res.status(400).json({ message: 'User does not exist' });
     }
     await db.none(
-      'INSERT INTO criteria (user_id, day_of_week, max_shifts_per_week) VALUES ($1, $2, $3)',
+      'INSERT INTO public1.criteria (user_id, day_of_week, max_shifts_per_week) VALUES ($1, $2, $3)',
       [user_id, day_of_week, max_shifts_per_week]
     );
     res.sendStatus(201);
