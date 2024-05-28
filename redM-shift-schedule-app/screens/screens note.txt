@@ -1,3 +1,0 @@
-Contains different pages or screens of the app like HomeScreen, LoginScreen, etc.
-
-There are directories for both the user and admin screens 

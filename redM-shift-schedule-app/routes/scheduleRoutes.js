@@ -1,9 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const scheduleController = require('../controllers/scheduleController');
-const db = require('/New-Shift-Schedule-App/shift-schedule-app-wsd/db');
 
-// Route to generate schedules
-router.post('/generate-schedule', scheduleController.generateSchedules);
+// GET /schedules
+router.get('/schedules', async (req, res) => {
+  const result = await db.query('SELECT * FROM schedules');
+  res.json(result.rows);
+});
+
+// POST /criteria
+router.post('/criteria', async (req, res) => {
+  const { user_id, day_of_week, max_shifts_per_week } = req.body;
+  await db.query(
+    'INSERT INTO criteria (user_id, day_of_week, max_shifts_per_week) VALUES ($1, $2, $3)',
+    [user_id, day_of_week, max_shifts_per_week]
+  );
+  res.sendStatus(201);
+});
 
 module.exports = router;
