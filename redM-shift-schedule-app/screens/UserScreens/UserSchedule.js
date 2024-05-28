@@ -1,12 +1,81 @@
-import React, { useState } from "react";
-import { Text, TouchableOpacity, View, ScrollView } from "react-native";
+// UserScheduleScreen.js
+
+import React, { useState, useEffect } from "react";
+import {
+  Text,
+  TouchableOpacity,
+  View,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import { Calendar } from "react-native-calendars";
 import dayjs from "dayjs";
+import ShiftCard from "../../components/Cards/ShiftCard";
 
+const ShiftCardsContainer = () => {
+  const [shiftData, setShiftData] = useState([]);
+
+  useEffect(() => {
+    fetchShiftData();
+  }, []);
+
+  const fetchShiftData = async () => {
+    try {
+      // Replace this with your actual database query logic
+      const data = [
+        {
+          shiftName: "6am Shift",
+          startTime: "06:00",
+          endTime: "14:00",
+          assignedUsers: ["User 1", "User 2"],
+        },
+        {
+          shiftName: "8am Shift",
+          startTime: "08:00",
+          endTime: "16:00",
+          assignedUsers: ["User 3", "User 4"],
+        },
+        {
+          shiftName: "2pm Shift",
+          startTime: "14:00",
+          endTime: "22:00",
+          assignedUsers: ["User 1", "User 2"],
+        },
+        {
+          shiftName: "10pm Shift",
+          startTime: "22:00",
+          endTime: "06:00",
+          assignedUsers: ["User 1", "User 2"],
+        },
+        // Add more shift data objects as needed
+      ];
+
+      setShiftData(data);
+    } catch (error) {
+      console.error("Error fetching shift data:", error);
+    }
+  };
+
+  return (
+    <ScrollView>
+      <View style={{ padding: 20, minWidth: 350 }}>
+        {shiftData.map((shift, index) => (
+          <ShiftCard
+            key={index}
+            shiftName={shift.shiftName}
+            startTime={shift.startTime}
+            endTime={shift.endTime}
+            assignedUsers={shift.assignedUsers}
+          />
+        ))}
+      </View>
+    </ScrollView>
+  );
+};
 export default function UserScheduleScreen({ navigation }) {
-  //data for the DropdownComponent
+  // Data for the DropdownComponent
   const data = [
     { key: "1", value: "Yusheen" },
     { key: "2", value: "Roxanne" },
@@ -22,7 +91,7 @@ export default function UserScheduleScreen({ navigation }) {
   // Switch Button
   const [selectedTab, setSelectedTab] = useState(0);
 
-  //Date range picker
+  // Date range picker
   const DateRangePicker = () => {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
@@ -85,9 +154,9 @@ export default function UserScheduleScreen({ navigation }) {
 
     return (
       <SafeAreaView style={{ flex: 1, alignItems: "center" }}>
-        {/* dropdown */}
+        {/* Dropdown */}
         <DropdownComponent data={data} onSelect={handleSelect} />
-        {/* switch and shift buttons */}
+        {/* Switch and shift buttons */}
         <View
           style={{
             width: 350,
@@ -143,22 +212,23 @@ export default function UserScheduleScreen({ navigation }) {
                 markedDates={markedDates}
                 onDayPress={handleDayPress}
               />
+              <ShiftCardsContainer />
             </View>
           </ScrollView>
         ) : (
           // Leave Page
           <ScrollView>
-            <View
-              style={{ flex: 1, alignItems: "center", paddingTop: 10 }}
-            ></View>
-            <Calendar
-              style={{ width: 350, borderRadius: 15 }}
-              enableSwipeMonths={true}
-              hideExtraDays={true}
-              markingType="period"
-              markedDates={markedDates}
-              onDayPress={handleDayPress}
-            />
+            <View style={{ flex: 1, alignItems: "center", paddingTop: 10 }}>
+              <Calendar
+                style={{ width: 350, borderRadius: 15 }}
+                enableSwipeMonths={true}
+                hideExtraDays={true}
+                markingType="period"
+                markedDates={markedDates}
+                onDayPress={handleDayPress}
+              />
+              <ShiftCardsContainer />
+            </View>
           </ScrollView>
         )}
       </SafeAreaView>

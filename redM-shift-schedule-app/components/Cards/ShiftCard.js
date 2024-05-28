@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const ShiftCard = ({ shiftName, startTime, endTime, assignedUsers }) => {
   return (
@@ -12,6 +13,7 @@ const ShiftCard = ({ shiftName, startTime, endTime, assignedUsers }) => {
         <Text style={styles.time}>Start: {startTime}</Text>
         <Text style={styles.time}>End: {endTime}</Text>
       </View>
+      <View></View>
     </View>
   );
 };
@@ -20,7 +22,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#d3d3d3',
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 15,
     marginVertical: 8,
   },
   shiftName: {
