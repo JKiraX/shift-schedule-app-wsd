@@ -5,8 +5,8 @@ export default function NotificationsScreen({ navigation }) {
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <Text
-                onPress={() => alert('This is the "Profile" screen.')}
-                style={{ fontSize: 26, fontWeight: 'bold' }}>Profile Screen</Text>
+                onPress={() => alert('This is the "Notifications" screen.')}
+                style={{ fontSize: 26, fontWeight: 'bold' }}>Notifications</Text>
         </View>
     );
 }

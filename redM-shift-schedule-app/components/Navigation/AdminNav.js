@@ -1,25 +1,29 @@
 import * as React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Button } from "react-native";
-//Screens
+import { useNavigation } from "@react-navigation/native";
+
+// Screens
 import AdminHomeScreen from "../../screens/AdminScreens/AdminHome";
 import AdminScheduleScreen from "../../screens/AdminScreens/AdminSchedule";
 import AdminEmployeesScreen from "../../screens/AdminScreens/AdminEmployees";
 import AdminProfileScreen from "../../screens/AdminScreens/AdminProfile";
 import NotificationsScreen from "../../screens/notifications";
-//Screen names
+
+// Screen names
 const AdminHome = "Home";
 const AdminSchedule = "Schedule";
 const AdminEmployees = "Employees";
 const AdminProfile = "Profile";
-const notifications = "Notifications";
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
-function AdminNav() {
+function TabNavigator() {
+  const navigation = useNavigation();
+
   return (
     <Tab.Navigator
       initialRouteName={AdminHome}
@@ -27,6 +31,7 @@ function AdminNav() {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           let rn = route.name;
+
           if (rn === AdminHome) {
             iconName = focused ? "home" : "home-outline";
           } else if (rn === AdminSchedule) {
@@ -36,15 +41,14 @@ function AdminNav() {
           } else if (rn === AdminProfile) {
             iconName = focused ? "account" : "account-outline";
           }
-          return (
-            <MaterialCommunityIcons name={iconName} size={size} color={color} />
-          );
+
+          return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: "white",
         tabBarInactiveTintColor: "#D3D3D3",
         tabBarLabelStyle: { paddingBottom: 10, fontSize: 10 },
         tabBarStyle: { padding: 10, height: 77, backgroundColor: "#3D5A80" },
-        tabBarHideOnKeyboard:true,
+        tabBarHideOnKeyboard: true,
       })}
     >
       <Tab.Screen
@@ -53,16 +57,13 @@ function AdminNav() {
         options={{
           headerTintColor: "#3D5A80",
           headerTitleAlign: "center",
-          headerRigh: () => (
-            <Button
-              title={
-                <MaterialCommunityIcons
-                  name="bell-ring-outline"
-                  size={24}
-                  color="black"
-                />
-              }
-              onPress={() => navigation.navigate(NotificationsScreen)}
+          headerRight: () => (
+            <MaterialCommunityIcons
+              name="bell-outline"
+              size={25}
+              style={{ paddingRight: 15 }}
+              color="#3D5A80"
+              onPress={() => navigation.navigate("Notifications")}
             />
           ),
         }}
@@ -83,6 +84,19 @@ function AdminNav() {
         options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
       />
     </Tab.Navigator>
+  );
+}
+
+function AdminNav() {
+  return (
+    <Stack.Navigator initialRouteName="MainTabs">
+      <Stack.Screen name="MainTabs" component={TabNavigator} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="Notifications"
+        component={NotificationsScreen}
+        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
+      />
+    </Stack.Navigator>
   );
 }
 
