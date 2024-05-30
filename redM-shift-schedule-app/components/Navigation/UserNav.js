@@ -2,25 +2,27 @@ import * as React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
 
-//Screens
+// Screens
 import UserHomeScreen from "../../screens/UserScreens/UserHome";
 import UserScheduleScreen from "../../screens/UserScreens/UserSchedule";
 import UserRequestLeaveScreen from "../../screens/UserScreens/UserRequestLeave";
 import UserProfileScreen from "../../screens/UserScreens/UserProfile";
 import NotificationsScreen from "../../screens/notifications";
 
-//Screen names
+// Screen names
 const UserHome = "Home";
 const UserSchedule = "Schedule";
 const UserRequestLeave = "Request Leave";
 const UserProfile = "Profile";
 
-
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-function UserNav() {
+function TabNavigator() {
+  const navigation = useNavigation();
+
   return (
     <Tab.Navigator
       initialRouteName={UserHome}
@@ -28,6 +30,7 @@ function UserNav() {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           let rn = route.name;
+
           if (rn === UserHome) {
             iconName = focused ? "home" : "home-outline";
           } else if (rn === UserSchedule) {
@@ -37,6 +40,7 @@ function UserNav() {
           } else if (rn === UserProfile) {
             iconName = focused ? "account" : "account-outline";
           }
+
           return (
             <MaterialCommunityIcons name={iconName} size={size} color={color} />
           );
@@ -51,7 +55,19 @@ function UserNav() {
       <Tab.Screen
         name={UserHome}
         component={UserHomeScreen}
-        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
+        options={{
+          headerTintColor: "#3D5A80",
+          headerTitleAlign: "center",
+          headerRight: () => (
+            <MaterialCommunityIcons
+              name="bell-outline"
+              size={25}
+              style={{ paddingRight: 15 }}
+              color="#3D5A80"
+              onPress={() => navigation.navigate("Notifications")}
+            />
+          ),
+        }}
       />
       <Tab.Screen
         name={UserSchedule}
@@ -69,6 +85,23 @@ function UserNav() {
         options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
       />
     </Tab.Navigator>
+  );
+}
+
+function UserNav() {
+  return (
+    <Stack.Navigator initialRouteName="MainTabs">
+      <Stack.Screen
+        name="Back"
+        component={TabNavigator}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Notifications"
+        component={NotificationsScreen}
+        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
+      />
+    </Stack.Navigator>
   );
 }
 
