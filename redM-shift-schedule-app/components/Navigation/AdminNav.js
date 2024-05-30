@@ -2,7 +2,6 @@ import * as React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 // Screens
@@ -11,6 +10,7 @@ import AdminScheduleScreen from "../../screens/AdminScreens/AdminSchedule";
 import AdminEmployeesScreen from "../../screens/AdminScreens/AdminEmployees";
 import AdminProfileScreen from "../../screens/AdminScreens/AdminProfile";
 import NotificationsScreen from "../../screens/notifications";
+import ReportsScreen from "../../screens/report";
 
 // Screen names
 const AdminHome = "Home";
@@ -66,6 +66,15 @@ function TabNavigator() {
               onPress={() => navigation.navigate("Notifications")}
             />
           ),
+          headerLeft: () => (
+            <MaterialCommunityIcons
+              name="chart-bar"
+              size={25}
+              style={{ paddingLeft: 15 }}
+              color="#3D5A80"
+              onPress={() => navigation.navigate("Reports")}
+            />
+          ),
         }}
       />
       <Tab.Screen
@@ -94,6 +103,11 @@ function AdminNav() {
       <Stack.Screen
         name="Notifications"
         component={NotificationsScreen}
+        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
+      />
+      <Stack.Screen
+        name="Reports"
+        component={ReportsScreen}
         options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
       />
     </Stack.Navigator>
