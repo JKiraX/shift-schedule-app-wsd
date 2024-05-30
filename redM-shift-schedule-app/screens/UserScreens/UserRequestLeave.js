@@ -120,7 +120,7 @@ export default function UserRequestLeaveScreen({ navigation }) {
               minWidth: 350,
               borderRadius: 15,
               borderColor: "#3D5A80",
-              backgroundColor:"white"
+              backgroundColor: "white",
             }}
             multiline
             numberOfLines={5}
@@ -128,10 +128,9 @@ export default function UserRequestLeaveScreen({ navigation }) {
             onChangeText={handleTextChange}
             value={justification}
             placeholder="Type here..."
-            
           />
         </KeyboardAvoidingView>
-        <SmallButton text="Submit" onPress={()=> console.log("Submit")}/>
+        <SmallButton text="Submit" onPress={() => console.log("Submit")} />
       </SafeAreaView>
     );
   };
