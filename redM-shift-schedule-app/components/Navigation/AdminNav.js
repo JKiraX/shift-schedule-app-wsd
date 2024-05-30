@@ -42,7 +42,9 @@ function TabNavigator() {
             iconName = focused ? "account" : "account-outline";
           }
 
-          return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+          return (
+            <MaterialCommunityIcons name={iconName} size={size} color={color} />
+          );
         },
         tabBarActiveTintColor: "white",
         tabBarInactiveTintColor: "#D3D3D3",
@@ -99,7 +101,11 @@ function TabNavigator() {
 function AdminNav() {
   return (
     <Stack.Navigator initialRouteName="MainTabs">
-      <Stack.Screen name="MainTabs" component={TabNavigator} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="MainTabs"
+        component={TabNavigator}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="Notifications"
         component={NotificationsScreen}
