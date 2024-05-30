@@ -51,7 +51,15 @@ function UserNav() {
       <Tab.Screen
         name={UserHome}
         component={UserHomeScreen}
-        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
+        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center", headerRight:() => (
+          <MaterialCommunityIcons
+            name= "bell-outline"
+            size={25}
+            style={{paddingRight:15}}
+            color="#3D5A80"
+            onPress={() => navigation.navigate(NotificationsScreen)}
+          />
+        ) }}
       />
       <Tab.Screen
         name={UserSchedule}
