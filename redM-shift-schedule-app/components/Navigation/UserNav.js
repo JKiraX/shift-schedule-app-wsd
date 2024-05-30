@@ -92,7 +92,7 @@ function UserNav() {
   return (
     <Stack.Navigator initialRouteName="MainTabs">
       <Stack.Screen
-        name="MainTabs"
+        name="Back"
         component={TabNavigator}
         options={{ headerShown: false }}
       />

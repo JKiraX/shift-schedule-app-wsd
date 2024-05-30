@@ -80,11 +80,7 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers }) => {
               Please select employee to switch on the shift.
             </Text>
             {/* Uername needs to come from backend */}
-            <Text style={{ fontSize: 16 }}>User 1</Text>
-            <View style={{ alignItems: "center" }}>
-              <DropdownComponent data={data} onSelect={handleSelect} />
-            </View>
-            <Text style={{ fontSize: 16 }}>User 2</Text>
+            <Text style={{ fontSize: 16 }}>Switch User 1 with:</Text>
             <View style={{ alignItems: "center" }}>
               <DropdownComponent data={data} onSelect={handleSelect} />
             </View>
