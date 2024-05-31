@@ -7,7 +7,7 @@ import {
   SafeAreaView,
   Alert,
 } from "react-native";
-import ContinueButton from "../../shift-schedule-app-wsd/redM-shift-schedule-app/components/Buttons/ContinueButton";
+import ContinueButton from "../components/Buttons/ContinueButton"
 
 const ChangePasswordScreen = () => {
   const [currentPassword, setCurrentPassword] = useState("");
