@@ -2,9 +2,12 @@ const db = require('./db');
 const moment = require('moment');
 
 async function generateSchedules() {
+  console.log('Generating schedules...'); // Log start
   const users = await db.any('SELECT user_id FROM public1.users');
   const shifts = await db.any('SELECT shift_id, name FROM public1.shifts');
-  const daysInMonth = moment().daysInMonth();
+  const currentMonth = moment().month();  // Get current month (0-11)
+  const currentYear = moment().year();    // Get current year (e.g., 2024)
+  const daysInMonth = moment().daysInMonth(); // Get the number of days in the current month
   const schedules = [];
 
   const shiftsByName = shifts.reduce((map, shift) => {
@@ -13,7 +16,7 @@ async function generateSchedules() {
   }, {});
 
   for (let day = 1; day <= daysInMonth; day++) {
-    const date = moment().date(day).format('YYYY-MM-DD');
+    const date = moment().year(currentYear).month(currentMonth).date(day).format('YYYY-MM-DD');
     const dayOfWeek = moment(date).day(); // Sunday: 0, Monday: 1, ..., Saturday: 6
 
     // Rotate through users
@@ -83,13 +86,13 @@ async function generateSchedules() {
     }
   }
 
-  // Ensure everyone works 5 days in a week
+  // Ensure everyone works 5 days in a week within the current month
   for (const user of users) {
-    for (let week = 1; week <= 5; week++) {
-      let workDays = schedules.filter(s => s.user_id === user.user_id && moment(s.date).week() === week).length;
+    for (let weekStart = 0; weekStart < daysInMonth; weekStart += 7) {
+      let workDays = schedules.filter(s => s.user_id === user.user_id && moment(s.date).month() === currentMonth && moment(s.date).year() === currentYear).length;
 
       while (workDays < 5) {
-        const date = moment().week(week).startOf('week').add(workDays, 'days').format('YYYY-MM-DD');
+        const date = moment().year(currentYear).month(currentMonth).startOf('month').add(weekStart, 'days').add(workDays, 'days').format('YYYY-MM-DD');
         if (!schedules.find(s => s.user_id === user.user_id && s.date === date)) {
           schedules.push({
             user_id: user.user_id,
@@ -101,7 +104,7 @@ async function generateSchedules() {
       }
     }
   }
-
+  console.log('Schedules to be inserted:', schedules); // Log schedules
   await db.tx(t => {
     const queries = [
       t.none('TRUNCATE TABLE public1.schedules'),
@@ -113,6 +116,10 @@ async function generateSchedules() {
       )
     ];
     return t.batch(queries);
+  }).then(() => {
+    console.log('Schedules generated and inserted successfully.'); // Log success
+  }).catch(error => {
+    console.error('Error inserting schedules:', error); // Log error
   });
 }
 

@@ -38,7 +38,7 @@ const UserHomeScreen = ({ navigation }) => {
     try {
       const formattedDate = moment(date).format('YYYY-MM-DD');
       const response = await fetch(`/api/schedules?date=${formattedDate}`);
-      
+  
       if (response.ok) {
         const data = await response.json();
         setShiftData(data);
