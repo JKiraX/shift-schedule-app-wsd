@@ -1,22 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   TextInput,
   StyleSheet,
   SafeAreaView,
-  Alert,
+  Modal,
+  TouchableOpacity,
 } from "react-native";
 import SmallButton from "../../components/Buttons/smallButton";
 import ContinueButton from "../../components/Buttons/ContinueButton";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import ChangePasswordScreen from "../changePassword";
 
-const ProfileScreen = () => {
+const Stack = createNativeStackNavigator();
+
+const ProfileScreenContent = ({ navigation }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+
   const handleChangePassword = () => {
-    Alert.alert("Change Password", "Change Password button pressed");
+    navigation.navigate("ChangePassword");
   };
 
   const handleLogout = () => {
-    Alert.alert("Logout", "Logout button pressed");
+    setModalVisible(true);
+  };
+
+  const handleModalConfirm = () => {
+    console.log("Logout confirmed");
+    setModalVisible(false);
+  };
+
+  const handleModalCancel = () => {
+    setModalVisible(false);
   };
 
   return (
@@ -48,13 +64,103 @@ const ProfileScreen = () => {
           editable={false}
         />
       </View>
+
       <View style={styles.button}>
-        <ContinueButton text="Change Password" onPress={handleChangePassword} />
+        <ContinueButton
+          text="Change Password"
+          onPress={handleChangePassword}
+          style={styles.button}
+        />
       </View>
       <View style={styles.button}>
-        <SmallButton text="Logout" onPress={handleLogout} />
+        <SmallButton
+          text="Logout"
+          onPress={handleLogout}
+          style={styles.button}
+        />
       </View>
+
+      <Modal visible={modalVisible} transparent={true} animationType="slide">
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0,0,0,0.5)",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#d3d3d3",
+              padding: 20,
+              borderRadius: 15,
+              width: 365,
+            }}
+          >
+            <Text style={{ fontSize: 18, marginBottom: 10 }}>
+              You are logging out of your profile. Would you like to continue?
+            </Text>
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                borderRadius: 15,
+                paddingTop: 20,
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  paddingHorizontal: 50,
+                  paddingVertical: 15,
+                  backgroundColor: "#3D5A80",
+                  borderRadius: 15,
+                  marginHorizontal: 10,
+                }}
+                onPress={handleModalCancel}
+              >
+                <Text style={{ color: "white", fontWeight: "bold" }}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  paddingHorizontal: 50,
+                  paddingVertical: 15,
+                  backgroundColor: "#3D5A80",
+                  borderRadius: 15,
+                  marginHorizontal: 10,
+                }}
+                onPress={handleModalConfirm}
+              >
+                <Text style={{ color: "white", fontWeight: "bold" }}>
+                  Confirm
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
+  );
+};
+
+const ProfileScreen = () => {
+  return (
+    <Stack.Navigator initialRouteName="ProfileScreenContent">
+      <Stack.Screen
+        name="ProfileScreenContent"
+        component={ProfileScreenContent}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack.Navigator>
   );
 };
 
@@ -83,6 +189,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#e9ecef",
     width: "100%",
     fontSize: 17,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
   },
   button: {
     marginBottom: 10,
