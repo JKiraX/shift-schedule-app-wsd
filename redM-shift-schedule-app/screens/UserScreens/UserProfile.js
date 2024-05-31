@@ -1,12 +1,92 @@
-import * as React from 'react';
-import { Text, View } from 'react-native';
+import React from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  SafeAreaView,
+  Alert,
+} from "react-native";
+import SmallButton from "../../components/Buttons/smallButton";
+import ContinueButton from "../../components/Buttons/ContinueButton";
 
-export default function UserProfileScreen({ navigation }) {
-    return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Text
-                onPress={() => alert('This is the "Home" screen.')}
-                style={{ fontSize: 26, fontWeight: 'bold' }}>User Profile Screen</Text>
-        </View>
-    );
-}
+const ProfileScreen = () => {
+  const handleChangePassword = () => {
+    Alert.alert("Change Password", "Change Password button pressed");
+  };
+
+  const handleLogout = () => {
+    Alert.alert("Logout", "Logout button pressed");
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="User's full name"
+          editable={false}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Contact Number</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Users phone number"
+          editable={false}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Users email"
+          keyboardType="email-address"
+          editable={false}
+        />
+      </View>
+      <View style={styles.button}>
+        <ContinueButton text="Change Password" onPress={handleChangePassword} />
+      </View>
+      <View style={styles.button}>
+        <SmallButton text="Logout" onPress={handleLogout} />
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  inputContainer: {
+    marginBottom: 18,
+    width: 350,
+    borderRadius: 15,
+  },
+  label: {
+    fontSize: 18,
+    marginBottom: 6,
+  },
+  input: {
+    height: 55,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: "#e9ecef",
+    width: "100%",
+    fontSize: 17,
+  },
+  button: {
+    marginBottom: 10,
+  },
+});
+
+export default ProfileScreen;
