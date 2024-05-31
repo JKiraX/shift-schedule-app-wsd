@@ -48,17 +48,12 @@ const ProfileScreen = () => {
           editable={false}
         />
       </View>
-
-      <ContinueButton
-        text="Change Password"
-        onPress={handleChangePassword}
-        style={styles.button} // Add this line to apply the button style
-      />
-      <SmallButton
-        text="Logout"
-        onPress={handleLogout}
-        style={styles.button} // Add this line to apply the button style
-      />
+      <View style={styles.button}>
+        <ContinueButton text="Change Password" onPress={handleChangePassword} />
+      </View>
+      <View style={styles.button}>
+        <SmallButton text="Logout" onPress={handleLogout} />
+      </View>
     </SafeAreaView>
   );
 };
@@ -90,7 +85,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   button: {
-    marginBottom: 20, // Add space between buttons
+    marginBottom: 10,
   },
 });
 
