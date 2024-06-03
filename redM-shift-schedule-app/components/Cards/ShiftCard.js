@@ -1,19 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const ShiftCard = ({ shiftName, startTime, endTime, assignedUsers }) => {
   return (
     <View style={styles.card}>
       <Text style={styles.shiftName}>{shiftName}</Text>
-      {assignedUsers.map((user, index) => (
-        <Text key={index}>{user}</Text>
-      ))}
+      <Text>{assignedUsers}</Text>
       <View style={styles.timeContainer}>
         <Text style={styles.time}>Start: {startTime}</Text>
         <Text style={styles.time}>End: {endTime}</Text>
       </View>
-      <View></View>
     </View>
   );
 };

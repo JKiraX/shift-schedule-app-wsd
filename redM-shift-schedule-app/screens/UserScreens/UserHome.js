@@ -37,10 +37,12 @@ const UserHomeScreen = ({ navigation }) => {
   const fetchShiftData = async (date) => {
     try {
       const formattedDate = moment(date).format('YYYY-MM-DD');
-      const response = await fetch(`/api/schedules?date=${formattedDate}`);
-  
+      const response = await fetch(`http://192.168.5.22:3001/schedules?date=${formattedDate}`); // Ensure the correct backend URL
+      console.log('Response status:', response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('Fetched data:', data);
         setShiftData(data);
       } else {
         console.error('Error fetching shift data:', response.status);
@@ -77,15 +79,15 @@ const UserHomeScreen = ({ navigation }) => {
       {/* Render Shift Cards */}
       <ScrollView>
         <View style={styles.shiftCardsContainer}>
-          {shiftData.map((shift, index) => (
-            <ShiftCard
-              key={index}
-              shiftName={shift.shiftName}
-              startTime={shift.startTime}
-              endTime={shift.endTime}
-              assignedUsers={shift.assignedUsers}
-            />
-          ))}
+        {shiftData.map((shifts, index) => (
+  <ShiftCard
+    key={index}
+    shiftName={shifts.shift_name}
+    startTime={shifts.start_time}
+    endTime={shifts.end_time}
+    assignedUsers={shifts.user_name} // Pass the user_name directly
+  />
+))}
         </View>
       </ScrollView>
     </SafeAreaView>
