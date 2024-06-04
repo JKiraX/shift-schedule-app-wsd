@@ -7,11 +7,7 @@ async function generateSchedules() {
   const shifts = await db.any('SELECT shift_id, name FROM public1.shifts');
   const currentMonth = moment().month();  // Get current month (0-11)
   const currentYear = moment().year();    // Get current year (e.g., 2024)
-  const previousMonth = moment().subtract(1, 'months').month();
-  const previousYear = moment().subtract(1, 'months').year();
-  const nextMonth = moment().add(1, 'months').month();
-  const nextYear = moment().add(1, 'months').year();
-
+  const daysInMonth = moment().daysInMonth(); // Get the number of days in the current month
   const schedules = [];
 
   const shiftsByName = shifts.reduce((map, shift) => {
@@ -94,10 +90,8 @@ async function generateSchedules() {
     }
   };
 
-  // Generate schedules for the previous, current, and next months
-  generateMonthSchedules(previousMonth, previousYear);
+  // Generate schedules for the current month
   generateMonthSchedules(currentMonth, currentYear);
-  generateMonthSchedules(nextMonth, nextYear);
 
   // Ensure everyone works 5 days in a 7-day period within the generated schedules
   for (const user of users) {
@@ -131,19 +125,14 @@ async function generateSchedules() {
     });
   }
 
-  // Clean up old schedules
-  const cleanupDate = moment().subtract(1, 'months').startOf('month').format('YYYY-MM-DD');
-
+  // Insert new schedules without deleting previous schedules
   await db.tx(t => {
-    const queries = [
-      t.none('DELETE FROM public1.schedules WHERE date < $1', [cleanupDate]),
-      ...schedules.map(schedule =>
-        t.none(
-          'INSERT INTO public1.schedules (user_id, shift_id, date) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
-          [schedule.user_id, schedule.shift_id, schedule.date]
-        )
+    const queries = schedules.map(schedule =>
+      t.none(
+        'INSERT INTO public1.schedules (user_id, shift_id, date) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
+        [schedule.user_id, schedule.shift_id, schedule.date]
       )
-    ];
+    );
     return t.batch(queries);
   });
 }

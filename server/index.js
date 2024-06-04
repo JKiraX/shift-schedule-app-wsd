@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const db = require('./db'); // Ensure this path is correct
+const generateSchedules = require('./scheduleGenerator'); // Ensure this path is correct
 const checkAndGenerateSchedules = require('./checkAndGenerateSchedules'); // Import the check and generate function
 const scheduleRoutes = require('./scheduleRoutes'); // Import the schedule routes
 
