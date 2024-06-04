@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native'; 
+import { useNavigation } from '@react-navigation/native';
+import AppLogin from "../LogInScreens/loginscreen";
 
 const ForgotPasswordScreen = () => {
   const [email, setEmail] = useState('');
+  const navigation = useNavigation();
 
   const handleResetPassword = () => {
     // Here you can implement the logic to send a reset password link to the provided email
@@ -20,8 +23,8 @@ const ForgotPasswordScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Forgot your Password</Text>
-      <Text style={styles.description}>Enter your email associated with the account</Text>
+      <Text style={styles.heading}>Forgot your password?</Text>
+      <Text style={styles.description}>Enter your email bellow</Text>
       <TextInput
         style={styles.input}
         placeholder="Email address"
@@ -32,8 +35,8 @@ const ForgotPasswordScreen = () => {
       />
       <View style={styles.signInContainer}>
         <Text style={styles.signInText}>Remember your password? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-          <Text style={[styles.signInText, styles.signInLink]}>Sign in</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+          <Text style={{color:"#98C1D9"}}>Sign in.</Text>
         </TouchableOpacity>
       </View>
       <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
@@ -54,6 +57,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
+    color:"#3D5A80"
   },
   description: {
     fontSize: 16,
@@ -62,10 +66,10 @@ const styles = StyleSheet.create({
   },
   input: {
     width: '100%',
-    height: 40,
+    height: 60,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
+    borderRadius: 10,
     paddingHorizontal: 10,
     marginBottom: 20,
   },
