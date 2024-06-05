@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,22 +8,35 @@ import {
   Image,
   SafeAreaView,
 } from "react-native";
-import ContinueButton from "./components/Buttons/ContinueButton";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
+import ContinueButton from "../../components/Buttons/ContinueButton";
+import Authentication from "./otp";
+import ForgotPasswordScreen from "./forgotpassword";
 
-const login = () => {
+const Stack = createNativeStackNavigator();
+
+const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigation = useNavigation();
 
   const handleLogin = () => {
     // Add login logic here
     console.log("Login pressed");
+    navigation.navigate("Authentication");
   };
+
+  const handleForgotPassword = () => {
+    console.log("Forgot password");
+    navigation.navigate("ForgotPassword");
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <View>
         <Image
-          source={require("./assets/RedMPS-Logo_Black (1).png")}
+          source={require("../../assets/RedMPS-Logo_Black (1).png")}
           style={styles.logo}
         />
       </View>
@@ -47,31 +60,41 @@ const login = () => {
           secureTextEntry={true}
         />
       </View>
-      <ContinueButton text="Login" onPress={() => console.log("continue")} />
-      <TouchableOpacity onPress={() => console.log("Forgot password pressed")}>
+      <ContinueButton text="Login" onPress={handleLogin} />
+      <TouchableOpacity onPress={handleForgotPassword}>
         <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
 };
 
+const AppLogin = () => {
+  return (
+    <Stack.Navigator initialRouteName="Login">
+      <Stack.Screen name="Login" component={LoginScreen} options={{headerShown:false}} />
+      <Stack.Screen name="Authentication" component={Authentication} options={{headerTintColor: "#3D5A80"}} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{headerTintColor:"#3D5A80", headerTitle:"Forgot Password"}} />
+    </Stack.Navigator>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 2,
-    justifyContent: "flex-start",
+    justifyContent: "center",
     alignItems: "center",
     position: "relative",
   },
-
   logo: {
     width: 270,
     height: 270,
     resizeMode: "center",
   },
   text: {
-    fontSize: 25,
+    fontSize: 22,
     marginBottom: 45,
     fontWeight: "bold",
+    color:"#3D5A80"
   },
   inputContainer: {
     flexDirection: "row",
@@ -106,4 +129,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default login;
+export default AppLogin;
