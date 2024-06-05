@@ -1,25 +1,17 @@
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  StatusBar,
-  TouchableOpacity,
-} from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Text, View, StatusBar, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { HeaderBackButton } from "@react-navigation/stack";
 import { OtpInput } from "react-native-otp-entry";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import ContinueButton from "./components/Buttons/ContinueButton";
+import ContinueButton from "../../components/Buttons/ContinueButton";
+import { useNavigation } from "@react-navigation/native";
+import UserNav from "../../components/Navigation/UserNav";
 
-const Stack = createNativeStackNavigator();
+const OtpScreen = () => {
+  const navigation = useNavigation();
 
-const OtpScreen = ({ navigation }) => {
   const handleContinue = () => {
-    // Navigate to the next screen or perform any other action
-    navigation.navigate("NextScreen");
+    navigation.navigate("UserNav");
   };
 
   return (
@@ -62,27 +54,18 @@ const OtpScreen = ({ navigation }) => {
           <Text style={{ fontStyle: "italic", color: "#98C1D9" }}> Resend</Text>
         </TouchableOpacity>
       </View>
-      <ContinueButton text="Continue" onPress={() => console.log("continue")} />
+      <ContinueButton text="Continue" onPress={handleContinue} />
     </View>
   );
 };
 
-export default function Authentication() {
+const Authentication = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <StatusBar />
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen
-            name="Otp"
-            component={OtpScreen}
-            options={{
-              headerTitle: "Authentication",
-              headerTintColor: "#3D5A80",
-            }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <OtpScreen />
     </SafeAreaView>
   );
-}
+};
+
+export default Authentication;

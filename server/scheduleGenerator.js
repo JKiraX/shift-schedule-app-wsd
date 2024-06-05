@@ -1,4 +1,3 @@
-// server/scheduleGenerator.js
 const db = require('./db');
 const moment = require('moment');
 
@@ -7,7 +6,8 @@ async function generateSchedules() {
   const shifts = await db.any('SELECT shift_id, name FROM public1.shifts');
   const currentMonth = moment().month();  // Get current month (0-11)
   const currentYear = moment().year();    // Get current year (e.g., 2024)
-  const daysInMonth = moment().daysInMonth(); // Get the number of days in the current month
+  const nextMonth = moment().add(1, 'months').month(); // Get next month (0-11)
+  const nextYear = moment().add(1, 'months').year();  // Get next year (e.g., 2024)
   const schedules = [];
 
   const shiftsByName = shifts.reduce((map, shift) => {
@@ -90,8 +90,9 @@ async function generateSchedules() {
     }
   };
 
-  // Generate schedules for the current month
-  generateMonthSchedules(currentMonth, currentYear);
+  // Generate schedules for the current month and next month
+  await Promise.resolve().then(() => generateMonthSchedules(currentMonth, currentYear));
+  await Promise.resolve().then(() => generateMonthSchedules(nextMonth, nextYear));
 
   // Ensure everyone works 5 days in a 7-day period within the generated schedules
   for (const user of users) {
