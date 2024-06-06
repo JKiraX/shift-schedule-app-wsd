@@ -1,4 +1,3 @@
-// server/scheduleGenerator.js
 const db = require('./db');
 const moment = require('moment');
 
