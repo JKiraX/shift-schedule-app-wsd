@@ -7,7 +7,11 @@ async function generateSchedules() {
   const shifts = await db.any('SELECT shift_id, name FROM public1.shifts');
   const currentMonth = moment().month();  // Get current month (0-11)
   const currentYear = moment().year();    // Get current year (e.g., 2024)
-  const daysInMonth = moment().daysInMonth(); // Get the number of days in the current month
+  const previousMonth = moment().subtract(1, 'months').month();
+  const previousYear = moment().subtract(1, 'months').year();
+  const nextMonth = moment().add(1, 'months').month();
+  const nextYear = moment().add(1, 'months').year();
+
   const schedules = [];
 
   const shiftsByName = shifts.reduce((map, shift) => {
@@ -21,6 +25,7 @@ async function generateSchedules() {
 
     for (let day = 1; day <= daysInMonth; day++) {
       const date = moment({ year, month, day }).format('YYYY-MM-DD');
+      const dayOfWeek = moment(date).day(); // Sunday: 0, Monday: 1, ..., Saturday: 6
 
       // Rotate through users
       let userIndex = day % users.length;
@@ -33,7 +38,7 @@ async function generateSchedules() {
           const user = users[(userIndex + i) % users.length];
 
           // Get user schedules for this week
-          const userSchedules = schedules.filter(s => s.user_id === user.user_id && moment(s.date).isoWeek() === moment(date).isoWeek());
+          const userSchedules = schedules.filter(s => s.user_id === user.user_id && moment(s.date).week() === moment(date).week());
           const workDays = userSchedules.length;
           const consecutiveWorkDays = userSchedules.reduce((acc, curr, idx, arr) => {
             if (idx === 0) return 1;
@@ -90,29 +95,19 @@ async function generateSchedules() {
     }
   };
 
-  // Generate schedules for the current month
+  // Generate schedules for the previous, current, and next months
+  generateMonthSchedules(previousMonth, previousYear);
   generateMonthSchedules(currentMonth, currentYear);
+  generateMonthSchedules(nextMonth, nextYear);
 
-  // Ensure everyone works 5 days in a 7-day period within the generated schedules
+  // Ensure everyone works 5 days in a week within the generated schedules
   for (const user of users) {
-    const userSchedulesByWeek = {};
-
-    schedules.forEach(schedule => {
-      if (schedule.user_id === user.user_id) {
-        const weekNumber = moment(schedule.date).isoWeek();
-        if (!userSchedulesByWeek[weekNumber]) {
-          userSchedulesByWeek[weekNumber] = [];
-        }
-        userSchedulesByWeek[weekNumber].push(schedule);
-      }
-    });
-
-    Object.keys(userSchedulesByWeek).forEach(weekNumber => {
-      let workDays = userSchedulesByWeek[weekNumber].length;
-      const weekStart = moment().isoWeek(weekNumber).startOf('isoWeek');
+    for (const month of [previousMonth, currentMonth, nextMonth]) {
+      let monthSchedules = schedules.filter(s => moment(s.date).month() === month && moment(s.date).year() === (month === previousMonth ? previousYear : (month === nextMonth ? nextYear : currentYear)));
+      let workDays = monthSchedules.filter(s => s.user_id === user.user_id).length;
 
       while (workDays < 5) {
-        const date = weekStart.clone().add(workDays, 'days').format('YYYY-MM-DD');
+        const date = moment().year(currentYear).month(month).startOf('month').add(workDays, 'days').format('YYYY-MM-DD');
         if (!schedules.find(s => s.user_id === user.user_id && s.date === date)) {
           schedules.push({
             user_id: user.user_id,
@@ -122,17 +117,22 @@ async function generateSchedules() {
           workDays++;
         }
       }
-    });
+    }
   }
 
-  // Insert new schedules without deleting previous schedules
+  // Clean up old schedules
+  const cleanupDate = moment().subtract(1, 'months').startOf('month').format('YYYY-MM-DD');
+
   await db.tx(t => {
-    const queries = schedules.map(schedule =>
-      t.none(
-        'INSERT INTO public1.schedules (user_id, shift_id, date) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
-        [schedule.user_id, schedule.shift_id, schedule.date]
+    const queries = [
+      t.none('DELETE FROM public1.schedules WHERE date < $1', [cleanupDate]),
+      ...schedules.map(schedule =>
+        t.none(
+          'INSERT INTO public1.schedules (user_id, shift_id, date) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
+          [schedule.user_id, schedule.shift_id, schedule.date]
+        )
       )
-    );
+    ];
     return t.batch(queries);
   });
 }
