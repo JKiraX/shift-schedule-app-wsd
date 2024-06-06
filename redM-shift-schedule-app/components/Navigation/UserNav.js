@@ -14,7 +14,7 @@ import NotificationsScreen from "../../screens/notifications";
 // Screen names
 const UserHome = "Home";
 const UserSchedule = "Schedule";
-const UserRequestLeave = "Request Leave";
+const UserRequestLeave = "Report Leave";
 const UserProfile = "Profile";
 
 const Tab = createBottomTabNavigator();

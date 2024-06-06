@@ -1,83 +1,87 @@
-const moment = require('moment');
-const userModel = require('../models/userModel');
-const shiftModel = require('../models/shiftModel');
-const scheduleModel = require('../models/scheduleModel');
+// const moment = require('moment');
+// const userModel = require('../models/userModel');
+// const shiftModel = require('../models/shiftModel');
+// const { createSchedule, createAssignments } = require('../models/scheduleModel');
+// const db = require('../../db'); // Ensure this is imported if needed elsewhere
 
-const generateSchedules = async (month, year) => {
-  try {
-    // Validation
-    if (!month || !year || month < 1 || month > 12 || year < 1900 || year > 2100) {
-      throw new Error('Invalid month or year provided.');
-    }
+// const generateSchedulesForCurrentMonth = async (month, year) => {
+//   try {
+//     const currentMonthStartDate = moment(`${year}-${month}-01`, 'YYYY-MM-DD');
+//     const currentMonthEndDate = moment(currentMonthStartDate).endOf('month');
+//     const users = await getUsers();
+//     const shifts = await getShifts();
+//     const currentDate = moment(currentMonthStartDate);
 
-    const users = await userModel.getUsers();
-    if (!users || users.length === 0) {
-      throw new Error('No users found in the database.');
-    }
+//     while (currentDate.isSameOrBefore(currentMonthEndDate, 'day')) {
+//       const scheduleDate = currentDate.toDate();
+//       const schedule = await createSchedule({ startDate: scheduleDate });
 
-    const startDate = moment(`${year}-${month}-01`, 'YYYY-MM-DD').toDate();
-    const endDate = moment(startDate).endOf('month').toDate();
+//       if (schedule) {
+//         const assignments = assignShiftsToUsers(users, shifts, scheduleDate);
+//         assignments.forEach(assignment => assignment.schedule_id = schedule.schedule_id);
+//         await createAssignments(assignments);
 
-    const schedule = await scheduleModel.createSchedule(startDate);
+//         // Print out the assignments for the current day
+//         console.log(`Assignments for ${currentDate.format('dddd, YYYY-MM-DD')}:`);
+//         assignments.forEach(assignment => {
+//           const user = users.find(u => u.user_id === assignment.user_id);
+//           const shift = shifts.find(s => s.shift_id === assignment.shift_id);
+//           console.log(`User: ${user.user_name}, Shift: ${shift.shift_name}`);
+//         });
+//       } else {
+//         console.warn(`No schedule created for ${currentDate.format('YYYY-MM-DD')}`);
+//       }
 
-    const shifts = await shiftModel.getShifts();
-    console.log('Shifts fetched from database:', shifts); // Log the fetched shifts
+//       currentDate.add(1, 'day');
+//     }
 
-    if (!Array.isArray(shifts)) {
-      throw new Error('Shifts data is not an array');
-    }
+//     console.log('Schedules generated and mapped for the current month');
+//   } catch (error) {
+//     console.error('Error generating schedules for the current month:', error);
+//   }
+// };
 
-    await assignShiftsToUsers(users, shifts, schedule, startDate, endDate);
+// const assignShiftsToUsers = (users, shifts, startDate) => {
+//   const assignments = [];
+//   const numDays = moment(startDate).daysInMonth();
 
-    console.log('Schedules generated successfully.');
-  } catch (error) {
-    console.error('Error generating schedules:', error);
-    throw error;
-  }
-};
+//   for (let day = 0; day < numDays; day++) {
+//     const currentDate = moment(startDate).add(day, 'days');
 
-const assignShiftsToUsers = async (users, shifts, schedule, startDate, endDate) => {
-  const assignments = [];
+//     for (let i = 0; i < users.length; i++) {
+//       const user = users[i];
+//       const shift = shifts[i % shifts.length]; // Rotate through shifts
 
-  for (const user of users) {
-    let daysWorked = 0;
-    let consecutiveDays = 0;
-    let currentDate = new Date(startDate);
-    let lastShiftId = null;
-    const assignedShiftsThisWeek = new Set();
+//       assignments.push({
+//         schedule_id: null, // This will be set later
+//         user_id: user.user_id,
+//         shift_id: shift.shift_id,
+//         date: currentDate.format('YYYY-MM-DD')
+//       });
+//     }
+//   }
 
-    while (currentDate <= endDate) {
-      let shiftId = null;
-      for (const shift of shifts) {
-        if (consecutiveDays < 3 && daysWorked < 5 && !assignedShiftsThisWeek.has(shift.shift_id)) {
-          if (lastShiftId !== shift.shift_id) {
-            shiftId = shift.shift_id;
-            break;
-          }
-        }
-      }
+//   return assignments;
+// };
 
-      if (shiftId) {
-        assignments.push({ schedule_id: schedule.schedule_id, user_id: user.user_id, shift_id: shiftId });
-        daysWorked++;
-        consecutiveDays++;
-        lastShiftId = shiftId;
-        assignedShiftsThisWeek.add(shiftId);
-      } else {
-        consecutiveDays = 0;
-        console.warn(`No shift assigned for user ${user.user_id} on date: ${currentDate}`);
-      }
+// const getUsers = async () => {
+//   try {
+//     const users = await userModel.getUsers();
+//     return users;
+//   } catch (error) {
+//     console.error('Error fetching users:', error);
+//     throw error;
+//   }
+// };
 
-      if (consecutiveDays >= 3 || daysWorked >= 5) {
-        consecutiveDays = 0;
-        lastShiftId = null;
-      }
+// const getShifts = async () => {
+//   try {
+//     const shifts = await shiftModel.getShifts();
+//     return shifts;
+//   } catch (error) {
+//     console.error('Error fetching shifts:', error);
+//     throw error;
+//   }
+// };
 
-      currentDate = moment(currentDate).add(1, 'days').toDate();
-    }
-  }
-
-  await scheduleModel.createAssignments(assignments);
-};
-
-module.exports = { generateSchedules };
+// module.exports = { generateSchedulesForCurrentMonth };
