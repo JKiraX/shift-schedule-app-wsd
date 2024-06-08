@@ -3,11 +3,12 @@ const bodyParser = require('body-parser');
 const db = require('./db'); // Ensure this path is correct
 const generateSchedules = require('./scheduleGenerator'); // Ensure this path is correct
 const checkAndGenerateSchedules = require('./checkAndGenerateSchedules'); // Import the check and generate function
-const scheduleRoutes = require('./scheduleRoutes');
+const scheduleRoutes = require('./scheduleRoutes'); // Import your routes
 
 const app = express();
 app.use(bodyParser.json());
 
+// Use the schedule routes for API endpoints
 app.use('/api', scheduleRoutes);
 
 app.get('/schedules', async (req, res) => {
