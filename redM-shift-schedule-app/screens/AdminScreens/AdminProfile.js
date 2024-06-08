@@ -151,13 +151,19 @@ const ProfileScreen = () => {
       <Stack.Screen
         name="ProfileScreenContent"
         component={ProfileScreenContent}
-        options={{ headerShown: false }}
+        options={{
+          title: "Profile",
+          headerTintColor: "#3D5A80",
+          headerTitleAlign: "center",
+        }}
       />
       <Stack.Screen
         name="ChangePassword"
         component={ChangePasswordScreen}
         options={{
-          headerShown: false,
+          title: "Change Password",
+          headerTintColor: "#3D5A80",
+          headerTitleAlign: "center",
         }}
       />
     </Stack.Navigator>
