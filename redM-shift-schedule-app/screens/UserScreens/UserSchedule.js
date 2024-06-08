@@ -10,42 +10,58 @@ const UserScheduleScreen = () => {
   const [selectedDates, setSelectedDates] = useState({});
   const [shiftData, setShiftData] = useState([]);
   const [markedDates, setMarkedDates] = useState({});
-
-  const data = [
-    { key: "1", value: "Yusheen" },
-    { key: "2", value: "Roxanne" },
-    { key: "3", value: "Hope" },
-    { key: "4", value: "Mpho" },
-    { key: "5", value: "Charlotte" },
-  ];
-
-  const handleSelect = (selected) => {
-    console.log(selected);
-  };
-
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [users, setUsers] = useState([]);
   const [selectedTab, setSelectedTab] = useState(0);
 
   useEffect(() => {
-    if (Object.keys(selectedDates).length > 0) {
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    if (Object.keys(selectedDates).length > 0 && selectedUser) {
       fetchShiftData();
     } else {
       setShiftData([]);
     }
-  }, [selectedDates]);
+  }, [selectedDates, selectedUser]);
 
-  const fetchShiftData = async () => {
+  const fetchUsers = async () => {
     try {
-      const dates = Object.keys(selectedDates).join(",");
-      console.log(`Requesting data for dates: ${dates}`);
-      const response = await fetch(`http://192.168.5.22:3001/schedules?dates=${dates}`);
+      const response = await fetch(`http://192.168.5.22:3001/api/users`);
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.status}`);
       }
       const data = await response.json();
-      setShiftData(data);
+      const userData = data.map(user => ({ key: user.id, value: user.name }));
+      setUsers(userData);
+    } catch (error) {
+      console.error("Error fetching user data:", error.message);
+    }
+  };
+  const fetchShiftData = async () => {
+    try {
+      const dates = Object.keys(selectedDates).join(",");
+      const queryParams = `?dates=${dates}`;
+      console.log(`Requesting data for dates: ${dates}`);
+  
+      const response = await fetch(`http://192.168.5.22:3001/api/schedules${queryParams}`);
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.status}`);
+      }
+      const data = await response.json();
+      const filteredData = selectedUser
+        ? data.filter((shift) => shift.user_id === selectedUser.key)
+        : data;
+      setShiftData(filteredData);
     } catch (error) {
       console.error("Error fetching shift data:", error.message);
     }
+  };
+
+  const handleSelect = (selected) => {
+    setSelectedUser(selected);
+    setShiftData([]); // Clear shift data when a new user is selected
   };
 
   const handleDayPress = (day) => {
@@ -81,7 +97,7 @@ const UserScheduleScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, alignItems: "center" }}>
-      <DropdownComponent data={data} onSelect={handleSelect} />
+      <DropdownComponent data={users} onSelect={handleSelect} />
       <View
         style={{
           width: 350,
@@ -125,31 +141,44 @@ const UserScheduleScreen = () => {
         </TouchableOpacity>
       </View>
       <ScrollView>
-        <View style={{ flex: 1, alignItems: "center", paddingTop: 10 }}>
-          <Calendar
-            style={{ width: 350, borderRadius: 15 }}
-            enableSwipeMonths={true}
-            hideExtraDays={true}
-            markingType="multi-dot"
-            markedDates={markedDates}
-            onDayPress={handleDayPress}
-          />
-          {Object.keys(groupedShiftData).map((date) => (
-            <View key={date} style={{ width: "100%", padding: 20 }}>
-              <Text style={styles.dateHeader}>{moment(date).format('LL')}:</Text>
-              {groupedShiftData[date].map((shift, index) => (
-                <ShiftCard
-                  key={index}
-                  shiftName={shift.shift_name}
-                  startTime={shift.start_time}
-                  endTime={shift.end_time}
-                  assignedUsers={shift.user_name}
-                />
-              ))}
-            </View>
-          ))}
-        </View>
-      </ScrollView>
+  <View style={{ flex: 1, alignItems: "center", paddingTop: 10 }}>
+    <Calendar
+      style={{ width: 350, borderRadius: 15 }}
+      enableSwipeMonths={true}
+      hideExtraDays={true}
+      markingType="multi-dot"
+      markedDates={markedDates}
+      onDayPress={handleDayPress}
+    />
+    {Object.keys(selectedDates).length > 0 ? (
+      selectedUser ? (
+        Object.keys(groupedShiftData).map((date) => (
+          <View key={date} style={{ width: "100%", padding: 20 }}>
+            <Text style={styles.dateHeader}>{moment(date).format('LL')}:</Text>
+            {groupedShiftData[date].map((shift, index) => (
+              <ShiftCard
+                key={index}
+                shiftName={shift.shift_name}
+                startTime={shift.start_time}
+                endTime={shift.end_time}
+                assignedUsers={shift.user_name}
+              />
+            ))}
+          </View>
+        ))
+      ) : (
+        Object.keys(selectedDates).map((date) => (
+          <View key={date} style={{ width: "100%", padding: 20 }}>
+            <Text style={styles.dateHeader}>{moment(date).format('LL')}:</Text>
+            <Text style={styles.noShiftsText}>Select a user to view their shifts</Text>
+          </View>
+        ))
+      )
+    ) : (
+      <Text style={styles.noShiftsText}>Select dates to view shifts</Text>
+    )}
+  </View>
+</ScrollView>
     </SafeAreaView>
   );
 };
@@ -159,6 +188,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+  },
+  noShiftsText: {
+    fontSize: 16,
+    color: "gray",
   },
 });
 

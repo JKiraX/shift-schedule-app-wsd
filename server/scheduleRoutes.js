@@ -28,4 +28,17 @@ router.post('/criteria', async (req, res) => {
   }
 });
 
+router.get('/users', async (req, res) => {
+  try {
+    const users = await db.any(`
+      SELECT user_id AS id, user_name AS name
+      FROM public1.users
+    `);
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 module.exports = router;
