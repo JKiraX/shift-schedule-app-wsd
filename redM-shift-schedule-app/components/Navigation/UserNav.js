@@ -82,7 +82,11 @@ function TabNavigator() {
       <Tab.Screen
         name={UserProfile}
         component={UserProfileScreen}
-        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
+        options={{
+          headerTintColor: "#3D5A80",
+          headerTitleAlign: "center",
+          headerShown: false,
+        }}
       />
     </Tab.Navigator>
   );
