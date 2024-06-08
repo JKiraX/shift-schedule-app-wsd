@@ -1,86 +1,95 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
- 
+import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import SmallButton from '../../components/Buttons/smallButton';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 const EditEmployeeScreen = () => {
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
   const [email, setEmail] = useState('');
- 
+  const navigation = useNavigation(); // Add this line to get the navigation object
+
   const handleUpdate = () => {
-    // Get the values from the input fields
-    const employeeData = { name, contact, email };
- 
+    // Add employee logic here
+    console.log("Employee details updated.");
+    Alert.alert("Employee details updated.", "", [
+      {
+        text: "OK",
+        onPress: () => navigation.goBack(),
+      },
+    ]);
+
     // Validate the input values (optional)
-    if (!employeeData.name || !employeeData.contact || !employeeData.email) {
-      alert('Please fill in all fields.');
+    if (!name || !contact || !email) {
+      Alert.alert('Please fill in all fields.');
       return;
     }
- 
+
     // Update the employee data (replace this with your actual update logic)
+    const employeeData = { name, contact, email };
     updateEmployee(employeeData);
- 
+
     // Clear the input fields (optional)
     setName('');
     setContact('');
     setEmail('');
   };
- 
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Name</Text>
-      <TextInput
-        style={styles.input}
-        value={name}
-        onChangeText={(text) => setName(text)}
-        placeholder="Enter name"
-      />
-      <Text style={styles.label}>Contact</Text>
-      <TextInput
-        style={styles.input}
-        value={contact}
-        onChangeText={(text) => setContact(text)}
-        placeholder="Enter contact"
-      />
-      <Text style={styles.label}>Email</Text>
-      <TextInput
-        style={styles.input}
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-        placeholder="Enter email"
-      />
-      <TouchableOpacity style={styles.button} onPress={handleUpdate}>
-        <Text style={styles.buttonText}>Update</Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.formContainer}>
+        <Text style={styles.label}>Name</Text>
+        <TextInput
+          style={styles.input}
+          value={name}
+          onChangeText={(text) => setName(text)}
+          placeholder="Enter name"
+        />
+        <Text style={styles.label}>Phone Number</Text>
+        <TextInput
+          style={styles.input}
+          value={contact}
+          onChangeText={(text) => setContact(text)}
+          placeholder="Enter phone number"
+        />
+        <Text style={styles.label}>E-mail</Text>
+        <TextInput
+          style={styles.input}
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+          placeholder="Enter email"
+          keyboardType="email-address"
+        />
+        <SmallButton text={"Update"} onPress={handleUpdate}/>
+      </View>
+    </SafeAreaView>
   );
 };
- 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
   },
+  formContainer: {
+    padding: 20,
+  },
   label: {
-    fontSize: 16,
-    marginBottom: 10,
+    fontSize: 18,
+    marginBottom: 6,
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
+    height: 55,
+    borderColor: "#ccc",
     borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: 'blue',
+    borderRadius: 10,
     padding: 10,
-    borderRadius: 5,
-  },
-  buttonText: {
-    fontSize: 16,
-    color: 'white',
+    backgroundColor: "#e9ecef",
+    width: "auto",
+    fontSize: 17,
+    marginBottom: 18,
   },
 });
- 
+
 export default EditEmployeeScreen;
