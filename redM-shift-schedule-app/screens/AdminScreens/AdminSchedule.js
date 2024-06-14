@@ -1,239 +1,229 @@
-// UserScheduleScreen.js
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
-  TouchableOpacity,
   View,
+  StyleSheet,
+  SafeAreaView,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import { Calendar } from "react-native-calendars";
-import dayjs from "dayjs";
-import ShiftCardChange from "../../components/Cards/ShiftCardChange"
+import ShiftCardChange from "../../components/Cards/ShiftCardChange";
+import DropdownComponent from "../../components/Dropdown/dropdownComponent";
+import moment from "moment";
 
-//Shift card
-const ShiftCardsContainer = () => {
+const AdminScheduleScreen = () => {
+  const [selectedDates, setSelectedDates] = useState({});
   const [shiftData, setShiftData] = useState([]);
+  const [markedDates, setMarkedDates] = useState({});
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [selectedTab, setSelectedTab] = useState(0);
+  const calendarRef = useRef(null);
+
+  const handleCalendarRef = (calendar) => {
+    calendarRef.current = calendar;
+  };
 
   useEffect(() => {
-    fetchShiftData();
+    fetchUsers();
   }, []);
 
+  useEffect(() => {
+    if (Object.keys(selectedDates).length > 0 && users.length > 0) {
+      fetchShiftData();
+    } else {
+      setShiftData([]);
+    }
+  }, [selectedDates, selectedUser, users]);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`http://192.168.5.22:3001/api/users`);
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.status}`);
+      }
+      const data = await response.json();
+      const userData = data.map((user) => ({ key: Number(user.id), value: user.name }));
+      setUsers(userData);
+    } catch (error) {
+      console.error("Error fetching user data:", error.message);
+    }
+  };
+  
   const fetchShiftData = async () => {
     try {
-      // Replace this with your actual database query logic
-      const data = [
-        {
-          shiftName: "6am Shift",
-          startTime: "06:00",
-          endTime: "14:00",
-          assignedUsers: ["User 1", "User 2"],
-        },
-        {
-          shiftName: "8am Shift",
-          startTime: "08:00",
-          endTime: "16:00",
-          assignedUsers: ["User 3", "User 4"],
-        },
-        {
-          shiftName: "2pm Shift",
-          startTime: "14:00",
-          endTime: "22:00",
-          assignedUsers: ["User 1", "User 2"],
-        },
-        {
-          shiftName: "10pm Shift",
-          startTime: "22:00",
-          endTime: "06:00",
-          assignedUsers: ["User 1", "User 2"],
-        },
-        // Add more shift data objects as needed
-      ];
+      const dates = Object.keys(selectedDates).join(",");
+      const userId = selectedUser ? selectedUser.key : null;
+      const queryParams = `?dates=${dates}${userId ? `&userId=${userId}` : ""}`;
+      console.log(`Requesting data for dates: ${dates} and user: ${userId}`);
 
+      const response = await fetch(
+        `http://192.168.5.22:3001/api/schedules${queryParams}`
+      );
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.status}`);
+      }
+      const data = await response.json();
       setShiftData(data);
     } catch (error) {
-      console.error("Error fetching shift data:", error);
+      console.error("Error fetching shift data:", error.message);
     }
   };
 
+  const handleSelect = (selected) => {
+    console.log("User selected:", selected); // Debugging statement
+    setSelectedUser(selected);
+    setShiftData([]); // Clear shift data when a new user is selected
+  };
+
+  const handleDayPress = (day) => {
+    const dateString = day.dateString;
+    const newSelectedDates = { ...selectedDates };
+
+    if (newSelectedDates[dateString]) {
+      delete newSelectedDates[dateString];
+    } else {
+      newSelectedDates[dateString] = {
+        selected: true,
+        marked: true,
+        dotColor: "#3D5A80",
+      };
+    }
+
+    setSelectedDates(newSelectedDates);
+    setMarkedDates(newSelectedDates);
+  };
+
+  const groupShiftsByDate = (shifts) => {
+    return shifts.reduce((acc, shift) => {
+      const date = shift.date ? moment(shift.date).format("YYYY-MM-DD") : null;
+      if (date) {
+        if (!acc[date]) {
+          acc[date] = [];
+        }
+        acc[date].push(shift);
+      }
+      return acc;
+    }, {});
+  };
+
+  const groupedShiftData = groupShiftsByDate(shiftData);
+
   return (
-    <ScrollView>
-      <View style={{ padding: 20, minWidth: 350 }}>
-        {shiftData.map((shift, index) => (
-          <ShiftCardChange
-            key={index}
-            shiftName={shift.shiftName}
-            startTime={shift.startTime}
-            endTime={shift.endTime}
-            assignedUsers={shift.assignedUsers}
-          />
-        ))}
+    <SafeAreaView style={{ flex: 1, alignItems: "center" }}>
+      <DropdownComponent data={users} onSelect={handleSelect} />
+      <View
+        style={{
+          width: 350,
+          height: 60,
+          backgroundColor: "white",
+          borderWidth: 0.5,
+          borderRadius: 15,
+          flexDirection: "row",
+          alignItems: "center",
+          paddingLeft: 5,
+          paddingRight: 5,
+          marginTop: 10,
+        }}
+      >
+        <TouchableOpacity
+          style={{
+            width: "45%",
+            height: 50,
+            backgroundColor: selectedTab === 0 ? "#98C1D9" : "white",
+            borderRadius: 15,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() => setSelectedTab(0)}
+        >
+          <Text style={{ fontSize: 18, fontWeight: "bold" }}>Shifts</Text>
+        </TouchableOpacity>
+        <View style={{ width: "10%" }} />
+        <TouchableOpacity
+          style={{
+            width: "45%",
+            height: 50,
+            backgroundColor: selectedTab === 1 ? "#98C1D9" : "white",
+            borderRadius: 15,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() => setSelectedTab(1)}
+        >
+          <Text style={{ fontSize: 18, fontWeight: "bold" }}>Leave</Text>
+        </TouchableOpacity>
       </View>
-    </ScrollView>
+      <ScrollView>
+        <View style={{ flex: 1, alignItems: "center", paddingTop: 10 }}>
+          <Calendar
+            style={{ width: 350, borderRadius: 15 }}
+            enableSwipeMonths={true}
+            hideExtraDays={true}
+            markingType="multi-dot"
+            markedDates={markedDates}
+            onDayPress={handleDayPress}
+          />
+          {Object.keys(selectedDates).map((date) => (
+            <View key={date} style={{ width: "100%", padding: 20 }}>
+              <Text style={styles.dateHeader}>
+                {moment(date).format("LL")}:
+              </Text>
+              {selectedUser ? (
+                groupedShiftData[date] &&
+                groupedShiftData[date].some(
+                  (shift) => shift.user_id === selectedUser.key
+                ) ? (
+                  groupedShiftData[date]
+                    .filter((shift) => shift.user_id === selectedUser.key)
+                    .map((shift, index) => (
+                      <ShiftCardChange
+                        key={index}
+                        shiftName={shift.shift_name}
+                        startTime={shift.start_time}
+                        endTime={shift.end_time}
+                        assignedUsers={shift.user_name}
+                        allUsers={users}
+                      />
+                    ))
+                ) : (
+                  <Text style={styles.noShiftsText}>
+                    No shifts available: On leave
+                  </Text>
+                )
+              ) : groupedShiftData[date]?.length > 0 ? (
+                groupedShiftData[date].map((shift, index) => (
+                  <ShiftCardChange
+                    key={index}
+                    shiftName={shift.shift_name}
+                    startTime={shift.start_time}
+                    endTime={shift.end_time}
+                    assignedUsers={shift.user_name}
+                    allUsers={users}
+                  />
+                ))
+              ) : (
+                <Text style={styles.noShiftsText}>No shifts available</Text>
+              )}
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
-export default function AdminScheduleScreen({ navigation }) {
-  // Data for the DropdownComponent
-  const data = [
-    { key: "1", value: "Yusheen" },
-    { key: "2", value: "Roxanne" },
-    { key: "3", value: "Hope" },
-    { key: "4", value: "Mpho" },
-    { key: "5", value: "Charlotte" },
-  ];
 
-  const handleSelect = (selected) => {
-    console.log(selected);
-  };
+const styles = StyleSheet.create({
+  dateHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  noShiftsText: {
+    fontSize: 16,
+    color: "gray",
+  },
+});
 
-  // Switch Button
-  const [selectedTab, setSelectedTab] = useState(0);
-
-  // Date range picker
-  const DateRangePicker = () => {
-    const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
-    const [markedDates, setMarkedDates] = useState({});
-
-    const generateMarkedDates = (start, end) => {
-      let dateRange = {};
-      let currentDate = dayjs(start);
-      const endDate = dayjs(end);
-
-      while (currentDate.isBefore(endDate) || currentDate.isSame(endDate)) {
-        const dateString = currentDate.format("YYYY-MM-DD");
-        if (dateString === start) {
-          dateRange[dateString] = {
-            startingDay: true,
-            color: "#3D5A80",
-            textColor: "white",
-          };
-        } else if (dateString === end) {
-          dateRange[dateString] = {
-            endingDay: true,
-            color: "#3D5A80",
-            textColor: "white",
-          };
-        } else {
-          dateRange[dateString] = { color: "#3D5A80", textColor: "white" };
-        }
-        currentDate = currentDate.add(1, "day");
-      }
-
-      return dateRange;
-    };
-
-    const handleDayPress = (day) => {
-      if (!startDate) {
-        setStartDate(day.dateString);
-        setEndDate(null);
-        setMarkedDates({
-          [day.dateString]: {
-            startingDay: true,
-            color: "#3D5A80",
-            textColor: "white",
-          },
-        });
-      } else if (day.dateString < startDate) {
-        setStartDate(day.dateString);
-        setEndDate(null);
-        setMarkedDates({
-          [day.dateString]: {
-            startingDay: true,
-            color: "#3D5A80",
-            textColor: "white",
-          },
-        });
-      } else {
-        setEndDate(day.dateString);
-        setMarkedDates(generateMarkedDates(startDate, day.dateString));
-      }
-    };
-
-    return (
-      <SafeAreaView style={{ flex: 1, alignItems: "center" }}>
-        {/* Dropdown */}
-        <DropdownComponent data={data} onSelect={handleSelect} />
-        {/* Switch and shift buttons */}
-        <View
-          style={{
-            width: 350,
-            height: 60,
-            backgroundColor: "white",
-            borderWidth: 0.5,
-            borderRadius: 15,
-            flexDirection: "row",
-            alignItems: "center",
-            paddingLeft: 5,
-            paddingRight: 5,
-            marginTop: 10,
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              width: "45%",
-              height: 50,
-              backgroundColor: selectedTab === 0 ? "#98C1D9" : "white",
-              borderRadius: 15,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            onPress={() => setSelectedTab(0)}
-          >
-            <Text style={{ fontSize: 18, fontWeight: "bold" }}>Shifts</Text>
-          </TouchableOpacity>
-          <View style={{ width: "10%" }} />
-          <TouchableOpacity
-            style={{
-              width: "45%",
-              height: 50,
-              backgroundColor: selectedTab === 1 ? "#98C1D9" : "white",
-              borderRadius: 15,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            onPress={() => setSelectedTab(1)}
-          >
-            <Text style={{ fontSize: 18, fontWeight: "bold" }}>Leave</Text>
-          </TouchableOpacity>
-        </View>
-        {/* Switch between shift and leave calendar "pages" */}
-        {selectedTab === 0 ? (
-          // Shifts Page
-          <ScrollView>
-            <View style={{ flex: 1, alignItems: "center", paddingTop: 10 }}>
-              <Calendar
-                style={{ width: 350, borderRadius: 15 }}
-                enableSwipeMonths={true}
-                hideExtraDays={true}
-                markingType="period"
-                markedDates={markedDates}
-                onDayPress={handleDayPress}
-              />
-              <ShiftCardsContainer />
-            </View>
-          </ScrollView>
-        ) : (
-          // Leave Page
-          <ScrollView>
-            <View style={{ flex: 1, alignItems: "center", paddingTop: 10 }}>
-              <Calendar
-                style={{ width: 350, borderRadius: 15 }}
-                enableSwipeMonths={true}
-                hideExtraDays={true}
-                markingType="period"
-                markedDates={markedDates}
-                onDayPress={handleDayPress}
-              />
-              <ShiftCardsContainer />
-            </View>
-          </ScrollView>
-        )}
-      </SafeAreaView>
-    );
-  };
-
-  return <DateRangePicker />;
-}
+export default AdminScheduleScreen;
