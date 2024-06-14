@@ -37,7 +37,7 @@ const UserHomeScreen = ({ navigation }) => {
   const fetchShiftData = async (date) => {
     try {
       const formattedDate = moment(date).format('YYYY-MM-DD');
-      const response = await fetch(`http://10.0.0.113:3001/schedules?date=${formattedDate}`); // Ensure the correct backend URL
+      const response = await fetch(`http://192.168.5.22:3001/schedules?date=${formattedDate}`); // Ensure the correct backend URL
       console.log('Response status:', response.status);
 
       if (response.ok) {

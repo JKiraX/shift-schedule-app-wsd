@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Text, View, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
 import { Calendar } from "react-native-calendars";
-import dayjs from "dayjs";
 import ShiftCard from "../../components/Cards/ShiftCard";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import moment from "moment";
@@ -25,16 +23,16 @@ const UserScheduleScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (Object.keys(selectedDates).length > 0) {
+    if (Object.keys(selectedDates).length > 0 && users.length > 0) {
       fetchShiftData();
     } else {
       setShiftData([]);
     }
-  }, [selectedDates, selectedUser]);
-
+  }, [selectedDates, selectedUser, users]);
+  
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`http://10.0.0.113:3001/api/users`);
+      const response = await fetch(`http://192.168.5.22:3001/api/users`);
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.status}`);
       }
@@ -49,10 +47,11 @@ const UserScheduleScreen = () => {
   const fetchShiftData = async () => {
     try {
       const dates = Object.keys(selectedDates).join(",");
-      const queryParams = `?dates=${dates}${selectedUser ? `&userId=${selectedUser.key}` : ''}`;
-      console.log(`Requesting data for dates: ${dates} and user: ${selectedUser ? selectedUser.key : 'all'}`);
+      const userId = selectedUser ? selectedUser.key : null;
+      const queryParams = `?dates=${dates}${userId ? `&userId=${userId}` : ''}`;
+      console.log(`Requesting data for dates: ${dates} and user: ${userId}`);
   
-      const response = await fetch(`http://10.0.0.113:3001/api/schedules${queryParams}`);
+      const response = await fetch(`http://192.168.5.22:3001/api/schedules${queryParams}`);
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.status}`);
       }
@@ -64,7 +63,9 @@ const UserScheduleScreen = () => {
   };
 
   const handleSelect = (selected) => {
+    console.log("User selected:", selected); // Debugging statement
     setSelectedUser(selected);
+    setShiftData([]); // Clear shift data when a new user is selected
   };
 
   const handleDayPress = (day) => {
@@ -87,11 +88,13 @@ const UserScheduleScreen = () => {
 
   const groupShiftsByDate = (shifts) => {
     return shifts.reduce((acc, shift) => {
-      const date = shift.date;
-      if (!acc[date]) {
-        acc[date] = [];
+      const date = shift.date ? moment(shift.date).format('YYYY-MM-DD') : null;
+      if (date) {
+        if (!acc[date]) {
+          acc[date] = [];
+        }
+        acc[date].push(shift);
       }
-      acc[date].push(shift);
       return acc;
     }, {});
   };
@@ -146,7 +149,6 @@ const UserScheduleScreen = () => {
       <ScrollView>
         <View style={{ flex: 1, alignItems: "center", paddingTop: 10 }}>
           <Calendar
-            ref={handleCalendarRef}
             style={{ width: 350, borderRadius: 15 }}
             enableSwipeMonths={true}
             hideExtraDays={true}
@@ -154,31 +156,43 @@ const UserScheduleScreen = () => {
             markedDates={markedDates}
             onDayPress={handleDayPress}
           />
-          {Object.keys(groupedShiftData).length > 0 ? (
-            Object.keys(groupedShiftData).map((date) => (
-              <View key={date} style={{ width: "100%", padding: 20 }}>
-                <Text style={styles.dateHeader}>{moment(date).format('LL')}:</Text>
-                {groupedShiftData[date].map((shift, index) => (
-                  <ShiftCard
-                    key={index}
-                    shiftName={shift.shift_name}
-                    startTime={shift.start_time}
-                    endTime={shift.end_time}
-                    assignedUsers={shift.user_name}
-                  />
-                ))}
-              </View>
-            ))
-          ) : (
-            Object.keys(selectedDates).map((date) => (
-              <View key={date} style={{ width: "100%", padding: 20 }}>
-                <Text style={styles.dateHeader}>{moment(date).format('LL')}:</Text>
-                <Text style={styles.noShiftsText}>
-                  {selectedUser ? 'No shifts available: On leave' : 'Select a user to view their shifts'}
-                </Text>
-              </View>
-            ))
-          )}
+{Object.keys(selectedDates).map((date) => (
+  <View key={date} style={{ width: "100%", padding: 20 }}>
+    <Text style={styles.dateHeader}>{moment(date).format('LL')}:</Text>
+    {selectedUser ? (
+      groupedShiftData[date] &&
+      groupedShiftData[date].some(shift => shift.user_id === selectedUser.key) ? (
+        groupedShiftData[date]
+          .filter(shift => shift.user_id === selectedUser.key)
+          .map((shift, index) => (
+            <ShiftCard
+              key={index}
+              shiftName={shift.shift_name}
+              startTime={shift.start_time}
+              endTime={shift.end_time}
+              assignedUsers={shift.user_name}
+            />
+          ))
+      ) : (
+        <Text style={styles.noShiftsText}>No shifts available: On leave</Text>
+      )
+    ) : (
+      groupedShiftData[date]?.length > 0 ? (
+        groupedShiftData[date].map((shift, index) => (
+          <ShiftCard
+            key={index}
+            shiftName={shift.shift_name}
+            startTime={shift.start_time}
+            endTime={shift.end_time}
+            assignedUsers={shift.user_name}
+          />
+        ))
+      ) : (
+        <Text style={styles.noShiftsText}>No shifts available</Text>
+      )
+    )}
+  </View>
+))}
         </View>
       </ScrollView>
     </SafeAreaView>

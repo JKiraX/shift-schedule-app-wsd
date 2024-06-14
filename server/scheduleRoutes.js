@@ -4,30 +4,45 @@ const db = require('./db');
 
 // GET /api/schedules
 router.get('/schedules', async (req, res) => {
-  const { dates, userId } = req.query;
-  if (!dates) {
-    return res.status(400).json({ message: "Dates parameter is required" });
+  const { date, dates, userId } = req.query;
+
+  if (!date && !dates) {
+    return res.status(400).json({ message: 'Date or dates parameter is required' });
   }
 
-  const dateArray = dates.split(',');
+  let dateList = [];
+  if (date) {
+    dateList = [date];
+  } else if (dates) {
+    dateList = dates.split(',');
+  }
 
   try {
-    let query = 'SELECT * FROM public1.schedules WHERE date = ANY($1::date[])';
-    const params = [dateArray];
-
+    let schedules;
     if (userId) {
-      query += ' AND user_id = $2';
-      params.push(userId);
+      schedules = await db.any(`
+        SELECT s.date, u.user_name AS user_name, sh.name AS shift_name, sh.start_time, sh.end_time, s.user_id
+        FROM public1.schedules s
+        JOIN public1.users u ON s.user_id = u.user_id
+        JOIN public1.shifts sh ON s.shift_id = sh.shift_id
+        WHERE s.date IN ($1:csv) AND u.user_id = $2
+      `, [dateList, userId]);
+    } else {
+      schedules = await db.any(`
+        SELECT s.date, u.user_name AS user_name, sh.name AS shift_name, sh.start_time, sh.end_time, s.user_id
+        FROM public1.schedules s
+        JOIN public1.users u ON s.user_id = u.user_id
+        JOIN public1.shifts sh ON s.shift_id = sh.shift_id
+        WHERE s.date IN ($1:csv)
+      `, [dateList]);
     }
 
-    const result = await db.any(query, params);
-    res.json(result);
+    res.json(schedules);
   } catch (error) {
     console.error('Error fetching schedules:', error);
     res.status(500).send('Internal Server Error');
   }
 });
-
 // POST /api/criteria
 router.post('/criteria', async (req, res) => {
   const { user_id, day_of_week, max_shifts_per_week } = req.body;
@@ -55,5 +70,26 @@ router.get('/users', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
+
+router.post('/report-leave', async (req, res) => {
+  const { user_id, type_of_leave, justification, start_date, end_date } = req.body;
+
+  if (!user_id || !type_of_leave || !justification || !start_date || !end_date) {
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+
+  try {
+    await db.none(
+      'INSERT INTO public1.reports (user_id, type_of_leave, justification, start_date, end_date) VALUES ($1, $2, $3, $4, $5)',
+      [user_id, type_of_leave, justification, start_date, end_date]
+    );
+    res.status(201).json({ message: 'Leave reported successfully.' });
+  } catch (error) {
+    console.error('Error reporting leave:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 
 module.exports = router;
