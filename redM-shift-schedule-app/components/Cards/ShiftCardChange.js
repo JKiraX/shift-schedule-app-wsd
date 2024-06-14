@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Text, View, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
+import PropTypes from "prop-types";
 
 // Reusable Switch Button component
 const SwitchButton = ({ onPress }) => {
@@ -14,7 +15,13 @@ const SwitchButton = ({ onPress }) => {
 };
 
 // ShiftCardChange component
-const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers }) => {
+const ShiftCardChange = ({
+  shiftName,
+  startTime,
+  endTime,
+  assignedUsers,
+  allUsers,
+}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   // Function to handle switch button press
@@ -33,15 +40,6 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers }) => {
     setModalVisible(false);
   };
 
-  // Data for the DropdownComponent
-  const data = [
-    { key: "1", value: "Yusheen" },
-    { key: "2", value: "Roxanne" },
-    { key: "3", value: "Hope" },
-    { key: "4", value: "Mpho" },
-    { key: "5", value: "Charlotte" },
-  ];
-
   const handleSelect = (selected) => {
     console.log(selected);
   };
@@ -49,9 +47,15 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers }) => {
   return (
     <View style={styles.card}>
       <Text style={styles.shiftName}>{shiftName}</Text>
-      {assignedUsers.map((user, index) => (
-        <Text key={index}>{user}</Text>
-      ))}
+      {assignedUsers ? (
+        typeof assignedUsers === "string" ? (
+          <Text>{assignedUsers}</Text>
+        ) : (
+          assignedUsers.map((user, index) => <Text key={index}>{user}</Text>)
+        )
+      ) : (
+        <Text>No assigned users</Text>
+      )}
       <View style={styles.timeContainer}>
         <Text style={styles.time}>Start: {startTime}</Text>
         <Text style={styles.time}>End: {endTime}</Text>
@@ -79,10 +83,9 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers }) => {
             >
               Please select employee to switch on the shift.
             </Text>
-            {/* Uername needs to come from backend */}
             <Text style={{ fontSize: 16 }}>Switch User 1 with:</Text>
             <View style={{ alignItems: "center" }}>
-              <DropdownComponent data={data} onSelect={handleSelect} />
+              <DropdownComponent data={allUsers} onSelect={handleSelect} />
             </View>
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
@@ -105,6 +108,22 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers }) => {
   );
 };
 
+ShiftCardChange.propTypes = {
+  shiftName: PropTypes.string.isRequired,
+  startTime: PropTypes.string.isRequired,
+  endTime: PropTypes.string.isRequired,
+  assignedUsers: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string),
+  ]),
+  allUsers: PropTypes.arrayOf(
+    PropTypes.shape({
+      key: PropTypes.number.isRequired,  // Ensure key is a number
+      value: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+};
+
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#d3d3d3",
@@ -120,19 +139,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   timeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     marginTop: 8,
   },
   time: {
     fontSize: 16,
+    marginBottom: 4, // Add space between time and switch button
   },
   button: {
     borderRadius: 15,
     paddingVertical: 16,
     paddingHorizontal: 15,
     backgroundColor: "#3D5A80",
+    marginTop: 8, // Add space between time and switch button
   },
   buttonText: {
     color: "white",
