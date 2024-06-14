@@ -1,14 +1,14 @@
 const express = require('express');
+const moment = require('moment-timezone');
 const bodyParser = require('body-parser');
 const db = require('./db'); // Ensure this path is correct
 const generateSchedules = require('./scheduleGenerator'); // Ensure this path is correct
 const checkAndGenerateSchedules = require('./checkAndGenerateSchedules'); // Import the check and generate function
-const scheduleRoutes = require('./scheduleRoutes'); // Import your routes
+const scheduleRoutes = require('./scheduleRoutes');
 
 const app = express();
 app.use(bodyParser.json());
 
-// Use the schedule routes for API endpoints
 app.use('/api', scheduleRoutes);
 
 app.get('/schedules', async (req, res) => {
@@ -29,7 +29,7 @@ app.get('/schedules', async (req, res) => {
     let schedules;
     if (userId) {
       schedules = await db.any(`
-        SELECT s.date, u.user_name AS user_name, sh.name AS shift_name, sh.start_time, sh.end_time
+        SELECT s.date, u.user_name AS user_name, sh.name AS shift_name, sh.start_time, sh.end_time, s.user_id
         FROM public1.schedules s
         JOIN public1.users u ON s.user_id = u.user_id
         JOIN public1.shifts sh ON s.shift_id = sh.shift_id
@@ -37,7 +37,7 @@ app.get('/schedules', async (req, res) => {
       `, [dateList, userId]);
     } else {
       schedules = await db.any(`
-        SELECT s.date, u.user_name AS user_name, sh.name AS shift_name, sh.start_time, sh.end_time
+        SELECT s.date, u.user_name AS user_name, sh.name AS shift_name, sh.start_time, sh.end_time, s.user_id
         FROM public1.schedules s
         JOIN public1.users u ON s.user_id = u.user_id
         JOIN public1.shifts sh ON s.shift_id = sh.shift_id
@@ -90,6 +90,32 @@ app.post('/generate-schedules', async (req, res) => {
   } catch (error) {
     console.error('Error generating schedules:', error);
     res.status(500).send('Internal Server Error');
+  }
+});
+
+app.post('/api/report-leave', async (req, res) => {
+  const { user_id, type_of_leave, justification, start_date, end_date } = req.body;
+  const reportedAt = moment().tz('Africa/Johannesburg').format('YYYY-MM-DD HH:mm:ssZ');
+
+  // Check if all required fields are provided
+  if (!user_id || !type_of_leave || !justification || !start_date || !end_date) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  try {
+    // Insert the leave report into the database
+    const query = `
+      INSERT INTO public1.reports (user_id, type_of_leave, justification, start_date, end_date, reported_at)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *;
+    `;
+    const values = [user_id, type_of_leave, justification, start_date, end_date, reportedAt];
+    const result = await db.one(query, values);
+
+    res.status(201).json(result);
+  } catch (err) {
+    console.error('Error reporting leave:', err);
+    res.status(500).json({ error: 'Failed to report leave' });
   }
 });
 
