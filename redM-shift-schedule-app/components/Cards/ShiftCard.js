@@ -20,6 +20,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 15,
     marginVertical: 8,
+    width: 350,
   },
   shiftName: {
     fontSize: 18,
