@@ -81,7 +81,7 @@ const AdminEmployee = () => {
         component={AdminEmployeeScreen}
         options={{
           title: "Employees",
-          headerTintColor: "#3D5A80",
+          headerTintColor: "#E51E2A",
           headerTitleAlign: "center",
         }}
       />
@@ -90,7 +90,7 @@ const AdminEmployee = () => {
         component={AddEmployeePage}
         options={{
           title: "Add Employee",
-          headerTintColor: "#3D5A80",
+          headerTintColor: "#E51E2A",
           headerTitleAlign: "center",
         }}
       />
@@ -99,7 +99,7 @@ const AdminEmployee = () => {
         component={EditEmployeeScreen}
         options={{
           title: "Edit Employee",
-          headerTintColor: "#3D5A80",
+          headerTintColor: "#E51E2A",
           headerTitleAlign: "center",
         }}
       />
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     padding: 10,
-    backgroundColor: "#3D5A80",
+    backgroundColor: "#E51E2A",
     borderRadius: 15,
   },
   addButtonText: {

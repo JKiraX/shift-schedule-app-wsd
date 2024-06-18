@@ -40,17 +40,17 @@ export default function UserRequestLeaveScreen({ navigation }) {
       if (dateString === start) {
         dateRange[dateString] = {
           startingDay: true,
-          color: "#3D5A80",
+          color: "#E51E2A",
           textColor: "white",
         };
       } else if (dateString === end) {
         dateRange[dateString] = {
           endingDay: true,
-          color: "#3D5A80",
+          color: "#E51E2A",
           textColor: "white",
         };
       } else {
-        dateRange[dateString] = { color: "#3D5A80", textColor: "white" };
+        dateRange[dateString] = { color: "#E51E2A", textColor: "white" };
       }
       currentDate = currentDate.add(1, "day");
     }
@@ -64,7 +64,7 @@ export default function UserRequestLeaveScreen({ navigation }) {
       setMarkedDates({
         [day.dateString]: {
           startingDay: true,
-          color: "#3D5A80",
+          color: "#E51E2A",
           textColor: "white",
         },
       });
@@ -74,7 +74,7 @@ export default function UserRequestLeaveScreen({ navigation }) {
       setMarkedDates({
         [day.dateString]: {
           startingDay: true,
-          color: "#3D5A80",
+          color: "#E51E2A",
           textColor: "white",
         },
       });
@@ -152,7 +152,7 @@ export default function UserRequestLeaveScreen({ navigation }) {
         >
           <Text
             style={{
-              color: "#3D5A80",
+              color: "#E51E2A",
               fontWeight: "bold",
               fontSize: 22,
               paddingTop: 10,
@@ -172,7 +172,7 @@ export default function UserRequestLeaveScreen({ navigation }) {
           />
           <Text
             style={{
-              color: "#3D5A80",
+              color: "#E51E2A",
               fontWeight: "bold",
               fontSize: 22,
               paddingTop: 10,
@@ -188,7 +188,7 @@ export default function UserRequestLeaveScreen({ navigation }) {
           />
           <Text
             style={{
-              color: "#3D5A80",
+              color: "#E51E2A",
               fontWeight: "bold",
               fontSize: 22,
               paddingTop: 10,
@@ -207,7 +207,7 @@ export default function UserRequestLeaveScreen({ navigation }) {
               textAlignVertical: "top",
               minWidth: 350,
               borderRadius: 15,
-              borderColor: "#3D5A80",
+              borderColor: "#E51E2A",
               backgroundColor: "white",
             }}
             multiline
@@ -253,7 +253,7 @@ export default function UserRequestLeaveScreen({ navigation }) {
                 style={{
                   paddingHorizontal: 50,
                   paddingVertical: 15,
-                  backgroundColor: "#3D5A80",
+                  backgroundColor: "#E51E2A",
                   borderRadius: 15,
                   marginHorizontal: 10,
                 }}
@@ -267,7 +267,7 @@ export default function UserRequestLeaveScreen({ navigation }) {
                 style={{
                   paddingHorizontal: 50,
                   paddingVertical: 15,
-                  backgroundColor: "#3D5A80",
+                  backgroundColor: "#E51E2A",
                   borderRadius: 15,
                   marginHorizontal: 10,
                 }}

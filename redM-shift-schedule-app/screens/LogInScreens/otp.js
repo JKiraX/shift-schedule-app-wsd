@@ -21,7 +21,7 @@ const OtpScreen = () => {
         size={60}
         color="#D3D3D3"
       />
-      <Text style={{ color: "#3D5A80", fontSize: 35 }}>Enter Code</Text>
+      <Text style={{ color: "#E51E2A", fontSize: 35 }}>Enter Code</Text>
       <Text>Your temporary login code was sent to</Text>
       {/* Number needs to come from back-end */}
       <Text style={{ fontWeight: "bold" }}>*** *** 1234</Text>

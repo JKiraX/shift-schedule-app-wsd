@@ -113,7 +113,7 @@ const ProfileScreenContent = ({ navigation }) => {
                 style={{
                   paddingHorizontal: 50,
                   paddingVertical: 15,
-                  backgroundColor: "#3D5A80",
+                  backgroundColor: "#E51E2A",
                   borderRadius: 15,
                   marginHorizontal: 10,
                 }}
@@ -127,7 +127,7 @@ const ProfileScreenContent = ({ navigation }) => {
                 style={{
                   paddingHorizontal: 50,
                   paddingVertical: 15,
-                  backgroundColor: "#3D5A80",
+                  backgroundColor: "#E51E2A",
                   borderRadius: 15,
                   marginHorizontal: 10,
                 }}
@@ -153,7 +153,7 @@ const ProfileScreen = () => {
         component={ProfileScreenContent}
         options={{
           title: "Profile",
-          headerTintColor: "#3D5A80",
+          headerTintColor: "#E51E2A",
           headerTitleAlign: "center",
         }}
       />
@@ -162,7 +162,7 @@ const ProfileScreen = () => {
         component={ChangePasswordScreen}
         options={{
           title: "Change Password",
-          headerTintColor: "#3D5A80",
+          headerTintColor: "#E51E2A",
           headerTitleAlign: "center",
         }}
       />

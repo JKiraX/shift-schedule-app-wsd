@@ -78,7 +78,7 @@ const UserScheduleScreen = () => {
       newSelectedDates[dateString] = {
         selected: true,
         marked: true,
-        dotColor: "#3D5A80",
+        dotColor: "#E51E2A",
       };
     }
 

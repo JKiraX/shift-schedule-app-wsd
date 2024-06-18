@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingVertical: 16,
     paddingHorizontal: 15,
-    backgroundColor: "#3D5A80",
+    backgroundColor: "#E51E2A",
     marginTop: 8, // Add space between time and switch button
   },
   buttonText: {
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   modalButton: {
     paddingHorizontal: 50,
     paddingVertical: 15,
-    backgroundColor: "#3D5A80",
+    backgroundColor: "#E51E2A",
     borderRadius: 15,
     marginHorizontal: 10,
   },

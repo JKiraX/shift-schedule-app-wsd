@@ -13,27 +13,59 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import SmallButton from "../../components/Buttons/smallButton";
+import { post } from "../../../server/userRegRoutes";
 
 const AddEmployeePage = () => {
   const [name, setName] = useState("");
-  const [contact, setContact] = useState("");
   const [email, setEmail] = useState("");
-  const [administrativePrivileges, setAdministrativePrivileges] =
-    useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [administrativePrivileges, setAdministrativePrivileges] =
+    useState(false);
 
   const navigation = useNavigation();
 
-  const handleAddEmployee = () => {
-    // Add employee logic here
-    console.log("Add employee button pressed");
-    Alert.alert("Employee added.", "", [
-      {
-        text: "OK",
-        onPress: () => navigation.goBack(),
-      },
-    ]);
+  const handleAddEmployee = async () => {
+    if (newPassword !== confirmPassword) {
+      Alert.alert("Passwords do not match.");
+      return;
+    }
+
+    const adminValue = administrativePrivileges ? 2 : 1;
+
+    try {
+      const response = await fetch(
+        "http://10.0.0.20:3001/api/add-employee",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_name: name,
+            email:email,
+            password: newPassword,
+            admin: adminValue,
+          }),
+        }
+      );
+npx
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert("Employee added.", "", [
+          {
+            text: "OK",
+            onPress: () => navigation.goBack(),
+          },
+        ]);
+      } else {
+        Alert.alert("Error", data.error);
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to add employee");
+      console.error(error);
+    }
   };
 
   return (
@@ -51,13 +83,6 @@ const AddEmployeePage = () => {
               onChangeText={(text) => setName(text)}
               placeholder="Enter name"
             />
-            <Text style={styles.label}>Phone Number</Text>
-            <TextInput
-              style={styles.input}
-              value={contact}
-              onChangeText={(text) => setContact(text)}
-              placeholder="Enter phone number"
-            />
             <Text style={styles.label}>E-mail</Text>
             <TextInput
               style={styles.input}
@@ -65,6 +90,7 @@ const AddEmployeePage = () => {
               onChangeText={(text) => setEmail(text)}
               placeholder="Enter email"
               keyboardType="email-address"
+              autoCapitalize="none"
             />
 
             <View style={styles.inputContainer}>
@@ -75,6 +101,7 @@ const AddEmployeePage = () => {
                 secureTextEntry
                 value={newPassword}
                 onChangeText={setNewPassword}
+                autoCapitalize="none"
               />
             </View>
 
@@ -86,6 +113,7 @@ const AddEmployeePage = () => {
                 secureTextEntry
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
+                autoCapitalize="none"
               />
             </View>
 

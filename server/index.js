@@ -5,10 +5,11 @@ const db = require('./db'); // Ensure this path is correct
 const generateSchedules = require('./scheduleGenerator'); // Ensure this path is correct
 const checkAndGenerateSchedules = require('./checkAndGenerateSchedules'); // Import the check and generate function
 const scheduleRoutes = require('./scheduleRoutes');
+const userRegistration = require('./userRegRoutes')
 
 const app = express();
 app.use(bodyParser.json());
-
+app.use('./add-employee',userRegistration)
 app.use('/api', scheduleRoutes);
 
 app.get('/schedules', async (req, res) => {

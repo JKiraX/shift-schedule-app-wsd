@@ -72,8 +72,8 @@ const AppLogin = () => {
   return (
     <Stack.Navigator initialRouteName="Login">
       <Stack.Screen name="Login" component={LoginScreen} options={{headerShown:false}} />
-      <Stack.Screen name="Authentication" component={Authentication} options={{headerTintColor: "#3D5A80"}} />
-      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{headerTintColor:"#3D5A80", headerTitle:"Forgot Password"}} />
+      <Stack.Screen name="Authentication" component={Authentication} options={{headerTintColor: "#E51E2A"}} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{headerTintColor:"#E51E2A", headerTitle:"Forgot Password"}} />
     </Stack.Navigator>
   );
 };

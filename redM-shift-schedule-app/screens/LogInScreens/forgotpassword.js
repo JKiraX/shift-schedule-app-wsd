@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
-    color:"#3D5A80"
+    color:"#E51E2A"
   },
   description: {
     fontSize: 16,
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#3D5A80',
+    backgroundColor: '#E51E2A',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
