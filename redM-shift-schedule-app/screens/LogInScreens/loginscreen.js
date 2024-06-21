@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import ContinueButton from "../../components/Buttons/ContinueButton";
-import Authentication from "./otp";
+import { AuthContext } from "../../../server/AuthProvider";
 import ForgotPasswordScreen from "./forgotpassword";
 
 const Stack = createNativeStackNavigator();
@@ -19,18 +19,22 @@ const Stack = createNativeStackNavigator();
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login } = useContext(AuthContext);
   const navigation = useNavigation();
 
-  const handleLogin = () => {
-    // Add login logic here
-    console.log("Login pressed");
-    navigation.navigate("Authentication");
+  const handleLogin = async () => {
+    try {
+      await login(email, password);
+      navigation.navigate("AdminHome");
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   };
 
   const handleForgotPassword = () => {
     console.log("Forgot password");
     navigation.navigate("ForgotPassword");
-  }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -71,9 +75,16 @@ const LoginScreen = () => {
 const AppLogin = () => {
   return (
     <Stack.Navigator initialRouteName="Login">
-      <Stack.Screen name="Login" component={LoginScreen} options={{headerShown:false}} />
-      <Stack.Screen name="Authentication" component={Authentication} options={{headerTintColor: "#3D5A80"}} />
-      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{headerTintColor:"#3D5A80", headerTitle:"Forgot Password"}} />
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{ headerTintColor: "#3D5A80", headerTitle: "Forgot Password" }}
+      />
     </Stack.Navigator>
   );
 };
@@ -94,7 +105,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginBottom: 45,
     fontWeight: "bold",
-    color:"#3D5A80"
+    color: "#3D5A80",
   },
   inputContainer: {
     flexDirection: "row",
