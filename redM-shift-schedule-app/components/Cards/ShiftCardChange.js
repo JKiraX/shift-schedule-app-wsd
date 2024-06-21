@@ -107,9 +107,25 @@ const ShiftCardChange = ({
         <SwitchButton onPress={handleSwitchPress} />
       </View>
       <Modal visible={modalVisible} transparent={true} animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0,0,0,0.5)",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#f2f2f2",
+              padding: 20,
+              borderRadius: 15,
+              width: 365,
+            }}
+          >
+            <Text
+              style={{ fontSize: 18, marginBottom: 10, fontWeight: "bold" }}
+            >
               Please select employee to switch on the shift.
             </Text>
             <Text style={styles.modalSubtitle}>Switch User with:</Text>
@@ -157,7 +173,7 @@ const ShiftCardChange = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#d3d3d3",
+    backgroundColor: "#f2f2f2",
     padding: 16,
     borderRadius: 15,
     marginVertical: 8,
@@ -187,8 +203,8 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingVertical: 16,
     paddingHorizontal: 15,
-    backgroundColor: "#3D5A80",
-    marginTop: 8,
+    backgroundColor: "#c82f2f",
+    marginTop: 8, // Add space between time and switch button
   },
   buttonText: {
     color: "white",
@@ -226,7 +242,7 @@ const styles = StyleSheet.create({
   modalButton: {
     paddingHorizontal: 50,
     paddingVertical: 15,
-    backgroundColor: "#3D5A80",
+    backgroundColor: "#c82f2f",
     borderRadius: 15,
     marginHorizontal: 10,
   },

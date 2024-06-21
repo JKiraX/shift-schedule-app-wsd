@@ -44,7 +44,10 @@ const AdminScheduleScreen = () => {
         throw new Error(`Network response was not ok: ${response.status}`);
       }
       const data = await response.json();
-      const userData = data.map((user) => ({ key: Number(user.id), value: user.name }));
+      const userData = data.map((user) => ({
+        key: Number(user.id),
+        value: user.name,
+      }));
       setUsers(userData);
     } catch (error) {
       console.error("Error fetching user data:", error.message);
@@ -87,7 +90,7 @@ const AdminScheduleScreen = () => {
       newSelectedDates[dateString] = {
         selected: true,
         marked: true,
-        dotColor: "#3D5A80",
+        dotColor: "#c82f2f",
       };
     }
 
@@ -121,7 +124,9 @@ const AdminScheduleScreen = () => {
   const groupedShiftData = groupShiftsByDate(shiftData);
 
   return (
-    <SafeAreaView style={{ flex: 1, alignItems: "center" }}>
+    <SafeAreaView
+      style={{ flex: 1, alignItems: "center", backgroundColor: "white" }}
+    >
       <DropdownComponent data={users} onSelect={handleSelect} />
       <View
         style={{
@@ -141,28 +146,46 @@ const AdminScheduleScreen = () => {
           style={{
             width: "45%",
             height: 50,
-            backgroundColor: selectedTab === 0 ? "#98C1D9" : "white",
+            backgroundColor:
+              selectedTab === 0 ? "rgba(200, 47, 47,0.8)" : "white",
             borderRadius: 15,
             justifyContent: "center",
             alignItems: "center",
           }}
           onPress={() => setSelectedTab(0)}
         >
-          <Text style={{ fontSize: 18, fontWeight: "bold" }}>Shifts</Text>
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "bold",
+              color: selectedTab === 0 ? "white" : "black",
+            }}
+          >
+            Shifts
+          </Text>
         </TouchableOpacity>
         <View style={{ width: "10%" }} />
         <TouchableOpacity
           style={{
             width: "45%",
             height: 50,
-            backgroundColor: selectedTab === 1 ? "#98C1D9" : "white",
+            backgroundColor:
+              selectedTab === 1 ? "rgba(200, 47, 47,0.8)" : "white",
             borderRadius: 15,
             justifyContent: "center",
             alignItems: "center",
           }}
           onPress={() => setSelectedTab(1)}
         >
-          <Text style={{ fontSize: 18, fontWeight: "bold" }}>Leave</Text>
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "bold",
+              color: selectedTab === 0 ? "black" : "white",
+            }}
+          >
+            Leave
+          </Text>
         </TouchableOpacity>
       </View>
       <ScrollView>
@@ -176,7 +199,7 @@ const AdminScheduleScreen = () => {
             onDayPress={handleDayPress}
           />
           {Object.keys(selectedDates).map((date) => (
-            <View key={date} style={{ width: "100%", padding: 20 }}>
+            <View key={date} style={{ width: "100%", padding: 20, }}>
               <Text style={styles.dateHeader}>
                 {moment(date).format("LL")}:
               </Text>

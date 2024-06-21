@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
+    backgroundColor:"white"
   },
   logo: {
     width: 270,

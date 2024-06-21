@@ -16,7 +16,7 @@ const ShiftCard = ({ shiftName, startTime, endTime, assignedUsers }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#d3d3d3',
+    backgroundColor: "#f2f2f2",
     padding: 16,
     borderRadius: 15,
     marginVertical: 8,
