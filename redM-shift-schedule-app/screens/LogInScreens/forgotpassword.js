@@ -36,7 +36,7 @@ const ForgotPasswordScreen = () => {
       <View style={styles.signInContainer}>
         <Text style={styles.signInText}>Remember your password? </Text>
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={{color:"#98C1D9"}}>Sign in.</Text>
+          <Text style={{color:"rgba(200, 47, 47,0.8)"}}>Sign in.</Text>
         </TouchableOpacity>
       </View>
       <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
