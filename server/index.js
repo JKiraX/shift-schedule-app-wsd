@@ -5,9 +5,12 @@ const db = require('./db'); // Ensure this path is correct
 const generateSchedules = require('./scheduleGenerator'); // Ensure this path is correct
 const checkAndGenerateSchedules = require('./checkAndGenerateSchedules'); // Import the check and generate function
 const scheduleRoutes = require('./scheduleRoutes');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const app = express();
 app.use(bodyParser.json());
+const SECRET_KEY = 'your_secret_key';
 
 app.use('/api', scheduleRoutes);
 
@@ -116,6 +119,23 @@ app.post('/api/report-leave', async (req, res) => {
   } catch (err) {
     console.error('Error reporting leave:', err);
     res.status(500).json({ error: 'Failed to report leave' });
+  }
+});
+
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (user && bcrypt.compareSync(password, user.password)) {
+      const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '1h' });
+      res.json({ token, user });
+    } else {
+      res.status(401).json({ error: 'Invalid email or password' });
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

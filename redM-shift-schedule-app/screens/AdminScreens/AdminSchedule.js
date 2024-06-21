@@ -50,7 +50,7 @@ const AdminScheduleScreen = () => {
       console.error("Error fetching user data:", error.message);
     }
   };
-  
+
   const fetchShiftData = async () => {
     try {
       const dates = Object.keys(selectedDates).join(",");
@@ -93,6 +93,16 @@ const AdminScheduleScreen = () => {
 
     setSelectedDates(newSelectedDates);
     setMarkedDates(newSelectedDates);
+  };
+  
+  const handleSwitchComplete = async (shiftId, newUser) => {
+    try {
+      // Update the shift data in the component's state or refetch the data from the server
+      // Example: Refetch the shift data after a successful switch
+      await fetchShiftData();
+    } catch (error) {
+      console.error('Error updating shift data:', error.message);
+    }
   };
 
   const groupShiftsByDate = (shifts) => {
@@ -180,6 +190,7 @@ const AdminScheduleScreen = () => {
                     .map((shift, index) => (
                       <ShiftCardChange
                         key={index}
+                        shiftId={shift.shift_id} // Ensure shiftId is passed
                         shiftName={shift.shift_name}
                         startTime={shift.start_time}
                         endTime={shift.end_time}
@@ -196,6 +207,7 @@ const AdminScheduleScreen = () => {
                 groupedShiftData[date].map((shift, index) => (
                   <ShiftCardChange
                     key={index}
+                    shiftId={shift.shift_id} // Ensure shiftId is passed
                     shiftName={shift.shift_name}
                     startTime={shift.start_time}
                     endTime={shift.end_time}

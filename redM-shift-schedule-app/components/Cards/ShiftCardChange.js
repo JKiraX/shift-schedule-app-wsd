@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import PropTypes from "prop-types";
@@ -16,13 +16,17 @@ const SwitchButton = ({ onPress }) => {
 
 // ShiftCardChange component
 const ShiftCardChange = ({
+  shiftId,
   shiftName,
   startTime,
   endTime,
   assignedUsers,
   allUsers,
+  onSwitchComplete,
 }) => {
+  console.log("Shift ID:", shiftId); // Debugging statement
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedSwitchUser, setSelectedSwitchUser] = useState(null);
 
   // Function to handle switch button press
   const handleSwitchPress = () => {
@@ -30,9 +34,40 @@ const ShiftCardChange = ({
   };
 
   // Function to handle switch confirmation
-  const handleSwitch = () => {
-    console.log("Switch");
-    setModalVisible(false);
+  const handleSwitch = async () => {
+    if (selectedSwitchUser && shiftId) {
+      try {
+        const response = await fetch(
+          `http://192.168.5.22:3001/api/schedules/${shiftId}/switch`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user_id: selectedSwitchUser.key,
+            }),
+          }
+        );
+  
+        if (!response.ok) {
+          throw new Error(`Network response was not ok: ${response.status}`);
+        }
+  
+        // Notify the parent component of the switch completion
+        if (onSwitchComplete) {
+          onSwitchComplete(shiftId, selectedSwitchUser);
+        }
+  
+        // Reset the selected switch user state and close modal
+        setSelectedSwitchUser(null);
+        setModalVisible(false);
+      } catch (error) {
+        console.error('Error updating shift data:', error.message);
+      }
+    } else {
+      setModalVisible(false);
+    }
   };
 
   // Function to handle modal cancellation
@@ -41,49 +76,43 @@ const ShiftCardChange = ({
   };
 
   const handleSelect = (selected) => {
+    setSelectedSwitchUser(selected);
     console.log(selected);
+  };
+
+  const getUserName = (userId) => {
+    const user = allUsers.find((user) => user.key === userId);
+    return user ? user.value : `User ID: ${userId}`;
+  };
+
+  const getShift = (shiftId) => {
+    const shift = shiftId.find((shift) => shift.key === shiftId);
+    return shift ? shift.value : `Shift ID: ${shiftId}`;
   };
 
   return (
     <View style={styles.card}>
-      <Text style={styles.shiftName}>{shiftName}</Text>
-      {assignedUsers ? (
-        typeof assignedUsers === "string" ? (
-          <Text>{assignedUsers}</Text>
-        ) : (
-          assignedUsers.map((user, index) => <Text key={index}>{user}</Text>)
-        )
-      ) : (
-        <Text>No assigned users</Text>
-      )}
+      <Text style={styles.shiftName}>{shiftName}
+      {/* {shiftId ? getShift(shiftId) : "No assigned user"} */}
+      </Text>
+      <Text style={styles.assignedUsers}>
+      {/* {assignedUsers ? getUserName(assignedUsers) : "No assigned user"} */}
+        {typeof assignedUsers === "string"
+          ? assignedUsers
+          : getUserName(assignedUsers)}
+      </Text>
       <View style={styles.timeContainer}>
         <Text style={styles.time}>Start: {startTime}</Text>
         <Text style={styles.time}>End: {endTime}</Text>
         <SwitchButton onPress={handleSwitchPress} />
       </View>
       <Modal visible={modalVisible} transparent={true} animationType="slide">
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "rgba(0,0,0,0.5)",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "#d3d3d3",
-              padding: 20,
-              borderRadius: 15,
-              width: 365,
-            }}
-          >
-            <Text
-              style={{ fontSize: 18, marginBottom: 10, fontWeight: "bold" }}
-            >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
               Please select employee to switch on the shift.
             </Text>
-            <Text style={{ fontSize: 16 }}>Switch User 1 with:</Text>
+            <Text style={styles.modalSubtitle}>Switch User with:</Text>
             <View style={{ alignItems: "center" }}>
               <DropdownComponent data={allUsers} onSelect={handleSelect} />
             </View>
@@ -108,21 +137,23 @@ const ShiftCardChange = ({
   );
 };
 
-ShiftCardChange.propTypes = {
-  shiftName: PropTypes.string.isRequired,
-  startTime: PropTypes.string.isRequired,
-  endTime: PropTypes.string.isRequired,
-  assignedUsers: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.arrayOf(PropTypes.string),
-  ]),
-  allUsers: PropTypes.arrayOf(
-    PropTypes.shape({
-      key: PropTypes.number.isRequired,  // Ensure key is a number
-      value: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-};
+// ShiftCardChange.propTypes = {
+//   shiftId: PropTypes.number.isRequired, // Add shiftId prop type
+//   shiftName: PropTypes.string.isRequired,
+//   startTime: PropTypes.string.isRequired,
+//   endTime: PropTypes.string.isRequired,
+//   assignedUsers: PropTypes.oneOfType([
+//     PropTypes.string,
+//     PropTypes.arrayOf(PropTypes.string),
+//   ]),
+//   allUsers: PropTypes.arrayOf(
+//     PropTypes.shape({
+//       key: PropTypes.number.isRequired,
+//       value: PropTypes.string.isRequired,
+//     })
+//   ).isRequired,
+//   onSwitchComplete: PropTypes.func, // Add onSwitchComplete prop type
+// };
 
 const styles = StyleSheet.create({
   card: {
@@ -139,18 +170,25 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   timeContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 8,
   },
   time: {
+    fontSize: 14,
+
+    marginBottom: 4,
+  },
+  assignedUsers: {
     fontSize: 16,
-    marginBottom: 4, // Add space between time and switch button
+    fontWeight: "500",
   },
   button: {
     borderRadius: 15,
     paddingVertical: 16,
     paddingHorizontal: 15,
     backgroundColor: "#3D5A80",
-    marginTop: 8, // Add space between time and switch button
+    marginTop: 8,
   },
   buttonText: {
     color: "white",
@@ -158,6 +196,26 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     fontSize: 16,
     textAlign: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#d3d3d3",
+    padding: 20,
+    borderRadius: 15,
+    width: 365,
+  },
+  modalTitle: {
+    fontSize: 18,
+    marginBottom: 10,
+    fontWeight: "bold",
+  },
+  modalSubtitle: {
+    fontSize: 16,
   },
   modalButtonContainer: {
     flexDirection: "row",
