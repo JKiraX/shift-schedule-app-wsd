@@ -63,8 +63,13 @@ export default function App() {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Button title="Trigger Notification" onPress={triggerNotificationHandler} />
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center",backgroundColor:"white" }}>
+      <Text
+        onPress={() => alert('This is the "Notifications" screen.')}
+        style={{ fontSize: 26, fontWeight: "bold" }}
+      >
+        Notifications
+      </Text>
     </View>
   );
 }

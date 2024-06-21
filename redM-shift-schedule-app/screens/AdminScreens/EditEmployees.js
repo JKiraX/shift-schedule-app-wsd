@@ -71,6 +71,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor:"white"
   },
   formContainer: {
     padding: 20,

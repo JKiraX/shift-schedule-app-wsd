@@ -46,10 +46,10 @@ function TabNavigator() {
             <MaterialCommunityIcons name={iconName} size={size} color={color} />
           );
         },
-        tabBarActiveTintColor: "white",
-        tabBarInactiveTintColor: "#D3D3D3",
+        tabBarActiveTintColor: "#c82f2f",
+        tabBarInactiveTintColor: "#909090",
         tabBarLabelStyle: { paddingBottom: 10, fontSize: 10 },
-        tabBarStyle: { padding: 10, height: 77, backgroundColor: "#3D5A80" },
+        tabBarStyle: { padding: 10, height: 77, backgroundColor: "white" },
         tabBarHideOnKeyboard: true,
       })}
     >
@@ -57,14 +57,14 @@ function TabNavigator() {
         name={AdminHome}
         component={AdminHomeScreen}
         options={{
-          headerTintColor: "#3D5A80",
+          headerTintColor: "#c82f2f",
           headerTitleAlign: "center",
           headerRight: () => (
             <MaterialCommunityIcons
               name="bell-outline"
               size={25}
               style={{ paddingRight: 15 }}
-              color="#3D5A80"
+              color="#909090"
               onPress={() => navigation.navigate("Notifications")}
             />
           ),
@@ -73,7 +73,7 @@ function TabNavigator() {
               name="chart-bar"
               size={25}
               style={{ paddingLeft: 15 }}
-              color="#3D5A80"
+              color="#909090"
               onPress={() => navigation.navigate("Reports")}
             />
           ),
@@ -82,13 +82,13 @@ function TabNavigator() {
       <Tab.Screen
         name={AdminSchedule}
         component={AdminScheduleScreen}
-        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
+        options={{ headerTintColor: "#c82f2f", headerTitleAlign: "center" }}
       />
       <Tab.Screen
         name={AdminEmployees}
         component={AdminEmployeesScreen}
         options={{
-          headerTintColor: "#3D5A80",
+          headerTintColor: "#c82f2f",
           headerTitleAlign: "center",
           headerShown: false,
         }}
@@ -97,7 +97,7 @@ function TabNavigator() {
         name={AdminProfile}
         component={AdminProfileScreen}
         options={{
-          headerTintColor: "#3D5A80",
+          headerTintColor: "#c82f2f",
           headerTitleAlign: "center",
           headerShown: false,
         }}
@@ -117,12 +117,12 @@ function AdminNav() {
       <Stack.Screen
         name="Notifications"
         component={NotificationsScreen}
-        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
+        options={{ headerTintColor: "#c82f2f", headerTitleAlign: "center" }}
       />
       <Stack.Screen
         name="Reports"
         component={ReportsScreen}
-        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
+        options={{ headerTintColor: "#c82f2f", headerTitleAlign: "center" }}
       />
     </Stack.Navigator>
   );

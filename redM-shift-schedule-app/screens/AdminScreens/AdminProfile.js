@@ -91,7 +91,7 @@ const ProfileScreenContent = ({ navigation }) => {
         >
           <View
             style={{
-              backgroundColor: "#d3d3d3",
+              backgroundColor: "#f2f2f2",
               padding: 20,
               borderRadius: 15,
               width: 365,
@@ -113,7 +113,7 @@ const ProfileScreenContent = ({ navigation }) => {
                 style={{
                   paddingHorizontal: 50,
                   paddingVertical: 15,
-                  backgroundColor: "#3D5A80",
+                  backgroundColor: "#c82f2f",
                   borderRadius: 15,
                   marginHorizontal: 10,
                 }}
@@ -127,7 +127,7 @@ const ProfileScreenContent = ({ navigation }) => {
                 style={{
                   paddingHorizontal: 50,
                   paddingVertical: 15,
-                  backgroundColor: "#3D5A80",
+                  backgroundColor: "#c82f2f",
                   borderRadius: 15,
                   marginHorizontal: 10,
                 }}
@@ -153,7 +153,7 @@ const ProfileScreen = () => {
         component={ProfileScreenContent}
         options={{
           title: "Profile",
-          headerTintColor: "#3D5A80",
+          headerTintColor: "#c82f2f",
           headerTitleAlign: "center",
         }}
       />
@@ -162,7 +162,7 @@ const ProfileScreen = () => {
         component={ChangePasswordScreen}
         options={{
           title: "Change Password",
-          headerTintColor: "#3D5A80",
+          headerTintColor: "#c82f2f",
           headerTitleAlign: "center",
         }}
       />
@@ -176,6 +176,7 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor:"white",
   },
   inputContainer: {
     marginBottom: 18,

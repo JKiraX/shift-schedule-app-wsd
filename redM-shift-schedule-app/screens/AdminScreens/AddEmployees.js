@@ -116,6 +116,7 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "stretch",
     justifyContent: "space-evenly",
+    backgroundColor:"white"
   },
   scrollViewContainer: {
     flexGrow: 1,

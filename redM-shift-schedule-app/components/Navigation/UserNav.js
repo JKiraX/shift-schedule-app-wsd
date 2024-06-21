@@ -45,10 +45,10 @@ function TabNavigator() {
             <MaterialCommunityIcons name={iconName} size={size} color={color} />
           );
         },
-        tabBarActiveTintColor: "white",
-        tabBarInactiveTintColor: "#D3D3D3",
+        tabBarActiveTintColor: "#c82f2f",
+        tabBarInactiveTintColor: "#909090",
         tabBarLabelStyle: { paddingBottom: 10, fontSize: 10 },
-        tabBarStyle: { padding: 10, height: 77, backgroundColor: "#3D5A80" },
+        tabBarStyle: { padding: 10, height: 77, backgroundColor: "white" },
         tabBarHideOnKeyboard: true,
       })}
     >
@@ -56,14 +56,14 @@ function TabNavigator() {
         name={UserHome}
         component={UserHomeScreen}
         options={{
-          headerTintColor: "#3D5A80",
+          headerTintColor: "#c82f2f",
           headerTitleAlign: "center",
           headerRight: () => (
             <MaterialCommunityIcons
               name="bell-outline"
               size={25}
               style={{ paddingRight: 15 }}
-              color="#3D5A80"
+              color="#909090"
               onPress={() => navigation.navigate("Notifications")}
             />
           ),
@@ -72,18 +72,18 @@ function TabNavigator() {
       <Tab.Screen
         name={UserSchedule}
         component={UserScheduleScreen}
-        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
+        options={{ headerTintColor: "#c82f2f", headerTitleAlign: "center" }}
       />
       <Tab.Screen
         name={UserRequestLeave}
         component={UserRequestLeaveScreen}
-        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
+        options={{ headerTintColor: "#c82f2f", headerTitleAlign: "center" }}
       />
       <Tab.Screen
         name={UserProfile}
         component={UserProfileScreen}
         options={{
-          headerTintColor: "#3D5A80",
+          headerTintColor: "#c82f2f",
           headerTitleAlign: "center",
           headerShown: false,
         }}
@@ -103,7 +103,7 @@ function UserNav() {
       <Stack.Screen
         name="Notifications"
         component={NotificationsScreen}
-        options={{ headerTintColor: "#3D5A80", headerTitleAlign: "center" }}
+        options={{ headerTintColor: "#c82f2f", headerTitleAlign: "center" }}
       />
     </Stack.Navigator>
   );
