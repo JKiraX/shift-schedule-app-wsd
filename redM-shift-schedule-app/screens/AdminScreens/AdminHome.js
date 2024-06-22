@@ -37,7 +37,7 @@ const AdminHomeScreen = ({ navigation }) => {
   const fetchShiftData = async (date) => {
     try {
       const formattedDate = moment(date).format('YYYY-MM-DD');
-      const response = await fetch(`http://192.168.5.22:3001/schedules?date=${formattedDate}`); // Ensure the correct backend URL
+      const response = await fetch(`http://192.168.5.61:3001/schedules?date=${formattedDate}`); // Ensure the correct backend URL
       console.log('Response status:', response.status);
 
       if (response.ok) {
@@ -53,22 +53,22 @@ const AdminHomeScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor:"white" }}>
       <CalendarStrip
         scrollable
         style={{ height: 120, paddingTop: 20, paddingBottom: 10}}
         calendarHeaderStyle={{
-          color: "#9098B1",
+          color: "black",
           fontSize: 18,
           fontWeight: "bold",
         }}
         calendarColor={"white"}
         dateNumberStyle={{
-          color: "#98C1D9",
+          color: "black",
           fontSize: 20,
           fontWeight: "normal",
         }}
-        dateNameStyle={{ color: "#98C1D9", fontSize: 12, marginTop: 5 }}
+        dateNameStyle={{ color: "black", fontSize: 12, marginTop: 5 }}
         iconContainer={{ flex: 0.1 }}
         selectedDate={selectedDate}
         onDateSelected={onDateSelected}

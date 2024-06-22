@@ -72,7 +72,7 @@ const ShiftCardChange = ({
         >
           <View
             style={{
-              backgroundColor: "#d3d3d3",
+              backgroundColor: "#f2f2f2",
               padding: 20,
               borderRadius: 15,
               width: 365,
@@ -126,7 +126,7 @@ ShiftCardChange.propTypes = {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#d3d3d3",
+    backgroundColor: "#f2f2f2",
     padding: 16,
     borderRadius: 15,
     marginVertical: 8,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingVertical: 16,
     paddingHorizontal: 15,
-    backgroundColor: "#3D5A80",
+    backgroundColor: "#c82f2f",
     marginTop: 8, // Add space between time and switch button
   },
   buttonText: {
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   modalButton: {
     paddingHorizontal: 50,
     paddingVertical: 15,
-    backgroundColor: "#3D5A80",
+    backgroundColor: "#c82f2f",
     borderRadius: 15,
     marginHorizontal: 10,
   },

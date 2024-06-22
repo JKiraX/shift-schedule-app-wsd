@@ -15,13 +15,13 @@ const OtpScreen = () => {
   };
 
   return (
-    <View style={{ flex: 0.6, alignItems: "center", justifyContent: "center" }}>
+    <View style={{ flex: 0.6, alignItems: "center", justifyContent: "center",backgroundColor:"white" }}>
       <MaterialCommunityIcons
         name="shield-check-outline"
         size={60}
-        color="#D3D3D3"
+        color="#f2f2f2"
       />
-      <Text style={{ color: "#3D5A80", fontSize: 35 }}>Enter Code</Text>
+      <Text style={{ color: "#c82f2f", fontSize: 35 }}>Enter Code</Text>
       <Text>Your temporary login code was sent to</Text>
       {/* Number needs to come from back-end */}
       <Text style={{ fontWeight: "bold" }}>*** *** 1234</Text>

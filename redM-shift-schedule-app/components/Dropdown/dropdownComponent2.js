@@ -27,13 +27,13 @@ const DropdownComponent2 = ({ data, onSelect }) => {
         maxWidth: 350,
         minWidth: 350,
         backgroundColor: "white",
-        borderColor: "#3D5A80",
+        borderColor: "#c82f2f",
       }}
       dropdownStyles={{
         maxWidth: 350,
         minWidth: 350,
         backgroundColor: "white",
-        borderColor: "#3D5A80",
+        borderColor: "#c82f2f",
       }}
       inputStyles={{ color: "black", fontWeight: "bold" }}
       searchIconComponent={

@@ -72,8 +72,8 @@ const AppLogin = () => {
   return (
     <Stack.Navigator initialRouteName="Login">
       <Stack.Screen name="Login" component={LoginScreen} options={{headerShown:false}} />
-      <Stack.Screen name="Authentication" component={Authentication} options={{headerTintColor: "#3D5A80"}} />
-      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{headerTintColor:"#3D5A80", headerTitle:"Forgot Password"}} />
+      <Stack.Screen name="Authentication" component={Authentication} options={{headerTintColor: "#c82f2f"}} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{headerTintColor:"#c82f2f", headerTitle:"Forgot Password"}} />
     </Stack.Navigator>
   );
 };
@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
+    backgroundColor:"white"
   },
   logo: {
     width: 270,
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginBottom: 45,
     fontWeight: "bold",
-    color:"#3D5A80"
+    color:"#c82f2f"
   },
   inputContainer: {
     flexDirection: "row",
@@ -123,7 +124,7 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     fontSize: 16,
-    color: "#98C1D9",
+    color: "rgba(200, 47, 47,0.8)",
     textDecorationLine: "underline",
     marginTop: 10,
   },

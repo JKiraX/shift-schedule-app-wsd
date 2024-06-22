@@ -102,10 +102,44 @@ const AdminEmployeeScreen = () => {
   );
 };
 
+const AdminEmployee = () => {
+  return (
+    <Stack.Navigator initialRouteName="AdminEmployeeScreen">
+      <Stack.Screen
+        name="AdminEmployeeScreen"
+        component={AdminEmployeeScreen}
+        options={{
+          title: "Employees",
+          headerTintColor: "#c82f2f",
+          headerTitleAlign: "center",
+        }}
+      />
+      <Stack.Screen
+        name="AddEmployees"
+        component={AddEmployeePage}
+        options={{
+          title: "Add Employee",
+          headerTintColor: "#c82f2f",
+          headerTitleAlign: "center",
+        }}
+      />
+      <Stack.Screen
+        name="EditEmployee"
+        component={EditEmployeeScreen}
+        options={{
+          title: "Edit Employee",
+          headerTintColor: "#c82f2f",
+          headerTitleAlign: "center",
+        }}
+      />
+    </Stack.Navigator>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor:"white",
     padding: 20,
   },
   searchBar: {
@@ -123,7 +157,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     padding: 10,
-    backgroundColor: "#3D5A80",
+    backgroundColor: "#c82f2f",
     borderRadius: 15,
   },
   addButtonText: {
