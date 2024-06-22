@@ -122,11 +122,33 @@ app.post('/api/report-leave', async (req, res) => {
   }
 });
 
+app.post('/api/schedules/:date/:oldUserId/:startTime/switch', async (req, res) => {
+  const { date, oldUserId, startTime } = req.params;
+  const { user_id } = req.body;
+
+  try {
+    const result = await db.one(`
+      UPDATE public1.schedules
+      SET user_id = $1
+      WHERE date = $2 AND user_id = $3 AND start_time = $4
+      RETURNING *
+    `, [user_id, date, oldUserId, startTime]);
+
+    // Fetch the new user's name
+    const newUser = await db.one('SELECT user_name FROM public1.users WHERE user_id = $1', [user_id]);
+
+    res.json({...result, user_name: newUser.user_name});
+  } catch (error) {
+    console.error('Error updating shift:', error);
+    res.status(500).json({ error: 'Failed to update shift' });
+  }
+});
+
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = await db.query('SELECT * FROM public1.users WHERE email = $1', [email]);
     if (user && bcrypt.compareSync(password, user.password)) {
       const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '1h' });
       res.json({ token, user });

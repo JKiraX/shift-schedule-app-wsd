@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
-import PropTypes from "prop-types";
+// import PropTypes from "prop-types";
 
 // Reusable Switch Button component
 const SwitchButton = ({ onPress }) => {
@@ -14,6 +14,7 @@ const SwitchButton = ({ onPress }) => {
   );
 };
 
+
 // ShiftCardChange component
 const ShiftCardChange = ({
   shiftId,
@@ -24,25 +25,29 @@ const ShiftCardChange = ({
   allUsers,
   onSwitchComplete,
 }) => {
-  console.log("Shift ID:", shiftId); // Debugging statement
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedSwitchUser, setSelectedSwitchUser] = useState(null);
-
-  // Function to handle switch button press
+  const [currentAssignedUser, setCurrentAssignedUser] = useState(
+    typeof assignedUsers === "string" ? assignedUsers : getUserName(assignedUsers)
+  );
+  console.log('ShiftCardChange rendered with:', { shiftId, currentAssignedUser });
   const handleSwitchPress = () => {
     setModalVisible(true);
   };
 
-  // Function to handle switch confirmation
   const handleSwitch = async () => {
     if (selectedSwitchUser && shiftId) {
       try {
+        console.log('Sending switch request for shiftId:', shiftId);
+        const [date, oldUserId, ...startTimeParts] = shiftId.split('-');
+        const startTime = startTimeParts.join('-');
+        
         const response = await fetch(
-          `http://192.168.5.22:3001/api/schedules/${shiftId}/switch`,
+          `http://10.0.0.113:3001/api/schedules/${date}/${oldUserId}/${startTime}/switch`,
           {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               user_id: selectedSwitchUser.key,
@@ -54,30 +59,33 @@ const ShiftCardChange = ({
           throw new Error(`Network response was not ok: ${response.status}`);
         }
   
-        // Notify the parent component of the switch completion
+        const updatedSchedule = await response.json();
+        console.log('Received updated schedule:', updatedSchedule);
+  
+        setCurrentAssignedUser(updatedSchedule.user_name);
+        console.log('Updated currentAssignedUser to:', updatedSchedule.user_name);
+  
         if (onSwitchComplete) {
-          onSwitchComplete(shiftId, selectedSwitchUser);
+          onSwitchComplete(shiftId, updatedSchedule.user_name);
         }
   
-        // Reset the selected switch user state and close modal
         setSelectedSwitchUser(null);
         setModalVisible(false);
       } catch (error) {
-        console.error('Error updating shift data:', error.message);
+        console.error("Error updating shift data:", error.message);
       }
     } else {
       setModalVisible(false);
     }
   };
 
-  // Function to handle modal cancellation
+
   const handleCancel = () => {
     setModalVisible(false);
   };
 
   const handleSelect = (selected) => {
     setSelectedSwitchUser(selected);
-    console.log(selected);
   };
 
   const getUserName = (userId) => {
@@ -85,47 +93,19 @@ const ShiftCardChange = ({
     return user ? user.value : `User ID: ${userId}`;
   };
 
-  const getShift = (shiftId) => {
-    const shift = shiftId.find((shift) => shift.key === shiftId);
-    return shift ? shift.value : `Shift ID: ${shiftId}`;
-  };
-
   return (
     <View style={styles.card}>
-      <Text style={styles.shiftName}>{shiftName}
-      {/* {shiftId ? getShift(shiftId) : "No assigned user"} */}
-      </Text>
-      <Text style={styles.assignedUsers}>
-      {/* {assignedUsers ? getUserName(assignedUsers) : "No assigned user"} */}
-        {typeof assignedUsers === "string"
-          ? assignedUsers
-          : getUserName(assignedUsers)}
-      </Text>
+      <Text style={styles.shiftName}>{shiftName}</Text>
+      <Text style={styles.assignedUsers}>{currentAssignedUser}</Text>
       <View style={styles.timeContainer}>
         <Text style={styles.time}>Start: {startTime}</Text>
         <Text style={styles.time}>End: {endTime}</Text>
         <SwitchButton onPress={handleSwitchPress} />
       </View>
       <Modal visible={modalVisible} transparent={true} animationType="slide">
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "rgba(0,0,0,0.5)",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "#f2f2f2",
-              padding: 20,
-              borderRadius: 15,
-              width: 365,
-            }}
-          >
-            <Text
-              style={{ fontSize: 18, marginBottom: 10, fontWeight: "bold" }}
-            >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
               Please select employee to switch on the shift.
             </Text>
             <Text style={styles.modalSubtitle}>Switch User with:</Text>
@@ -133,16 +113,10 @@ const ShiftCardChange = ({
               <DropdownComponent data={allUsers} onSelect={handleSelect} />
             </View>
             <View style={styles.modalButtonContainer}>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={handleCancel}
-              >
+              <TouchableOpacity style={styles.modalButton} onPress={handleCancel}>
                 <Text style={styles.modalButtonText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={handleSwitch}
-              >
+              <TouchableOpacity style={styles.modalButton} onPress={handleSwitch}>
                 <Text style={styles.modalButtonText}>Switch</Text>
               </TouchableOpacity>
             </View>
@@ -154,7 +128,7 @@ const ShiftCardChange = ({
 };
 
 // ShiftCardChange.propTypes = {
-//   shiftId: PropTypes.number.isRequired, // Add shiftId prop type
+//   shiftId: PropTypes.number.isRequired,
 //   shiftName: PropTypes.string.isRequired,
 //   startTime: PropTypes.string.isRequired,
 //   endTime: PropTypes.string.isRequired,
@@ -168,7 +142,7 @@ const ShiftCardChange = ({
 //       value: PropTypes.string.isRequired,
 //     })
 //   ).isRequired,
-//   onSwitchComplete: PropTypes.func, // Add onSwitchComplete prop type
+//   onSwitchComplete: PropTypes.func,
 // };
 
 const styles = StyleSheet.create({
@@ -192,7 +166,6 @@ const styles = StyleSheet.create({
   },
   time: {
     fontSize: 14,
-
     marginBottom: 4,
   },
   assignedUsers: {
@@ -204,7 +177,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 15,
     backgroundColor: "#c82f2f",
-    marginTop: 8, // Add space between time and switch button
+    marginTop: 8,
   },
   buttonText: {
     color: "white",
