@@ -16,24 +16,64 @@ import SmallButton from "../../components/Buttons/smallButton";
 
 const AddEmployeePage = () => {
   const [name, setName] = useState("");
-  const [contact, setContact] = useState("");
   const [email, setEmail] = useState("");
-  const [administrativePrivileges, setAdministrativePrivileges] =
-    useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [administrativePrivileges, setAdministrativePrivileges] =
+    useState(false);
 
   const navigation = useNavigation();
 
-  const handleAddEmployee = () => {
-    // Add employee logic here
-    console.log("Add employee button pressed");
-    Alert.alert("Employee added.", "", [
-      {
-        text: "OK",
-        onPress: () => navigation.goBack(),
-      },
-    ]);
+  const handleAddEmployee = async () => {
+    if (newPassword !== confirmPassword) {
+      Alert.alert("Passwords do not match.");
+      return;
+    }
+
+    const adminValue = administrativePrivileges ? 2 : 1;
+
+    try {
+      const response = await fetch(
+        'http://192.168.5.61:3001/api/add-employee',
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_name: name,
+            email: email,
+            password: newPassword,
+            admin: adminValue
+          }),
+        }
+      );
+
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
+      const responseText = await response.text();
+      console.log("Response body:", responseText);
+
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = JSON.parse(responseText);
+        if (response.ok) {
+          Alert.alert("Employee added.", "", [
+            {
+              text: "OK",
+              onPress: () => navigation.goBack(),
+            },
+          ]);
+        } else {
+          Alert.alert("Error", data.error);
+        }
+      } else {
+        throw new Error("Received non-JSON response from server");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      Alert.alert("Error", "Failed to add employee: " + error.message);
+    }
   };
 
   return (
@@ -51,13 +91,6 @@ const AddEmployeePage = () => {
               onChangeText={(text) => setName(text)}
               placeholder="Enter name"
             />
-            <Text style={styles.label}>Phone Number</Text>
-            <TextInput
-              style={styles.input}
-              value={contact}
-              onChangeText={(text) => setContact(text)}
-              placeholder="Enter phone number"
-            />
             <Text style={styles.label}>E-mail</Text>
             <TextInput
               style={styles.input}
@@ -65,6 +98,7 @@ const AddEmployeePage = () => {
               onChangeText={(text) => setEmail(text)}
               placeholder="Enter email"
               keyboardType="email-address"
+              autoCapitalize="none"
             />
 
             <View style={styles.inputContainer}>
@@ -75,6 +109,7 @@ const AddEmployeePage = () => {
                 secureTextEntry
                 value={newPassword}
                 onChangeText={setNewPassword}
+                autoCapitalize="none"
               />
             </View>
 
@@ -86,6 +121,7 @@ const AddEmployeePage = () => {
                 secureTextEntry
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
+                autoCapitalize="none"
               />
             </View>
 
@@ -116,7 +152,7 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "stretch",
     justifyContent: "space-evenly",
-    backgroundColor:"white"
+    backgroundColor: "white",
   },
   scrollViewContainer: {
     flexGrow: 1,

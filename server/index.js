@@ -5,11 +5,26 @@ const db = require('./db'); // Ensure this path is correct
 const generateSchedules = require('./scheduleGenerator'); // Ensure this path is correct
 const checkAndGenerateSchedules = require('./checkAndGenerateSchedules'); // Import the check and generate function
 const scheduleRoutes = require('./scheduleRoutes');
+const employeeRoutes = require('./userRegRoutes');
 
 const app = express();
+
+app.use((req, res, next) => {
+  console.log(`Received ${req.method} request to ${req.url}`);
+  console.log('Request headers:', req.headers);
+  console.log('Request body:', req.body);
+  next();
+});
+
 app.use(bodyParser.json());
 
+app.use('/api', employeeRoutes);
+
 app.use('/api', scheduleRoutes);
+app.use((req, res, next) => {
+  console.log('No route matched for', req.method, req.url);
+  next();
+});
 
 app.get('/schedules', async (req, res) => {
   const { date, dates, userId } = req.query;
@@ -125,3 +140,4 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   checkAndGenerateSchedules(); // Check and generate schedules for the current month when the server starts
 });
+
