@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   SafeAreaView,
   View,
@@ -7,34 +7,60 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useNavigation } from "@react-navigation/native";
-import AddEmployeePage from "../AdminScreens/AddEmployees";
-import EditEmployeeScreen from "../AdminScreens/EditEmployees";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
-const Stack = createNativeStackNavigator();
 
 const AdminEmployeeScreen = () => {
-  const [employees, setEmployees] = useState([
-    { id: "1", name: "Kgothatso Louw" },
-    { id: "2", name: "Muzzammil Govender" },
-    { id: "3", name: "Ashton Khan" },
-  ]);
-
+  const [users, setUsers] = useState([]);
   const navigation = useNavigation();
 
-  const handleDelete = (employeeId) => {
-    setEmployees(employees.filter((emp) => emp.id !== employeeId));
+  const fetchUsers = useCallback(async () => {
+    try {
+      const response = await fetch(`http://10.0.0.20:3001/api/users`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      Alert.alert('Error', 'Failed to fetch users');
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUsers();
+    }, [fetchUsers])
+  );
+
+  const handleDelete = async (userId) => {
+    try {
+      const response = await fetch(`http://10.0.0.20:3001/api/users/${userId}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        setUsers(users.filter((user) => user.user_id !== userId));
+      } else if (response.status === 404) {
+        Alert.alert('Error', 'User not found');
+      } else {
+        throw new Error('Failed to delete user');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      Alert.alert('Error', 'Failed to delete user');
+    }
   };
 
   const handleAdd = () => {
-    navigation.push("AddEmployees");
+    navigation.push("AddUser");
   };
 
-  const handleEdit = (employee) => {
-    navigation.push("EditEmployee", { employee });
+  const handleEdit = (user) => {
+    navigation.push("EditUser", { user });
   };
 
   return (
@@ -42,15 +68,18 @@ const AdminEmployeeScreen = () => {
       <View style={styles.searchBar}>
         <TextInput style={styles.searchInput} placeholder="Search" />
         <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
-          <Text style={styles.addButtonText}>Add Employee</Text>
+          <Text style={styles.addButtonText}>Add User</Text>
         </TouchableOpacity>
       </View>
       <FlatList
-        data={employees}
-        keyExtractor={(item) => item.id}
+        data={users}
+        keyExtractor={(item) => item.user_id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.employeeItem}>
-            <Text style={styles.employeeName}>{item.name}</Text>
+          <View style={styles.userItem}>
+            <View>
+              <Text style={styles.userName}>{item.user_name}</Text>
+              <Text style={styles.userEmail}>{item.email}</Text>
+            </View>
             <View style={styles.actions}>
               <TouchableOpacity
                 style={styles.actionButton}
@@ -59,7 +88,7 @@ const AdminEmployeeScreen = () => {
                 <MaterialCommunityIcons name="pencil" size={24} color="black" />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => handleDelete(item.id)}
+                onPress={() => handleDelete(item.user_id)}
                 style={styles.actionButton}
               >
                 <MaterialCommunityIcons name="delete" size={24} color="black" />
@@ -67,43 +96,9 @@ const AdminEmployeeScreen = () => {
             </View>
           </View>
         )}
-        contentContainerStyle={styles.employeeList}
+        contentContainerStyle={styles.userList}
       />
     </SafeAreaView>
-  );
-};
-
-const AdminEmployee = () => {
-  return (
-    <Stack.Navigator initialRouteName="AdminEmployeeScreen">
-      <Stack.Screen
-        name="AdminEmployeeScreen"
-        component={AdminEmployeeScreen}
-        options={{
-          title: "Employees",
-          headerTintColor: "#3D5A80",
-          headerTitleAlign: "center",
-        }}
-      />
-      <Stack.Screen
-        name="AddEmployees"
-        component={AddEmployeePage}
-        options={{
-          title: "Add Employee",
-          headerTintColor: "#3D5A80",
-          headerTitleAlign: "center",
-        }}
-      />
-      <Stack.Screen
-        name="EditEmployee"
-        component={EditEmployeeScreen}
-        options={{
-          title: "Edit Employee",
-          headerTintColor: "#3D5A80",
-          headerTitleAlign: "center",
-        }}
-      />
-    </Stack.Navigator>
   );
 };
 
@@ -135,10 +130,10 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
   },
-  employeeList: {
+  userList: {
     paddingBottom: 20,
   },
-  employeeItem: {
+  userItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 10,
@@ -146,8 +141,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
   },
-  employeeName: {
+  userName: {
     fontSize: 18,
+    fontWeight: "bold",
+  },
+  userEmail: {
+    fontSize: 14,
+    color: "#666",
   },
   actions: {
     flexDirection: "row",
@@ -157,4 +157,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AdminEmployee;
+export default AdminEmployeeScreen;
