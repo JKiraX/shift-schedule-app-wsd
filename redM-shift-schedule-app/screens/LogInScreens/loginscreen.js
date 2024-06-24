@@ -13,6 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import ContinueButton from "../../components/Buttons/ContinueButton";
 import Authentication from "./otp";
 import ForgotPasswordScreen from "./forgotpassword";
+import axios from 'axios';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,10 +22,19 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
 
-  const handleLogin = () => {
-    // Add login logic here
-    console.log("Login pressed");
-    navigation.navigate("Authentication");
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('http://192.168.6.93:3001/login', { email, password });
+
+      if (response.data) {
+        const { admin } = response.data;
+        const destination = admin ? 'AdminNav' : 'UserNav';
+        navigation.navigate(destination, { user: response.data });
+      }
+    } catch (error) {
+      Alert.alert("Login failed", "Invalid email or password");
+      console.error("Login error", error);
+    }
   };
 
   const handleForgotPassword = () => {

@@ -119,6 +119,25 @@ app.post('/api/report-leave', async (req, res) => {
   }
 });
 
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await db.oneOrNone(
+      `SELECT user_name, email, admin FROM public1.users WHERE email = $1 AND password = $2`,
+      [email, password]
+    );
+
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {

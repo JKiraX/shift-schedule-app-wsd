@@ -15,7 +15,9 @@ import ChangePasswordScreen from "../changePassword";
 
 const Stack = createNativeStackNavigator();
 
-const ProfileScreenContent = ({ navigation }) => {
+const AdminProfileScreen = ({ route }) => {
+  const { userDetails } = route.params;
+  const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleChangePassword = () => {
@@ -42,6 +44,7 @@ const ProfileScreenContent = ({ navigation }) => {
         <TextInput
           style={styles.input}
           placeholder="User's full name"
+          value={userDetails.user_name} // Display user details
           editable={false}
         />
       </View>
@@ -60,6 +63,7 @@ const ProfileScreenContent = ({ navigation }) => {
         <TextInput
           style={styles.input}
           placeholder="Users email"
+          value={userDetails.email} // Display user details
           keyboardType="email-address"
           editable={false}
         />

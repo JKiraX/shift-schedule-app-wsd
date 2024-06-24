@@ -23,6 +23,8 @@ const Stack = createNativeStackNavigator();
 
 function TabNavigator() {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { userDetails } = route.params;
 
   return (
     <Tab.Navigator
@@ -78,6 +80,7 @@ function TabNavigator() {
             />
           ),
         }}
+        initialParams={{ userDetails }}
       />
       <Tab.Screen
         name={AdminSchedule}
@@ -101,6 +104,7 @@ function TabNavigator() {
           headerTitleAlign: "center",
           headerShown: false,
         }}
+        initialParams={{ userDetails }}
       />
     </Tab.Navigator>
   );
