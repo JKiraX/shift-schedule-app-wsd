@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Platform } from 'react-native';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -48,8 +49,16 @@ function TabNavigator() {
         },
         tabBarActiveTintColor: "#c82f2f",
         tabBarInactiveTintColor: "#909090",
-        tabBarLabelStyle: { paddingBottom: 10, fontSize: 10 },
-        tabBarStyle: { padding: 10, height: 77, backgroundColor: "white" },
+        tabBarLabelStyle: { 
+          fontSize: 10,
+          marginBottom: Platform.OS === 'ios' ? 0 : 5,
+        },
+        tabBarStyle: { 
+          height: Platform.OS === 'ios' ? 90 : 60,
+          paddingTop: Platform.OS === 'ios' ? 10 : 5,
+          paddingBottom: Platform.OS === 'ios' ? 30 : 5,
+          backgroundColor: "white",
+        },
         tabBarHideOnKeyboard: true,
       })}
     >
@@ -110,7 +119,7 @@ function AdminNav() {
   return (
     <Stack.Navigator initialRouteName="MainTabs">
       <Stack.Screen
-        name="Back"
+        name="MainTabs"
         component={TabNavigator}
         options={{ headerShown: false }}
       />
