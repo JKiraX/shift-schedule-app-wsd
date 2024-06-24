@@ -29,7 +29,7 @@ const LoginScreen = () => {
       if (response.data) {
         const { admin } = response.data;
         const destination = admin ? 'AdminNav' : 'UserNav';
-        navigation.navigate(destination, { user: response.data });
+        navigation.navigate(destination, { userDetails });
       }
     } catch (error) {
       Alert.alert("Login failed", "Invalid email or password");
