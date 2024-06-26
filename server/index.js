@@ -21,6 +21,22 @@ app.use(bodyParser.json());
 app.use('/api', employeeRoutes);
 
 app.use('/api', scheduleRoutes);
+
+app.get("/users", async (req, res) => {
+  try {
+    const users = await db.any(`
+      SELECT user_id, user_name
+      FROM public1.users
+      WHERE admin = 1
+      ORDER BY user_name
+    `);
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.use((req, res, next) => {
   console.log('No route matched for', req.method, req.url);
   next();
