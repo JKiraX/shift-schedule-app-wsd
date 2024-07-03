@@ -44,23 +44,23 @@ const AdminEmployeeScreen = () => {
     fetchUsers();
   }, []);
 
-  // const handleDelete = async (userId) => {
-  // //   try {
-  // //     const response = await fetch(`http://192.168.5.61:3001/api/users/${userId}`, {
-  // //       method: 'DELETE',
-  // //     });
-  // //     if (response.ok) {
-  // //       setUsers(users.filter((user) => user.user_id !== userId));
-  // //     } else if (response.status === 404) {
-  // //       Alert.alert('Error', 'User not found');
-  // //     } else {
-  // //       throw new Error('Failed to delete user');
-  // //     }
-  // //   } catch (error) {
-  // //     console.error('Error deleting user:', error);
-  // //     Alert.alert('Error', 'Failed to delete user');
-  // //   }
-  // // };
+  const handleDelete = async (userId) => {
+    try {
+      const response = await fetch(`http://192.168.5.61:3001/api/users/${userId}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        setUsers((prevUsers) => prevUsers.filter((user) => user.user_id !== userId));
+      } else if (response.status === 404) {
+        Alert.alert('Error', 'User not found');
+      } else {
+        throw new Error('Failed to delete user');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      Alert.alert('Error', 'Failed to delete user');
+    }
+  };
 
   const handleAdd = () => {
     navigation.push("AddEmployees");

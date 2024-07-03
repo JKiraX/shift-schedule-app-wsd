@@ -19,7 +19,7 @@ const DropdownComponent2 = ({ data, onSelect }) => {
       save="value"
       placeholder={
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <MaterialIcons name="person-outline" size={24} color="black" />
+          <MaterialIcons name="directions-run" size={24} color="black" />
           <Text style={{ marginLeft: 10 }}>Select Leave Type</Text>
         </View>
       }
