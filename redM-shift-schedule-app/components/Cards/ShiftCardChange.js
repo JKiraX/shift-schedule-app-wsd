@@ -1,19 +1,20 @@
 import React, { useState } from "react";
+import PropTypes from 'prop-types';
 import { Text, View, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
-// import PropTypes from "prop-types";
 
 // Reusable Switch Button component
-const SwitchButton = ({ onPress }) => {
-  return (
-    <TouchableOpacity onPress={onPress}>
-      <View style={styles.button}>
-        <Text style={styles.buttonText}>Switch</Text>
-      </View>
-    </TouchableOpacity>
-  );
-};
+const SwitchButton = ({ onPress }) => (
+  <TouchableOpacity onPress={onPress}>
+    <View style={styles.button}>
+      <Text style={styles.buttonText}>Switch</Text>
+    </View>
+  </TouchableOpacity>
+);
 
+SwitchButton.propTypes = {
+  onPress: PropTypes.func.isRequired,
+};
 
 // ShiftCardChange component
 const ShiftCardChange = ({
@@ -30,66 +31,55 @@ const ShiftCardChange = ({
   const [currentAssignedUser, setCurrentAssignedUser] = useState(
     typeof assignedUsers === "string" ? assignedUsers : getUserName(assignedUsers)
   );
-  console.log('ShiftCardChange rendered with:', { shiftId, currentAssignedUser });
-  const handleSwitchPress = () => {
-    setModalVisible(true);
-  };
+
+  const handleSwitchPress = () => setModalVisible(true);
 
   const handleSwitch = async () => {
-    if (selectedSwitchUser && shiftId) {
-      try {
-        console.log('Sending switch request for shiftId:', shiftId);
-        const [date, oldUserId, ...startTimeParts] = shiftId.split('-');
-        const startTime = startTimeParts.join('-');
-        
-        const response = await fetch(
-          `http://10.0.0.113:3001/api/schedules/${date}/${oldUserId}/${startTime}/switch`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              user_id: selectedSwitchUser.key,
-            }),
-          }
-        );
+    if (!selectedSwitchUser?.key) {
+      alert('Please select a user to switch with.');
+      return;
+    }
+
+    try {
+      const [year, month, day, shift_id] = shiftId.split("-");
+      const date = `${year}-${month}-${day}`;
   
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status}`);
-        }
-  
-        const updatedSchedule = await response.json();
-        console.log('Received updated schedule:', updatedSchedule);
-  
-        setCurrentAssignedUser(updatedSchedule.user_name);
-        console.log('Updated currentAssignedUser to:', updatedSchedule.user_name);
-  
-        if (onSwitchComplete) {
-          onSwitchComplete(shiftId, updatedSchedule.user_name);
-        }
-  
-        setSelectedSwitchUser(null);
-        setModalVisible(false);
-      } catch (error) {
-        console.error("Error updating shift data:", error.message);
+      const response = await fetch('http://192.168.5.22/api/schedules/switch', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date,
+          shift_id,
+          user_id: selectedSwitchUser.key
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to switch shift');
       }
-    } else {
+
+      const result = await response.json();
+      setCurrentAssignedUser(result.user_name);
+      onSwitchComplete(shiftId, result.user_name);
+
+      setSelectedSwitchUser(null);
       setModalVisible(false);
+    } catch (error) {
+      console.error('Error switching shift:', error);
+      alert(error.message);
     }
   };
 
-
-  const handleCancel = () => {
-    setModalVisible(false);
-  };
+  const handleCancel = () => setModalVisible(false);
 
   const handleSelect = (selected) => {
-    setSelectedSwitchUser(selected);
+    const selectedUser = allUsers.find(user => user.value === selected);
+    setSelectedSwitchUser(selectedUser);
   };
 
   const getUserName = (userId) => {
-    const user = allUsers.find((user) => user.key === userId);
+    const user = allUsers.find(user => user.key === userId);
     return user ? user.value : `User ID: ${userId}`;
   };
 
@@ -110,7 +100,10 @@ const ShiftCardChange = ({
             </Text>
             <Text style={styles.modalSubtitle}>Switch User with:</Text>
             <View style={{ alignItems: "center" }}>
-              <DropdownComponent data={allUsers} onSelect={handleSelect} />
+              <DropdownComponent
+                data={allUsers}
+                onSelect={handleSelect}
+              />
             </View>
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity style={styles.modalButton} onPress={handleCancel}>
@@ -127,23 +120,15 @@ const ShiftCardChange = ({
   );
 };
 
-// ShiftCardChange.propTypes = {
-//   shiftId: PropTypes.number.isRequired,
-//   shiftName: PropTypes.string.isRequired,
-//   startTime: PropTypes.string.isRequired,
-//   endTime: PropTypes.string.isRequired,
-//   assignedUsers: PropTypes.oneOfType([
-//     PropTypes.string,
-//     PropTypes.arrayOf(PropTypes.string),
-//   ]),
-//   allUsers: PropTypes.arrayOf(
-//     PropTypes.shape({
-//       key: PropTypes.number.isRequired,
-//       value: PropTypes.string.isRequired,
-//     })
-//   ).isRequired,
-//   onSwitchComplete: PropTypes.func,
-// };
+ShiftCardChange.propTypes = {
+  shiftId: PropTypes.string.isRequired,
+  shiftName: PropTypes.string.isRequired,
+  startTime: PropTypes.string.isRequired,
+  endTime: PropTypes.string.isRequired,
+  assignedUsers: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
+  allUsers: PropTypes.arrayOf(PropTypes.object).isRequired,
+  onSwitchComplete: PropTypes.func.isRequired,
+};
 
 const styles = StyleSheet.create({
   card: {
@@ -181,9 +166,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    fontWeight: "semi-bold",
-    textTransform: "uppercase",
-    fontSize: 16,
+    fontWeight: "bold",
     textAlign: "center",
   },
   modalOverlay: {
@@ -209,7 +192,6 @@ const styles = StyleSheet.create({
   modalButtonContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    borderRadius: 15,
     paddingTop: 20,
   },
   modalButton: {

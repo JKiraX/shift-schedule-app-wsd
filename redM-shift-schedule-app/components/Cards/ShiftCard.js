@@ -1,7 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const ShiftCard = ({ shiftName, startTime, endTime, assignedUsers }) => {
+const ShiftCard = ({ shiftId,
+  shiftName,
+  startTime,
+  endTime,
+  assignedUsers,
+  allUsers, }) => {
   return (
     <View style={styles.card}>
       <Text style={styles.shiftName}>{shiftName}</Text>
