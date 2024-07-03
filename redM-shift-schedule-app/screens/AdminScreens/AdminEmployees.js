@@ -18,9 +18,11 @@ const Stack = createNativeStackNavigator();
 
 const AdminEmployeeScreen = () => {
   const [employees, setEmployees] = useState([
-    { id: "1", name: "Kgothatso Louw" },
-    { id: "2", name: "Muzzammil Govender" },
-    { id: "3", name: "Ashton Khan" },
+    { id: "1", name: "Roxanne Smith" },
+    { id: "2", name: "Yusheen Sriram" },
+    { id: "3", name: "Mpho Mafalo" },
+    { id: "4", name: "Phumeza Ntwashu" },
+    { id: "5", name: "Hope" },
   ]);
 
   const navigation = useNavigation();

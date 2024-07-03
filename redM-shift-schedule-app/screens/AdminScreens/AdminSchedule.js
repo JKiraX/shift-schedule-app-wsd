@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Text,
   View,
@@ -17,9 +17,9 @@ const AdminScheduleScreen = () => {
   const [shiftData, setShiftData] = useState([]);
   const [markedDates, setMarkedDates] = useState({});
   const [selectedUser, setSelectedUser] = useState(null);
-  const [users, setUsers] = useState([]);
   const [switchTrigger, setSwitchTrigger] = useState(0);
   const [selectedTab, setSelectedTab] = useState(0);
+  const [allUsers, setAllUsers] = useState([]);
   const calendarRef = useRef(null);
 
   const handleCalendarRef = (calendar) => {
@@ -27,33 +27,37 @@ const AdminScheduleScreen = () => {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
-    if (Object.keys(selectedDates).length > 0 && users.length > 0) {
+    if (Object.keys(selectedDates).length > 0 && allUsers.length > 0) {
       fetchShiftData();
     } else {
       setShiftData([]);
     }
-  }, [selectedDates, selectedUser, users, switchTrigger]);
+  }, [selectedDates, selectedUser, allUsers, switchTrigger]);
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch(`http://192.168.5.22:3001/api/users`);
-      if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.status}`);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("http://192.168.5.22:3001/users");
+        if (!response.ok) {
+          throw new Error("Failed to fetch users");
+        }
+        const data = await response.json();
+
+        // Log the raw data for debugging
+        console.log("Raw users data:", data);
+
+        const formattedUsers = data.map((user) => ({
+          key: user.user_id?.toString() ?? `unknown-${Math.random()}`,
+          value: user.user_name ?? "Unknown User",
+        }));
+        setAllUsers(formattedUsers);
+      } catch (error) {
+        console.error("Error fetching users:", error);
       }
-      const data = await response.json();
-      const userData = data.map((user) => ({
-        key: Number(user.id),
-        value: user.name,
-      }));
-      setUsers(userData);
-    } catch (error) {
-      console.error("Error fetching user data:", error.message);
-    }
-  };
+    };
+
+    fetchUsers();
+  }, []);
 
   const fetchShiftData = async () => {
     try {
@@ -77,45 +81,60 @@ const AdminScheduleScreen = () => {
   };
 
   const handleSelect = (selected) => {
-    console.log("User selected:", selected); // Debugging statement
-    setSelectedUser(selected);
-    setShiftData([]); // Clear shift data when a new user is selected
+    console.log("Selected user:", selected);
+    const selectedUser = allUsers.find((user) => user.value === selected);
+    setSelectedUser(selectedUser);
   };
 
-  const handleDayPress = (day) => {
-    const dateString = day.dateString;
-    const newSelectedDates = { ...selectedDates };
+  const handleDayPress = useCallback(
+    (day) => {
+      const dateString = day.dateString;
+      const newSelectedDates = { ...selectedDates };
 
-    if (newSelectedDates[dateString]) {
-      delete newSelectedDates[dateString];
-    } else {
-      newSelectedDates[dateString] = {
-        selected: true,
-        marked: true,
-        dotColor: "#3D5A80",
-      };
-    }
-
-    setSelectedDates(newSelectedDates);
-    setMarkedDates(newSelectedDates);
-  };
-
-  const handleSwitchComplete = async (shiftId, newUserName) => {
-    console.log('Switch completed for shiftId:', shiftId, 'New user:', newUserName);
-    
-    // Find the shift in shiftData and update it
-    const updatedShiftData = shiftData.map(shift => {
-      if (`${moment(shift.date).format("YYYY-MM-DD")}-${shift.user_id}-${shift.start_time}` === shiftId) {
-        return { ...shift, user_name: newUserName };
+      if (newSelectedDates[dateString]) {
+        delete newSelectedDates[dateString];
+      } else {
+        newSelectedDates[dateString] = {
+          selected: true,
+          marked: true,
+          dotColor: "#3D5A80",
+        };
       }
-      return shift;
-    });
-  
-    setShiftData(updatedShiftData);
-    setSwitchTrigger(prev => prev + 1);
-  };
 
-  const groupShiftsByDate = (shifts) => {
+      setSelectedDates(newSelectedDates);
+      setMarkedDates(newSelectedDates);
+    },
+    [selectedDates]
+  );
+
+  const handleSwitchComplete = useCallback(
+    (shiftId, newUserName) => {
+      console.log(
+        "Switch completed for shiftId:",
+        shiftId,
+        "New user:",
+        newUserName
+      );
+
+      // Find the shift in shiftData and update it
+      const updatedShiftData = shiftData.map((shift) => {
+        if (
+          `${moment(shift.date).format("YYYY-MM-DD")}-${shift.user_id}-${
+            shift.start_time
+          }` === shiftId
+        ) {
+          return { ...shift, user_name: newUserName };
+        }
+        return shift;
+      });
+
+      setShiftData(updatedShiftData);
+      setSwitchTrigger((prev) => prev + 1);
+    },
+    [shiftData]
+  );
+
+  const groupShiftsByDate = useCallback((shifts) => {
     return shifts.reduce((acc, shift, index) => {
       const date = shift.date ? moment(shift.date).format("YYYY-MM-DD") : null;
       if (date) {
@@ -127,13 +146,19 @@ const AdminScheduleScreen = () => {
       }
       return acc;
     }, {});
-  };
+  }, []);
 
   const groupedShiftData = groupShiftsByDate(shiftData);
 
   return (
-    <SafeAreaView style={{ flex: 1, alignItems: "center" }}>
-      <DropdownComponent data={users} onSelect={handleSelect} />
+    <SafeAreaView style={{ flex: 1, alignItems: "center", backgroundColor: "white" }}>
+      <DropdownComponent
+        data={allUsers}
+        onSelect={(selected) => {
+          console.log("Dropdown selected:", selected);
+          handleSelect(selected);
+        }}
+      />
       <View
         style={{
           width: 350,
@@ -152,28 +177,28 @@ const AdminScheduleScreen = () => {
           style={{
             width: "45%",
             height: 50,
-            backgroundColor: selectedTab === 0 ? "#98C1D9" : "white",
+            backgroundColor: selectedTab === 0 ? "rgba(200, 47, 47,0.8)" : "white",
             borderRadius: 15,
             justifyContent: "center",
             alignItems: "center",
           }}
           onPress={() => setSelectedTab(0)}
         >
-          <Text style={{ fontSize: 18, fontWeight: "bold" }}>Shifts</Text>
+          <Text style={{ fontSize: 18, fontWeight: "bold",color: selectedTab === 0 ? "white" : "black" }}>Shifts</Text>
         </TouchableOpacity>
         <View style={{ width: "10%" }} />
         <TouchableOpacity
           style={{
             width: "45%",
             height: 50,
-            backgroundColor: selectedTab === 1 ? "#98C1D9" : "white",
+            backgroundColor: selectedTab === 1 ? "rgba(200, 47, 47,0.8)" : "white",
             borderRadius: 15,
             justifyContent: "center",
             alignItems: "center",
           }}
           onPress={() => setSelectedTab(1)}
         >
-          <Text style={{ fontSize: 18, fontWeight: "bold" }}>Leave</Text>
+          <Text style={{ fontSize: 18, fontWeight: "bold",color: selectedTab === 0 ? "black" : "white" }}>Leave</Text>
         </TouchableOpacity>
       </View>
       <ScrollView>
@@ -199,7 +224,7 @@ const AdminScheduleScreen = () => {
                 ) ? (
                   groupedShiftData[date]
                     .filter((shift) => shift.user_id === selectedUser.key)
-                    .map((shift, index) => (
+                    .map((shift) => (
                       <ShiftCardChange
                         key={shift.shiftId}
                         shiftId={shift.shiftId}
@@ -207,7 +232,7 @@ const AdminScheduleScreen = () => {
                         startTime={shift.start_time}
                         endTime={shift.end_time}
                         assignedUsers={shift.user_name}
-                        allUsers={users}
+                        allUsers={allUsers}
                         onSwitchComplete={handleSwitchComplete}
                       />
                     ))
@@ -217,7 +242,7 @@ const AdminScheduleScreen = () => {
                   </Text>
                 )
               ) : groupedShiftData[date]?.length > 0 ? (
-                groupedShiftData[date].map((shift, index) => (
+                groupedShiftData[date].map((shift) => (
                   <ShiftCardChange
                     key={shift.shiftId}
                     shiftId={shift.shiftId}
@@ -225,7 +250,7 @@ const AdminScheduleScreen = () => {
                     startTime={shift.start_time}
                     endTime={shift.end_time}
                     assignedUsers={shift.user_name}
-                    allUsers={users}
+                    allUsers={allUsers}
                     onSwitchComplete={handleSwitchComplete}
                   />
                 ))
@@ -248,6 +273,7 @@ const styles = StyleSheet.create({
   },
   noShiftsText: {
     fontSize: 16,
+    fontStyle: "italic",
     color: "gray",
   },
 });
