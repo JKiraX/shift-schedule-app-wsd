@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, SafeAreaView, ScrollView } from "react-native";
+import { Text, View, StyleSheet, SafeAreaView, ScrollView, Dimensions } from "react-native";
 import CalendarStrip from "react-native-calendar-strip";
 import ShiftCard from "../../components/Cards/ShiftCard";
 import moment from "moment";
 
+const { width, height } = Dimensions.get('window');
+
 const AdminHomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [shiftData, setShiftData] = useState([]);
+
+  useEffect(() => {
+    fetchShiftData(selectedDate);
+  }, [selectedDate]);
 
   const canScrollToDate = (date) => {
     const currentDate = moment().startOf("day");
@@ -17,18 +23,9 @@ const AdminHomeScreen = ({ navigation }) => {
   const markedDates = [
     {
       date: new Date(),
-      dots: [
-        {
-          color: "#EE6C4D",
-          selectedDotColor: "#EE6C4D",
-        },
-      ],
+      dots: [{ color: "#EE6C4D", selectedDotColor: "#EE6C4D" }],
     },
   ];
-
-  useEffect(() => {
-    fetchShiftData(selectedDate);
-  }, [selectedDate]);
 
   const onDateSelected = (date) => {
     setSelectedDate(date);
@@ -37,12 +34,10 @@ const AdminHomeScreen = ({ navigation }) => {
   const fetchShiftData = async (date) => {
     try {
       const formattedDate = moment(date).format('YYYY-MM-DD');
-      const response = await fetch(`http://192.168.5.61:3001/schedules?date=${formattedDate}`); // Ensure the correct backend URL
-      console.log('Response status:', response.status);
-
+      const response = await fetch(`http://192.168.5.61:3001/schedules?date=${formattedDate}`);
+      
       if (response.ok) {
         const data = await response.json();
-        console.log('Fetched data:', data);
         setShiftData(data);
       } else {
         console.error('Error fetching shift data:', response.status);
@@ -53,41 +48,32 @@ const AdminHomeScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor:"white" }}>
+    <SafeAreaView style={styles.container}>
       <CalendarStrip
         scrollable
-        style={{ height: 120, paddingTop: 20, paddingBottom: 10}}
-        calendarHeaderStyle={{
-          color: "black",
-          fontSize: 18,
-          fontWeight: "bold",
-        }}
+        style={styles.calendarStrip}
+        calendarHeaderStyle={styles.calendarHeader}
         calendarColor={"white"}
-        dateNumberStyle={{
-          color: "black",
-          fontSize: 20,
-          fontWeight: "normal",
-        }}
-        dateNameStyle={{ color: "black", fontSize: 12, marginTop: 5 }}
-        iconContainer={{ flex: 0.1 }}
+        dateNumberStyle={styles.dateNumber}
+        dateNameStyle={styles.dateName}
+        iconContainer={styles.iconContainer}
         selectedDate={selectedDate}
         onDateSelected={onDateSelected}
         datesBlacklist={(date) => !canScrollToDate(date)}
         markedDates={markedDates}
       />
 
-      {/* Render Shift Cards */}
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.shiftCardsContainer}>
-        {shiftData.map((shifts, index) => (
-  <ShiftCard
-    key={index}
-    shiftName={shifts.shift_name}
-    startTime={shifts.start_time}
-    endTime={shifts.end_time}
-    assignedUsers={shifts.user_name} // Pass the user_name directly
-  />
-))}
+          {shiftData.map((shift, index) => (
+            <ShiftCard
+              key={index}
+              shiftName={shift.shift_name}
+              startTime={shift.start_time}
+              endTime={shift.end_time}
+              assignedUsers={shift.user_name}
+            />
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -95,8 +81,38 @@ const AdminHomeScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+  calendarStrip: {
+    height: height * 0.15,
+    paddingTop: 20,
+    paddingBottom: 10,
+  },
+  calendarHeader: {
+    color: "black",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  dateNumber: {
+    color: "black",
+    fontSize: 20,
+    fontWeight: "normal",
+  },
+  dateName: {
+    color: "black",
+    fontSize: 12,
+    marginTop: 5,
+  },
+  iconContainer: {
+    flex: 0.1,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
   shiftCardsContainer: {
-    padding: 20,
+    padding: width * 0.05,
   },
 });
 

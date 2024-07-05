@@ -1,28 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import SmallButton from '../../components/Buttons/smallButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const { width, height } = Dimensions.get('window');
 
 const EditEmployeeScreen = () => {
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
   const [email, setEmail] = useState('');
-  const navigation = useNavigation(); // Add this line to get the navigation object
+  const navigation = useNavigation();
 
   const handleUpdate = () => {
-    // Add employee logic here
-    console.log("Employee details updated.");
-    Alert.alert("Employee details updated.", "", [
-      {
-        text: "OK",
-        onPress: () => navigation.goBack(),
-      },
-    ]);
-
-    // Validate the input values (optional)
     if (!name || !contact || !email) {
-      Alert.alert('Please fill in all fields.');
+      Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
 
@@ -30,38 +22,36 @@ const EditEmployeeScreen = () => {
     const employeeData = { name, contact, email };
     updateEmployee(employeeData);
 
-    // Clear the input fields (optional)
+    Alert.alert("Success", "Employee details updated.", [
+      { text: "OK", onPress: () => navigation.goBack() },
+    ]);
+
+    // Clear the input fields
     setName('');
     setContact('');
     setEmail('');
   };
 
+  const renderInputField = (label, value, setValue, placeholder, keyboardType = 'default') => (
+    <View style={styles.inputContainer}>
+      <Text style={styles.label}>{label}</Text>
+      <TextInput
+        style={styles.input}
+        value={value}
+        onChangeText={setValue}
+        placeholder={placeholder}
+        keyboardType={keyboardType}
+      />
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.formContainer}>
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={(text) => setName(text)}
-          placeholder="Enter name"
-        />
-        <Text style={styles.label}>Phone Number</Text>
-        <TextInput
-          style={styles.input}
-          value={contact}
-          onChangeText={(text) => setContact(text)}
-          placeholder="Enter phone number"
-        />
-        <Text style={styles.label}>E-mail</Text>
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-          placeholder="Enter email"
-          keyboardType="email-address"
-        />
-        <SmallButton text={"Update"} onPress={handleUpdate}/>
+        {renderInputField('Name', name, setName, 'Enter name')}
+        {renderInputField('Phone Number', contact, setContact, 'Enter phone number', 'phone-pad')}
+        {renderInputField('E-mail', email, setEmail, 'Enter email', 'email-address')}
+        <SmallButton text="Update" onPress={handleUpdate} />
       </View>
     </SafeAreaView>
   );
@@ -70,26 +60,29 @@ const EditEmployeeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor:"white"
+    backgroundColor: "white",
   },
   formContainer: {
-    padding: 20,
+    padding: width * 0.05,
+    alignItems: 'center',
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: height * 0.02,
   },
   label: {
     fontSize: 18,
-    marginBottom: 6,
+    marginBottom: height * 0.01,
   },
   input: {
-    height: 55,
+    height: height * 0.07,
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 10,
-    padding: 10,
+    padding: width * 0.03,
     backgroundColor: "#e9ecef",
-    width: "auto",
+    width: '100%',
     fontSize: 17,
-    marginBottom: 18,
   },
 });
 
