@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, SafeAreaView, ScrollView, Dimensions } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  Dimensions,
+} from "react-native";
 import CalendarStrip from "react-native-calendar-strip";
 import ShiftCard from "../../components/Cards/ShiftCard";
 import moment from "moment";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 const AdminHomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -33,14 +40,16 @@ const AdminHomeScreen = ({ navigation }) => {
 
   const fetchShiftData = async (date) => {
     try {
-      const formattedDate = moment(date).format('YYYY-MM-DD');
-      const response = await fetch(`http://192.168.5.61:3001/schedules?date=${formattedDate}`);
-      
+      const formattedDate = moment(date).format("YYYY-MM-DD");
+      const response = await fetch(
+        `http://192.168.5.61:3001/schedules?date=${formattedDate}`
+      );
+
       if (response.ok) {
         const data = await response.json();
         setShiftData(data);
       } else {
-        console.error('Error fetching shift data:', response.status);
+        console.error("Error fetching shift data:", response.status);
       }
     } catch (error) {
       console.error("Error fetching shift data:", error);

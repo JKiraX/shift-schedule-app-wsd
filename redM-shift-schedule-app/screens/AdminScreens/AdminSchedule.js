@@ -14,7 +14,7 @@ import ShiftCardChange from "../../components/Cards/ShiftCardChange";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import moment from "moment";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 const AdminScheduleScreen = () => {
   const [selectedDates, setSelectedDates] = useState({});
@@ -40,9 +40,12 @@ const AdminScheduleScreen = () => {
   const fetchUsers = async () => {
     try {
       const response = await fetch(`http://192.168.5.61:3001/api/users`);
-      if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`Network response was not ok: ${response.status}`);
       const data = await response.json();
-      setUsers(data.map(user => ({ key: Number(user.id), value: user.name })));
+      setUsers(
+        data.map((user) => ({ key: Number(user.id), value: user.name }))
+      );
     } catch (error) {
       console.error("Error fetching user data:", error.message);
     }
@@ -53,8 +56,11 @@ const AdminScheduleScreen = () => {
       const dates = Object.keys(selectedDates).join(",");
       const userId = selectedUser ? selectedUser.key : null;
       const queryParams = `?dates=${dates}${userId ? `&userId=${userId}` : ""}`;
-      const response = await fetch(`http://192.168.5.61:3001/api/schedules${queryParams}`);
-      if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
+      const response = await fetch(
+        `http://192.168.5.61:3001/api/schedules${queryParams}`
+      );
+      if (!response.ok)
+        throw new Error(`Network response was not ok: ${response.status}`);
       const data = await response.json();
       setShiftData(data);
     } catch (error) {
@@ -73,7 +79,11 @@ const AdminScheduleScreen = () => {
     if (newSelectedDates[dateString]) {
       delete newSelectedDates[dateString];
     } else {
-      newSelectedDates[dateString] = { selected: true, marked: true, dotColor: "#c82f2f" };
+      newSelectedDates[dateString] = {
+        selected: true,
+        marked: true,
+        dotColor: "#c82f2f",
+      };
     }
     setSelectedDates(newSelectedDates);
     setMarkedDates(newSelectedDates);
@@ -97,7 +107,12 @@ const AdminScheduleScreen = () => {
       style={[styles.tabButton, selectedTab === tabIndex && styles.selectedTab]}
       onPress={() => setSelectedTab(tabIndex)}
     >
-      <Text style={[styles.tabButtonText, selectedTab === tabIndex && styles.selectedTabText]}>
+      <Text
+        style={[
+          styles.tabButtonText,
+          selectedTab === tabIndex && styles.selectedTabText,
+        ]}
+      >
         {label}
       </Text>
     </TouchableOpacity>
@@ -105,7 +120,9 @@ const AdminScheduleScreen = () => {
 
   const renderShifts = (date) => {
     if (selectedUser) {
-      const userShifts = groupedShiftData[date]?.filter(shift => shift.user_id === selectedUser.key);
+      const userShifts = groupedShiftData[date]?.filter(
+        (shift) => shift.user_id === selectedUser.key
+      );
       if (userShifts && userShifts.length > 0) {
         return userShifts.map((shift, index) => (
           <ShiftCardChange
@@ -118,7 +135,9 @@ const AdminScheduleScreen = () => {
           />
         ));
       } else {
-        return <Text style={styles.noShiftsText}>No shifts available: On leave</Text>;
+        return (
+          <Text style={styles.noShiftsText}>No shifts available: On leave</Text>
+        );
       }
     } else if (groupedShiftData[date]?.length > 0) {
       return groupedShiftData[date].map((shift, index) => (

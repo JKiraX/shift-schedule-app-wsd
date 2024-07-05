@@ -16,7 +16,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ChangePasswordScreen from "../changePassword";
 
 const Stack = createNativeStackNavigator();
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 const ProfileScreenContent = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -139,13 +139,13 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: "100%",
     alignItems: "center",
-    flexDirection:"column",
+    flexDirection: "column",
   },
   button: {
     marginVertical: height * 0.02,
     width: width * 0.9,
     maxWidth: 350,
-    alignSelf:"center",
+    alignSelf: "center",
   },
   modalOverlay: {
     flex: 1,

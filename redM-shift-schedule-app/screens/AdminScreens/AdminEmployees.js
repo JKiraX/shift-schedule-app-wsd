@@ -15,8 +15,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import AddEmployeePage from './AddEmployees';
-import EditEmployeeScreen from './EditEmployees';
+import AddEmployeePage from "./AddEmployees";
+import EditEmployeeScreen from "./EditEmployees";
 
 const Stack = createNativeStackNavigator();
 
@@ -37,26 +37,31 @@ const AdminEmployeeScreen = () => {
       const data = await response.json();
       setUsers(data);
     } catch (error) {
-      console.error('Error fetching users:', error);
-      Alert.alert('Error', `Failed to fetch users: ${error.message}`);
+      console.error("Error fetching users:", error);
+      Alert.alert("Error", `Failed to fetch users: ${error.message}`);
     }
   };
 
   const handleDelete = async (userId) => {
     try {
-      const response = await fetch(`http://192.168.5.61:3001/api/users/${userId}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `http://192.168.5.61:3001/api/users/${userId}`,
+        {
+          method: "DELETE",
+        }
+      );
       if (response.ok) {
-        setUsers((prevUsers) => prevUsers.filter((user) => user.user_id !== userId));
+        setUsers((prevUsers) =>
+          prevUsers.filter((user) => user.user_id !== userId)
+        );
       } else if (response.status === 404) {
-        Alert.alert('Error', 'User not found');
+        Alert.alert("Error", "User not found");
       } else {
-        throw new Error('Failed to delete user');
+        throw new Error("Failed to delete user");
       }
     } catch (error) {
-      console.error('Error deleting user:', error);
-      Alert.alert('Error', 'Failed to delete user');
+      console.error("Error deleting user:", error);
+      Alert.alert("Error", "Failed to delete user");
     }
   };
 
@@ -84,8 +89,8 @@ const AdminEmployeeScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.searchBar}>
         <TextInput style={styles.searchInput} placeholder="Search" />
-        <TouchableOpacity 
-          style={styles.addButton} 
+        <TouchableOpacity
+          style={styles.addButton}
           onPress={() => navigation.push("AddEmployees")}
         >
           <Text style={styles.addButtonText}>Add User</Text>
@@ -93,7 +98,9 @@ const AdminEmployeeScreen = () => {
       </View>
       <FlatList
         data={users}
-        keyExtractor={(item) => item.user_id ? item.user_id.toString() : Math.random().toString()}
+        keyExtractor={(item) =>
+          item.user_id ? item.user_id.toString() : Math.random().toString()
+        }
         renderItem={renderUserItem}
         contentContainerStyle={styles.userList}
       />
@@ -133,7 +140,7 @@ const AdminEmployee = () => (
   </Stack.Navigator>
 );
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
@@ -158,8 +165,8 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#c82f2f",
     borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   addButtonText: {
     color: "white",
@@ -171,7 +178,7 @@ const styles = StyleSheet.create({
   userItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: 'center',
+    alignItems: "center",
     padding: 15,
     backgroundColor: "#fff",
     borderBottomWidth: 1,
@@ -180,7 +187,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 2,

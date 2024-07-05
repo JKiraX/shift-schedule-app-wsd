@@ -20,7 +20,8 @@ const AddEmployeePage = () => {
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [administrativePrivileges, setAdministrativePrivileges] = useState(false);
+  const [administrativePrivileges, setAdministrativePrivileges] =
+    useState(false);
 
   const navigation = useNavigation();
 
@@ -33,16 +34,19 @@ const AddEmployeePage = () => {
     const adminValue = administrativePrivileges ? 2 : 1;
 
     try {
-      const response = await fetch('http://192.168.5.61:3001/api/add-employee', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_name: name,
-          email: email,
-          password: newPassword,
-          admin: adminValue
-        }),
-      });
+      const response = await fetch(
+        "http://192.168.5.61:3001/api/add-employee",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_name: name,
+            email: email,
+            password: newPassword,
+            admin: adminValue,
+          }),
+        }
+      );
 
       const responseText = await response.text();
       const contentType = response.headers.get("content-type");
@@ -65,7 +69,14 @@ const AddEmployeePage = () => {
     }
   };
 
-  const renderInputField = (label, value, setValue, placeholder, secureTextEntry = false, keyboardType = "default") => (
+  const renderInputField = (
+    label,
+    value,
+    setValue,
+    placeholder,
+    secureTextEntry = false,
+    keyboardType = "default"
+  ) => (
     <View style={styles.inputContainer}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
@@ -89,15 +100,36 @@ const AddEmployeePage = () => {
         <ScrollView contentContainerStyle={styles.scrollViewContainer}>
           <View style={styles.formContainer}>
             {renderInputField("Name", name, setName, "Enter name")}
-            {renderInputField("E-mail", email, setEmail, "Enter email", false, "email-address")}
-            {renderInputField("Password", newPassword, setNewPassword, "Enter password", true)}
-            {renderInputField("Confirm Password", confirmPassword, setConfirmPassword, "Confirm password", true)}
+            {renderInputField(
+              "E-mail",
+              email,
+              setEmail,
+              "Enter email",
+              false,
+              "email-address"
+            )}
+            {renderInputField(
+              "Password",
+              newPassword,
+              setNewPassword,
+              "Enter password",
+              true
+            )}
+            {renderInputField(
+              "Confirm Password",
+              confirmPassword,
+              setConfirmPassword,
+              "Confirm password",
+              true
+            )}
 
             <View style={styles.privilegesContainer}>
               <Text style={styles.label}>Administrative Privileges</Text>
               <TouchableOpacity
                 style={styles.privilegesButton}
-                onPress={() => setAdministrativePrivileges(!administrativePrivileges)}
+                onPress={() =>
+                  setAdministrativePrivileges(!administrativePrivileges)
+                }
               >
                 <Text style={styles.privilegesButtonText}>
                   {administrativePrivileges ? "Yes" : "No"}
@@ -112,7 +144,7 @@ const AddEmployeePage = () => {
   );
 };
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
@@ -128,8 +160,8 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     padding: 20,
-    width: width > 600 ? 600 : '100%',
-    alignSelf: 'center',
+    width: width > 600 ? 600 : "100%",
+    alignSelf: "center",
   },
   inputContainer: {
     marginBottom: 20,
