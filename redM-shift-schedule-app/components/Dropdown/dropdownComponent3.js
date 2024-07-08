@@ -1,21 +1,19 @@
-import React, { useState } from "react";
-import { Text, View, StyleSheet, useWindowDimensions } from "react-native";
-import { SelectList } from "react-native-dropdown-select-list";
-import { MaterialIcons } from "@expo/vector-icons";
+import React from 'react';
+import { Text, View, StyleSheet, useWindowDimensions } from 'react-native';
+import { SelectList } from 'react-native-dropdown-select-list';
+import { MaterialIcons } from '@expo/vector-icons';
 
-const DropdownComponent = ({ data = [], onSelect }) => {
-  const [selected, setSelected] = useState("");
+const DropdownComponent3 = ({ data, onSelect }) => {
   const { width: windowWidth } = useWindowDimensions();
 
   const handleSelect = (val) => {
-    setSelected(val);
-    onSelect(val);
+    const selectedItem = data.find(item => item.value === val);
+    onSelect(selectedItem);
   };
 
   const renderPlaceholder = () => (
     <View style={styles.placeholderContainer}>
-      <MaterialIcons name="person-outline" size={24} color="black" />
-      <Text style={styles.placeholderText}>Select User</Text>
+      <Text style={styles.placeholderText}>Select</Text>
     </View>
   );
 
@@ -37,28 +35,28 @@ const DropdownComponent = ({ data = [], onSelect }) => {
 
 const styles = StyleSheet.create({
   placeholderContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   placeholderText: {
     marginLeft: 10,
   },
   dropdownBox: {
-    backgroundColor: "white",
-    borderColor: "#c82f2f",
+    backgroundColor: 'white',
+    borderColor: '#c82f2f',
     borderWidth: 1,
     borderRadius: 15,
   },
   dropdown: {
-    backgroundColor: "white",
-    borderColor: "#c82f2f",
+    backgroundColor: 'white',
+    borderColor: '#c82f2f',
     borderWidth: 1,
     borderRadius: 15,
   },
   input: {
-    color: "black",
-    fontWeight: "bold",
+    color: 'black',
+    fontWeight: 'bold',
   },
 });
 
-export default DropdownComponent;
+export default DropdownComponent3;
