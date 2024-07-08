@@ -19,4 +19,5 @@ db.connect()
     console.error('Error connecting to the database:', error.message);
   });
 
+// Export the db object directly
 module.exports = db;

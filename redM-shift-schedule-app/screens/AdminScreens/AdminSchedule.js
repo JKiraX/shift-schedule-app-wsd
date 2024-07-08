@@ -53,6 +53,7 @@ const AdminScheduleScreen = () => {
         setAllUsers(formattedUsers);
       } catch (error) {
         console.error("Error fetching users:", error);
+
       }
     };
 
@@ -67,7 +68,7 @@ const AdminScheduleScreen = () => {
       console.log(`Requesting data for dates: ${dates} and user: ${userId}`);
 
       const response = await fetch(
-        `http://192.168.5.22:3001/api/schedules${queryParams}`
+        `http://192.168.5.61:3001/api/schedules${queryParams}`
       );
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.status}`);

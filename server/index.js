@@ -1,3 +1,4 @@
+
 const express = require("express");
 const moment = require("moment-timezone");
 const bodyParser = require("body-parser");
@@ -8,15 +9,49 @@ const scheduleRoutes = require("./scheduleRoutes");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const cors = require('cors');
+
 const app = express();
+
+app.use((req, res, next) => {
+  console.log(`Received ${req.method} request to ${req.url}`);
+  console.log('Request headers:', req.headers);
+  console.log('Request body:', req.body);
+  next();
+});
+
 app.use(bodyParser.json());
 const SECRET_KEY = "your_secret_key";
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", scheduleRoutes);
 
-app.use(cors());
-app.get("/schedules", async (req, res) => {
+
+app.use('/api', employeeRoutes);
+
+app.use('/api', scheduleRoutes);
+
+app.get("/users", async (req, res) => {
+  try {
+    const users = await db.any(`
+      SELECT user_id, user_name
+      FROM public1.users
+      WHERE admin = 1
+      ORDER BY user_name
+    `);
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.use((req, res, next) => {
+  console.log('No route matched for', req.method, req.url);
+  next();
+});
+
+app.get('/schedules', async (req, res) => {
+
   const { date, dates, userId } = req.query;
 
   if (!date && !dates) {
@@ -260,3 +295,4 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   checkAndGenerateSchedules();
 });
+

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -7,16 +7,19 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
-import AddEmployeePage from "../AdminScreens/AddEmployees";
-import EditEmployeeScreen from "../AdminScreens/EditEmployees";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
+import AddEmployeePage from './AddEmployees';
+import EditEmployeeScreen from './EditEmployees';
 
 const Stack = createNativeStackNavigator();
 
 const AdminEmployeeScreen = () => {
+
   const [employees, setEmployees] = useState([
     { id: "1", name: "Roxanne Smith" },
     { id: "2", name: "Yusheen Sriram" },
@@ -25,18 +28,57 @@ const AdminEmployeeScreen = () => {
     { id: "5", name: "Hope" },
   ]);
 
+
+  const [users, setUsers] = useState([]);
+
   const navigation = useNavigation();
 
-  const handleDelete = (employeeId) => {
-    setEmployees(employees.filter((emp) => emp.id !== employeeId));
-  };
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("http://192.168.5.61:3001/api/users");
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+          throw new Error(`Network response was not ok: ${response.status} ${errorText}`);
+        }
+        const data = await response.json();
+        console.log("Fetched users:", data);
+        setUsers(data);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        Alert.alert('Error', `Failed to fetch users: ${error.message}`);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  // const handleDelete = async (userId) => {
+  // //   try {
+  // //     const response = await fetch(`http://192.168.5.61:3001/api/users/${userId}`, {
+  // //       method: 'DELETE',
+  // //     });
+  // //     if (response.ok) {
+  // //       setUsers(users.filter((user) => user.user_id !== userId));
+  // //     } else if (response.status === 404) {
+  // //       Alert.alert('Error', 'User not found');
+  // //     } else {
+  // //       throw new Error('Failed to delete user');
+  // //     }
+  // //   } catch (error) {
+  // //     console.error('Error deleting user:', error);
+  // //     Alert.alert('Error', 'Failed to delete user');
+  // //   }
+  // // };
 
   const handleAdd = () => {
     navigation.push("AddEmployees");
   };
 
-  const handleEdit = (employee) => {
-    navigation.push("EditEmployee", { employee });
+  const handleEdit = (user) => {
+    navigation.push("EditEmployee", { user });
   };
 
   return (
@@ -44,15 +86,17 @@ const AdminEmployeeScreen = () => {
       <View style={styles.searchBar}>
         <TextInput style={styles.searchInput} placeholder="Search" />
         <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
-          <Text style={styles.addButtonText}>Add Employee</Text>
+          <Text style={styles.addButtonText}>Add User</Text>
         </TouchableOpacity>
       </View>
       <FlatList
-        data={employees}
-        keyExtractor={(item) => item.id}
+        data={users}
+        keyExtractor={(item) => item.user_id ? item.user_id.toString() : Math.random().toString()}
         renderItem={({ item }) => (
-          <View style={styles.employeeItem}>
-            <Text style={styles.employeeName}>{item.name}</Text>
+          <View style={styles.userItem}>
+            <View>
+              <Text style={styles.userName}>{item.name}</Text>
+            </View>
             <View style={styles.actions}>
               <TouchableOpacity
                 style={styles.actionButton}
@@ -61,7 +105,7 @@ const AdminEmployeeScreen = () => {
                 <MaterialCommunityIcons name="pencil" size={24} color="black" />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => handleDelete(item.id)}
+                onPress={() => handleDelete(item.user_id)}
                 style={styles.actionButton}
               >
                 <MaterialCommunityIcons name="delete" size={24} color="black" />
@@ -69,7 +113,7 @@ const AdminEmployeeScreen = () => {
             </View>
           </View>
         )}
-        contentContainerStyle={styles.employeeList}
+        contentContainerStyle={styles.userList}
       />
     </SafeAreaView>
   );
@@ -112,7 +156,7 @@ const AdminEmployee = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:"white",
+    backgroundColor: "white",
     padding: 20,
   },
   searchBar: {
@@ -137,10 +181,10 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
   },
-  employeeList: {
+  userList: {
     paddingBottom: 20,
   },
-  employeeItem: {
+  userItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 10,
@@ -148,8 +192,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
   },
-  employeeName: {
+  userName: {
     fontSize: 18,
+    fontWeight: "bold",
+  },
+  userEmail: {
+    fontSize: 14,
+    color: "#666",
   },
   actions: {
     flexDirection: "row",
