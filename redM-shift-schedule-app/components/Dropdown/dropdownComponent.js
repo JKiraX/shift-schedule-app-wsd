@@ -10,7 +10,7 @@ const DropdownComponent = ({ data = [], onSelect }) => {
     <SelectList
       setSelected={(val) => {
         setSelected(val);
-        onSelect(val);
+        onSelect(val); // Ensure onSelect gets called
       }}
       data={data}
       save="value"

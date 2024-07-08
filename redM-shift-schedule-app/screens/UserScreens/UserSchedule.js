@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Text,
   View,
@@ -18,6 +18,7 @@ const UserScheduleScreen = () => {
   const [markedDates, setMarkedDates] = useState({});
   const [selectedUser, setSelectedUser] = useState(null);
   const [users, setUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [selectedTab, setSelectedTab] = useState(0);
   const calendarRef = useRef(null);
 
@@ -26,30 +27,53 @@ const UserScheduleScreen = () => {
   };
 
   useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("http://192.168.5.22:3001/users");
+        if (!response.ok) {
+          throw new Error("Failed to fetch users");
+        }
+        const data = await response.json();
+
+        // Log the raw data for debugging
+        console.log("Raw users data:", data);
+
+        const formattedUsers = data.map((user) => ({
+          key: user.user_id?.toString() ?? `unknown-${Math.random()}`,
+          value: user.user_name ?? "Unknown User",
+        }));
+        setAllUsers(formattedUsers);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
     fetchUsers();
   }, []);
-
+  
   useEffect(() => {
-    if (Object.keys(selectedDates).length > 0 && users.length > 0) {
+    if (Object.keys(selectedDates).length > 0 && allUsers.length > 0) {
       fetchShiftData();
     } else {
       setShiftData([]);
     }
-  }, [selectedDates, selectedUser, users]);
+  }, [selectedDates, selectedUser, allUsers]);
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch(`http://192.168.5.61:3001/api/users`);
-      if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.status}`);
-      }
-      const data = await response.json();
-      const userData = data.map((user) => ({ key: user.id, value: user.name }));
-      setUsers(userData);
-    } catch (error) {
-      console.error("Error fetching user data:", error.message);
-    }
-  };
+
+  // const fetchUsers = async () => {
+  //   try {
+  //     const response = await fetch(`http://10.0.0.113:3001/api/users`);
+  //     if (!response.ok) {
+  //       throw new Error(`Network response was not ok: ${response.status}`);
+  //     }
+  //     const data = await response.json();
+  //     const userData = data.map((user) => ({ key: user.id, value: user.name }));
+  //     setUsers(userData);
+  //   } catch (error) {
+  //     console.error("Error fetching user data:", error.message);
+  //   }
+  // };
+
 
   const fetchShiftData = async () => {
     try {
@@ -57,7 +81,7 @@ const UserScheduleScreen = () => {
       const userId = selectedUser ? selectedUser.key : null;
       const queryParams = `?dates=${dates}${userId ? `&userId=${userId}` : ""}`;
       console.log(`Requesting data for dates: ${dates} and user: ${userId}`);
-
+  
       const response = await fetch(
         `http://192.168.5.61:3001/api/schedules${queryParams}`
       );
@@ -65,6 +89,7 @@ const UserScheduleScreen = () => {
         throw new Error(`Network response was not ok: ${response.status}`);
       }
       const data = await response.json();
+      console.log("Received shift data:", JSON.stringify(data, null, 2));
       setShiftData(data);
     } catch (error) {
       console.error("Error fetching shift data:", error.message);
@@ -72,15 +97,15 @@ const UserScheduleScreen = () => {
   };
 
   const handleSelect = (selected) => {
-    console.log("User selected:", selected); // Debugging statement
-    setSelectedUser(selected);
-    setShiftData([]); // Clear shift data when a new user is selected
+    console.log("Selected user:", selected);
+    const selectedUser = allUsers.find((user) => user.value === selected);
+    setSelectedSwitchUser(selectedUser);
   };
 
-  const handleDayPress = (day) => {
+  const handleDayPress = useCallback((day) => {
     const dateString = day.dateString;
     const newSelectedDates = { ...selectedDates };
-
+  
     if (newSelectedDates[dateString]) {
       delete newSelectedDates[dateString];
     } else {
@@ -90,23 +115,24 @@ const UserScheduleScreen = () => {
         dotColor: "#c82f2f",
       };
     }
-
+  
     setSelectedDates(newSelectedDates);
     setMarkedDates(newSelectedDates);
-  };
-
-  const groupShiftsByDate = (shifts) => {
+  }, [selectedDates]);
+  
+  const groupShiftsByDate = useCallback((shifts) => {
     return shifts.reduce((acc, shift) => {
       const date = shift.date ? moment(shift.date).format("YYYY-MM-DD") : null;
       if (date) {
         if (!acc[date]) {
           acc[date] = [];
         }
-        acc[date].push(shift);
+        const shiftId = `${date}-${shift.user_id}-${shift.start_time}`;
+        acc[date].push({ ...shift, shiftId });
       }
       return acc;
     }, {});
-  };
+  }, []);
 
   const groupedShiftData = groupShiftsByDate(shiftData);
 
@@ -114,7 +140,13 @@ const UserScheduleScreen = () => {
     <SafeAreaView
       style={{ flex: 1, alignItems: "center", backgroundColor: "white" }}
     >
-      <DropdownComponent data={users} onSelect={handleSelect} />
+         <DropdownComponent
+        data={allUsers}
+        onSelect={(selected) => {
+          console.log("Dropdown selected:", selected);
+          handleSelect(selected);
+        }}
+      />
       <View
         style={{
           width: 350,
@@ -177,7 +209,7 @@ const UserScheduleScreen = () => {
       </View>
       <ScrollView>
         <View style={{ flex: 1, alignItems: "center", paddingTop: 10 }}>
-          <Calendar
+        <Calendar
             style={{ width: 350, borderRadius: 15 }}
             enableSwipeMonths={true}
             hideExtraDays={true}
@@ -190,6 +222,7 @@ const UserScheduleScreen = () => {
               <Text style={styles.dateHeader}>
                 {moment(date).format("LL")}:
               </Text>
+
               {selectedUser ? (
                 groupedShiftData[date] &&
                 groupedShiftData[date].some(
@@ -197,13 +230,16 @@ const UserScheduleScreen = () => {
                 ) ? (
                   groupedShiftData[date]
                     .filter((shift) => shift.user_id === selectedUser.key)
-                    .map((shift, index) => (
+                    .map((shift) => (
                       <ShiftCard
-                        key={index}
+                        key={shift.shiftId}
+                        shiftId={shift.shiftId}
                         shiftName={shift.shift_name}
                         startTime={shift.start_time}
                         endTime={shift.end_time}
                         assignedUsers={shift.user_name}
+                        allUsers={allUsers}
+                        // onSwitchComplete={handleSwitchComplete}
                       />
                     ))
                 ) : (
@@ -212,13 +248,16 @@ const UserScheduleScreen = () => {
                   </Text>
                 )
               ) : groupedShiftData[date]?.length > 0 ? (
-                groupedShiftData[date].map((shift, index) => (
+                groupedShiftData[date].map((shift) => (
                   <ShiftCard
-                    key={index}
+                    key={shift.shiftId}
+                    shiftId={shift.shiftId}
                     shiftName={shift.shift_name}
                     startTime={shift.start_time}
                     endTime={shift.end_time}
                     assignedUsers={shift.user_name}
+                    allUsers={allUsers}
+                    // onSwitchComplete={handleSwitchComplete}
                   />
                 ))
               ) : (

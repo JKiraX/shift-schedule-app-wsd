@@ -1,11 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const ShiftCard = ({ shiftName, startTime, endTime, assignedUsers }) => {
+const ShiftCard = ({ shiftId,
+  shiftName,
+  startTime,
+  endTime,
+  assignedUsers,
+  allUsers, }) => {
   return (
     <View style={styles.card}>
       <Text style={styles.shiftName}>{shiftName}</Text>
-      <Text>{assignedUsers}</Text>
+      <Text style={styles.assignedUsers}>{assignedUsers}</Text>
       <View style={styles.timeContainer}>
         <Text style={styles.time}>Start: {startTime}</Text>
         <Text style={styles.time}>End: {endTime}</Text>
@@ -27,13 +32,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 8,
   },
+  
   timeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 8,
   },
   time: {
+    fontSize: 14,
+  },
+  assignedUsers: {
     fontSize: 16,
+    fontWeight: '500',
   },
 });
 

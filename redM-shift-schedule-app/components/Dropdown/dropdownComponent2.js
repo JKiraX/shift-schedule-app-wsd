@@ -42,5 +42,5 @@ const DropdownComponent2 = ({ data, onSelect }) => {
     />
   );
 };
-
+// for merging
 export default DropdownComponent2;

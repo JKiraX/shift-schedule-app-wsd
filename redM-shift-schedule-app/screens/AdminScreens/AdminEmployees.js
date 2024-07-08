@@ -19,7 +19,18 @@ import EditEmployeeScreen from './EditEmployees';
 const Stack = createNativeStackNavigator();
 
 const AdminEmployeeScreen = () => {
+
+  const [employees, setEmployees] = useState([
+    { id: "1", name: "Roxanne Smith" },
+    { id: "2", name: "Yusheen Sriram" },
+    { id: "3", name: "Mpho Mafalo" },
+    { id: "4", name: "Phumeza Ntwashu" },
+    { id: "5", name: "Hope" },
+  ]);
+
+
   const [users, setUsers] = useState([]);
+
   const navigation = useNavigation();
 
   useEffect(() => {
