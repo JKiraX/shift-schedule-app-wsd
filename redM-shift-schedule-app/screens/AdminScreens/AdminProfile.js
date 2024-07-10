@@ -52,6 +52,8 @@ const ProfileScreenContent = ({ navigation }) => {
           onPress={handleChangePassword}
           style={styles.button}
         />
+      </View>
+      <View style={styles.buttonContainer}>
         <SmallButton
           text="Logout"
           onPress={handleLogout}
@@ -137,9 +139,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   buttonContainer: {
-    width: "100%",
-    alignItems: "center",
-    flexDirection: "column",
+    marginBottom:10,
   },
   button: {
     marginVertical: height * 0.02,

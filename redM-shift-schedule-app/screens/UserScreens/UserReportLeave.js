@@ -30,11 +30,11 @@ const UserRequestLeaveScreen = () => {
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [overtime, setOvertime] = useState("");
-
+  
   const toggleDatepicker = () => {
     setShowPicker(!showPicker);
   };
-
+  
   const onChange = (event, selectedDate) => {
     if (event.type === "set") {
       const currentDate = selectedDate || date;
@@ -47,7 +47,7 @@ const UserRequestLeaveScreen = () => {
       toggleDatepicker();
     }
   };
-
+  
   const confirmIOSDate = () => {
     setOvertime(date.toDateString());
     toggleDatepicker();
@@ -227,22 +227,43 @@ const UserRequestLeaveScreen = () => {
                 />
               )}
 
-              {showPicker && Platform.OS === "ios" && (
-                <View style={styles.iosPickerButtonContainer}>
-                  <TouchableOpacity
-                    style={[styles.button, styles.pickerButton, { backgroundColor: "#11182711" }]}
-                    onPress={confirmIOSDate}
-                  >
-                    <Text>Confirm</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.button, styles.pickerButton, { backgroundColor: "#11182711" }]}
-                    onPress={toggleDatepicker}
-                  >
-                    <Text>Cancel</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
+              {showPicker && (
+              <View>
+                {Platform.OS === "ios" ? (
+                  <View>
+                    <DateTimePicker
+                      mode="date"
+                      display="spinner"
+                      value={date}
+                      onChange={onChange}
+                      style={styles.datePicker}
+                    />
+                    <View style={styles.iosPickerButtonContainer}>
+                      <TouchableOpacity
+                        style={[styles.button, styles.pickerButton, { backgroundColor: "#11182711" }]}
+                        onPress={confirmIOSDate}
+                      >
+                        <Text>Confirm</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.button, styles.pickerButton, { backgroundColor: "#11182711" }]}
+                        onPress={toggleDatepicker}
+                      >
+                        <Text>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ) : (
+                  <DateTimePicker
+                    mode="date"
+                    display="default"
+                    value={date}
+                    onChange={onChange}
+                    style={styles.datePicker}
+                  />
+                )}
+              </View>
+)}
 
               {!showPicker && (
                 <Pressable onPress={toggleDatepicker}>

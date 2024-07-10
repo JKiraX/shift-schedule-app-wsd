@@ -76,17 +76,23 @@ const AdminScheduleScreen = () => {
   const handleDayPress = (day) => {
     const dateString = day.dateString;
     const newSelectedDates = { ...selectedDates };
+    const newMarkedDates = { ...markedDates };
+  
     if (newSelectedDates[dateString]) {
       delete newSelectedDates[dateString];
+      delete newMarkedDates[dateString];
     } else {
-      newSelectedDates[dateString] = {
+      newSelectedDates[dateString] = { selected: true };
+      newMarkedDates[dateString] = {
         selected: true,
+        selectedColor: "#c82f2f",
         marked: true,
-        dotColor: "#c82f2f",
+        dotColor: "#c82f2f"
       };
     }
+  
     setSelectedDates(newSelectedDates);
-    setMarkedDates(newSelectedDates);
+    setMarkedDates(newMarkedDates);
   };
 
   const groupShiftsByDate = (shifts) => {
@@ -165,13 +171,22 @@ const AdminScheduleScreen = () => {
       </View>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <Calendar
-          style={styles.calendar}
-          enableSwipeMonths={true}
-          hideExtraDays={true}
-          markingType="multi-dot"
-          markedDates={markedDates}
-          onDayPress={handleDayPress}
-        />
+        style={styles.calendar}
+        enableSwipeMonths={true}
+        hideExtraDays={true}
+        markingType="dot"
+        markedDates={markedDates}
+        onDayPress={handleDayPress}
+        theme={{
+          selectedDayBackgroundColor: '#c82f2f',
+          selectedDayTextColor: '#ffffff',
+          todayTextColor: '#c82f2f',
+          dotColor: '#c82f2f',
+          arrowColor:"#c82f2f",
+          monthTextColor:"#c82f2f",
+          textMonthFontWeight:"bold"
+        }}
+      />
         {Object.keys(selectedDates).map((date) => (
           <View key={date} style={styles.dateContainer}>
             <Text style={styles.dateHeader}>{moment(date).format("LL")}:</Text>
