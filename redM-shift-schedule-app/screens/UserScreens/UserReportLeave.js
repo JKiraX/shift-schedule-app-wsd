@@ -218,52 +218,42 @@ const UserRequestLeaveScreen = () => {
               <Text style={styles.sectionTitle}>Overtime Form:</Text>
               <Text style={styles.label}>Which day did you work overtime?</Text>
               {showPicker && (
-                <DateTimePicker
-                  mode="date"
-                  display="spinner"
-                  value={date}
-                  onChange={onChange}
-                  style={styles.datePicker}
-                />
-              )}
-
-              {showPicker && (
-              <View>
-                {Platform.OS === "ios" ? (
-                  <View>
+                <View>
+                  {Platform.OS === "ios" ? (
+                    <View>
+                      <DateTimePicker
+                        mode="date"
+                        display="spinner"
+                        value={date}
+                        onChange={onChange}
+                        style={styles.datePicker}
+                      />
+                      <View style={styles.iosPickerButtonContainer}>
+                        <TouchableOpacity
+                          style={[styles.button, styles.pickerButton, { backgroundColor: "#11182711" }]}
+                          onPress={confirmIOSDate}
+                        >
+                          <Text>Confirm</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.button, styles.pickerButton, { backgroundColor: "#11182711" }]}
+                          onPress={toggleDatepicker}
+                        >
+                          <Text>Cancel</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ) : (
                     <DateTimePicker
                       mode="date"
-                      display="spinner"
+                      display="default"
                       value={date}
                       onChange={onChange}
                       style={styles.datePicker}
                     />
-                    <View style={styles.iosPickerButtonContainer}>
-                      <TouchableOpacity
-                        style={[styles.button, styles.pickerButton, { backgroundColor: "#11182711" }]}
-                        onPress={confirmIOSDate}
-                      >
-                        <Text>Confirm</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.button, styles.pickerButton, { backgroundColor: "#11182711" }]}
-                        onPress={toggleDatepicker}
-                      >
-                        <Text>Cancel</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ) : (
-                  <DateTimePicker
-                    mode="date"
-                    display="default"
-                    value={date}
-                    onChange={onChange}
-                    style={styles.datePicker}
-                  />
-                )}
-              </View>
-)}
+                  )}
+                </View>
+              )}
 
               {!showPicker && (
                 <Pressable onPress={toggleDatepicker}>
@@ -486,6 +476,8 @@ const styles = StyleSheet.create({
   },
   pickerButton: {
     paddingHorizontal: 20,
+    paddingVertical:20,
+    borderRadius:15,
   },
   submitButtonContainer: {
     marginTop: 20, // Adjust this value to increase or decrease the space
