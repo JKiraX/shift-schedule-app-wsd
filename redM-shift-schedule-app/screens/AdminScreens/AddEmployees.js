@@ -16,6 +16,7 @@ import SmallButton from "../../components/Buttons/smallButton";
 
 const AddEmployeePage = () => {
   const [name, setName] = useState("");
+  const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -84,13 +85,22 @@ const AddEmployeePage = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollViewContainer}>
           <View style={styles.formContainer}>
-            <Text style={styles.label}>Name</Text>
+            <Text style={styles.label}>First Name</Text>
             <TextInput
               style={styles.input}
               value={name}
               onChangeText={(text) => setName(text)}
-              placeholder="Enter name"
+              placeholder="Enter first name"
             />
+
+            <Text style={styles.label}>Last Name</Text>
+            <TextInput
+              style={styles.input}
+              value={lastName}
+              onChangeText={(text) => setLastName(text)}
+              placeholder="Enter last name"
+            />
+
             <Text style={styles.label}>E-mail</Text>
             <TextInput
               style={styles.input}

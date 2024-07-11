@@ -26,7 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", scheduleRoutes);
 
 
-app.use('/api', employeeRoutes);
+// app.use('/api', employeeRoutes);
 
 app.use('/api', scheduleRoutes);
 
