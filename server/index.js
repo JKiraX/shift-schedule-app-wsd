@@ -9,8 +9,16 @@ const scheduleRoutes = require("./scheduleRoutes");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
+
+// Define the rate limit rule
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+});
 
 app.use((req, res, next) => {
   console.log(`Received ${req.method} request to ${req.url}`);
@@ -19,14 +27,12 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(limiter);
 app.use(bodyParser.json());
 const SECRET_KEY = "your_secret_key";
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", scheduleRoutes);
-
-
-app.use('/api', employeeRoutes);
 
 app.use('/api', scheduleRoutes);
 
