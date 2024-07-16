@@ -1,4 +1,3 @@
-
 const express = require("express");
 const moment = require("moment-timezone");
 const bodyParser = require("body-parser");
@@ -8,8 +7,8 @@ const checkAndGenerateSchedules = require("./checkAndGenerateSchedules");
 const scheduleRoutes = require("./scheduleRoutes");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
+const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 
@@ -17,24 +16,23 @@ const app = express();
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
+  message: "Too many requests from this IP, please try again later.",
 });
 
 app.use((req, res, next) => {
   console.log(`Received ${req.method} request to ${req.url}`);
-  console.log('Request headers:', req.headers);
-  console.log('Request body:', req.body);
+  console.log("Request headers:", req.headers);
+  console.log("Request body:", req.body);
   next();
 });
 
 app.use(limiter);
 app.use(bodyParser.json());
-const SECRET_KEY = "your_secret_key";
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", scheduleRoutes);
 
-app.use('/api', scheduleRoutes);
+app.use("/api", scheduleRoutes);
 
 app.get("/users", async (req, res) => {
   try {
@@ -52,12 +50,11 @@ app.get("/users", async (req, res) => {
 });
 
 app.use((req, res, next) => {
-  console.log('No route matched for', req.method, req.url);
+  console.log("No route matched for", req.method, req.url);
   next();
 });
 
-app.get('/schedules', async (req, res) => {
-
+app.get("/schedules", async (req, res) => {
   const { date, dates, userId } = req.query;
 
   if (!date && !dates) {
@@ -125,7 +122,9 @@ app.get("/api/schedules/id", async (req, res) => {
   const { date, shift_id } = req.query;
 
   if (!date || !shift_id) {
-    return res.status(400).json({ error: "Both date and shift_id are required" });
+    return res
+      .status(400)
+      .json({ error: "Both date and shift_id are required" });
   }
 
   try {
@@ -220,57 +219,71 @@ app.post("/api/report-leave", async (req, res) => {
   }
 });
 
-app.put('/api/schedules/switch', async (req, res) => {
+app.put("/api/schedules/switch", async (req, res) => {
   const { date, shift_id, user_id } = req.body;
-  
-  console.log('Received switch request:', { date, shift_id, user_id });
+
+  console.log("Received switch request:", { date, shift_id, user_id });
 
   if (!date || !shift_id || !user_id) {
-    return res.status(400).json({ error: "All fields (date, shift_id, user_id) are required" });
+    return res
+      .status(400)
+      .json({ error: "All fields (date, shift_id, user_id) are required" });
   }
 
   try {
-    const parsedDate = date.split('-').slice(0, 3).join('-');
+    const parsedDate = date.split("-").slice(0, 3).join("-");
     const parsedShiftId = parseInt(shift_id, 10);
 
-    console.log('Parsed data:', { parsedDate, parsedShiftId, user_id });
+    console.log("Parsed data:", { parsedDate, parsedShiftId, user_id });
 
     // Check if the shift_id is valid
-    const validShift = await db.oneOrNone('SELECT * FROM public1.shifts WHERE shift_id = $1', [parsedShiftId]);
+    const validShift = await db.oneOrNone(
+      "SELECT * FROM public1.shifts WHERE shift_id = $1",
+      [parsedShiftId]
+    );
     if (!validShift) {
-      return res.status(400).json({ error: 'Invalid shift_id. This shift does not exist.' });
+      return res
+        .status(400)
+        .json({ error: "Invalid shift_id. This shift does not exist." });
     }
 
     // Find the schedule
     const schedule = await db.oneOrNone(
-      'SELECT * FROM public1.schedules WHERE date = $1 AND shift_id = $2',
+      "SELECT * FROM public1.schedules WHERE date = $1 AND shift_id = $2",
       [parsedDate, parsedShiftId]
     );
 
-    console.log('Schedule check result:', schedule);
+    console.log("Schedule check result:", schedule);
 
     if (!schedule) {
-      return res.status(404).json({ error: 'Schedule not found for the given date and shift.' });
+      return res
+        .status(404)
+        .json({ error: "Schedule not found for the given date and shift." });
     }
 
     // Update the schedule
     const updatedSchedule = await db.one(
-      'UPDATE public1.schedules SET user_id = $1 WHERE date = $2 AND shift_id = $3 RETURNING *',
+      "UPDATE public1.schedules SET user_id = $1 WHERE date = $2 AND shift_id = $3 RETURNING *",
       [user_id, parsedDate, parsedShiftId]
     );
 
-    console.log('Updated schedule:', updatedSchedule);
+    console.log("Updated schedule:", updatedSchedule);
 
     // Get the user name
-    const userResult = await db.one('SELECT user_name FROM public1.users WHERE user_id = $1', [user_id]);
-    
+    const userResult = await db.one(
+      "SELECT user_name FROM public1.users WHERE user_id = $1",
+      [user_id]
+    );
+
     const response = { ...updatedSchedule, user_name: userResult.user_name };
-    console.log('Sending response:', response);
+    console.log("Sending response:", response);
 
     res.json(response);
   } catch (error) {
-    console.error('Error switching schedule:', error);
-    res.status(500).json({ error: 'Internal server error', details: error.message });
+    console.error("Error switching schedule:", error);
+    res
+      .status(500)
+      .json({ error: "Internal server error", details: error.message });
   }
 });
 app.post("/login", async (req, res) => {
@@ -301,4 +314,3 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   checkAndGenerateSchedules();
 });
-
