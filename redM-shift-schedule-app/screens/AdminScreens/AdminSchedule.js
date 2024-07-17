@@ -11,6 +11,7 @@ import { Calendar } from "react-native-calendars";
 import ShiftCardChange from "../../components/Cards/ShiftCardChange";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import moment from "moment";
+import { randomBytes } from "crypto";
 
 const AdminScheduleScreen = () => {
   const [selectedDates, setSelectedDates] = useState({});
@@ -47,18 +48,23 @@ const AdminScheduleScreen = () => {
         console.log("Raw users data:", data);
 
         const formattedUsers = data.map((user) => ({
-          key: user.user_id?.toString() ?? `unknown-${Math.random()}`,
+          key: user.user_id?.toString() ?? `unknown-${generateSecureKey()}`,
           value: user.user_name ?? "Unknown User",
         }));
         setAllUsers(formattedUsers);
       } catch (error) {
         console.error("Error fetching users:", error);
-
       }
     };
 
     fetchUsers();
   }, []);
+
+  const generateSecureKey = () => {
+    const array = randomBytes(4); // Generates 4 bytes of random data
+    const key = array.toString('hex');
+    return key;
+  };
 
   const fetchShiftData = async () => {
     try {
