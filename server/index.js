@@ -70,6 +70,25 @@ app.get("/users", async (req, res) => {
   }
 });
 
+app.delete("/users/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  try {
+    const result = await db.query(`
+      DELETE FROM public1.users
+      WHERE user_id = $1
+    `, [userId]);
+
+    if (result.rowCount === 0) {
+      res.status(404).json({ error: "User not found" });
+    } else {
+      res.json({ message: "User deleted successfully" });
+    }
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.use((req, res, next) => {
   console.log("No route matched for", req.method, req.url);
   next();

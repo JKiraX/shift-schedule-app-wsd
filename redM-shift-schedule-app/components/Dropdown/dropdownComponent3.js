@@ -1,22 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Text, View, StyleSheet, useWindowDimensions } from 'react-native';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const DropdownComponent2 = ({ data, onSelect }) => {
-  const [selected, setSelected] = useState('');
+const DropdownComponent3 = ({ data, onSelect }) => {
   const { width: windowWidth } = useWindowDimensions();
 
   const handleSelect = (val) => {
-    setSelected(val);
     const selectedItem = data.find(item => item.value === val);
     onSelect(selectedItem);
   };
 
   const renderPlaceholder = () => (
     <View style={styles.placeholderContainer}>
-      <MaterialIcons name="directions-run" size={24} color="black" />
-      <Text style={styles.placeholderText}>Select Leave Type</Text>
+      <Text style={styles.placeholderText}>Select</Text>
     </View>
   );
 
@@ -62,4 +59,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DropdownComponent2;
+export default DropdownComponent3;

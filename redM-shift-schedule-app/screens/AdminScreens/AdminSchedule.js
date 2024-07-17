@@ -6,12 +6,16 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
+  Dimensions,
+  Platform,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import ShiftCardChange from "../../components/Cards/ShiftCardChange";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import moment from "moment";
 import { randomBytes } from "crypto";
+
+const { width, height } = Dimensions.get("window");
 
 const AdminScheduleScreen = () => {
   const [selectedDates, setSelectedDates] = useState({});
@@ -22,10 +26,6 @@ const AdminScheduleScreen = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [allUsers, setAllUsers] = useState([]);
   const calendarRef = useRef(null);
-
-  const handleCalendarRef = (calendar) => {
-    calendarRef.current = calendar;
-  };
 
   useEffect(() => {
     if (Object.keys(selectedDates).length > 0 && allUsers.length > 0) {
@@ -71,14 +71,11 @@ const AdminScheduleScreen = () => {
       const dates = Object.keys(selectedDates).join(",");
       const userId = selectedUser ? selectedUser.key : null;
       const queryParams = `?dates=${dates}${userId ? `&userId=${userId}` : ""}`;
-      console.log(`Requesting data for dates: ${dates} and user: ${userId}`);
-
       const response = await fetch(
         `http://192.168.5.61:3001/api/schedules${queryParams}`
       );
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`Network response was not ok: ${response.status}`);
-      }
       const data = await response.json();
       console.log("Received shift data:", JSON.stringify(data, null, 2));
       setShiftData(data);
@@ -273,10 +270,61 @@ const AdminScheduleScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    backgroundColor: "white",
+    padding: width * 0.02,
+  },
+  tabContainer: {
+    width: width * 0.9,
+    height: height * 0.07,
+    backgroundColor: "white",
+    borderWidth: 0.5,
+    borderRadius: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: width * 0.01,
+    marginTop: height * 0.01,
+  },
+  tabButton: {
+    width: "45%",
+    height: height * 0.06,
+    backgroundColor: "white",
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  selectedTab: {
+    backgroundColor: "rgba(200, 47, 47,0.8)",
+  },
+  tabButtonText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "black",
+  },
+  selectedTabText: {
+    color: "white",
+  },
+  tabSpacer: {
+    width: "10%",
+  },
+  scrollViewContent: {
+    alignItems: "center",
+    paddingTop: height * 0.01,
+  },
+  calendar: {
+    width: width * 0.9,
+    borderRadius: 15,
+  },
+  dateContainer: {
+    width: "100%",
+    padding: width * 0.05,
+  },
   dateHeader: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: height * 0.01,
   },
   noShiftsText: {
     fontSize: 16,

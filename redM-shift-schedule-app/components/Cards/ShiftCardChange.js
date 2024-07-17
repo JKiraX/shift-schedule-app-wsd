@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Text, View, TouchableOpacity, Modal, StyleSheet, Platform } from "react-native";
 import PropTypes from 'prop-types';
 import { Text, View, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
@@ -136,13 +137,18 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 15,
     marginVertical: 8,
-    width: 350,
-    alignItems: "stretch",
+    width: "112%",
+    maxWidth: 350,
+    alignSelf: "center",
   },
   shiftName: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 8,
+  },
+  userText: {
+    fontSize: 16,
+    marginBottom: 4,
   },
   timeContainer: {
     flexDirection: "row",
@@ -155,6 +161,7 @@ const styles = StyleSheet.create({
   },
   assignedUsers: {
     fontSize: 16,
+    marginBottom: 4,
     fontWeight: "500",
   },
   button: {
@@ -166,7 +173,9 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    fontWeight: "bold",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    fontSize: 16,
     textAlign: "center",
   },
   modalOverlay: {
@@ -195,7 +204,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   modalButton: {
-    paddingHorizontal: 50,
+    paddingHorizontal: 20,
     paddingVertical: 15,
     backgroundColor: "#c82f2f",
     borderRadius: 15,
