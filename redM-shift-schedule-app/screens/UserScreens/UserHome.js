@@ -57,12 +57,20 @@ const UserHomeScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <CalendarStrip
         scrollable
-        style={styles.calendarStrip}
-        calendarHeaderStyle={styles.calendarHeader}
-        calendarColor={styles.calendarColor.backgroundColor}
-        dateNumberStyle={styles.dateNumber}
-        dateNameStyle={styles.dateName}
-        iconContainer={styles.iconContainer}
+        style={{ height: 120, paddingTop: 20, paddingBottom: 10}}
+        calendarHeaderStyle={{
+          color: "black",
+          fontSize: 18,
+          fontWeight: "bold",
+        }}
+        calendarColor={"white"}
+        dateNumberStyle={{
+         color: "black",
+          fontSize: 20,
+          fontWeight: "normal",
+        }}
+        dateNameStyle={{ color: "black", fontSize: 12, marginTop: 5 }}
+        iconContainer={{ flex: 0.1 }}
         selectedDate={selectedDate}
         onDateSelected={onDateSelected}
         datesBlacklist={(date) => !canScrollToDate(date)}

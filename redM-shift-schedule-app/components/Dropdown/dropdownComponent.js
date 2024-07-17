@@ -21,7 +21,10 @@ const DropdownComponent = ({ data = [], onSelect }) => {
 
   return (
     <SelectList
-      setSelected={handleSelect}
+      setSelected={(val) => {
+        setSelected(val);
+        onSelect(val); // Ensure onSelect gets called
+      }}
       data={data}
       save="value"
       placeholder={renderPlaceholder()}

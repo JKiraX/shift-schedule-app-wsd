@@ -3,7 +3,12 @@ import { View, Text, StyleSheet, Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
-const ShiftCard = ({ shiftName, startTime, endTime, assignedUsers }) => {
+const ShiftCard = ({ shiftId,
+  shiftName,
+  startTime,
+  endTime,
+  assignedUsers,
+  allUsers, }) => {
   return (
     <View style={styles.card}>
       <Text style={styles.shiftName}>{shiftName}</Text>
@@ -42,6 +47,7 @@ const styles = StyleSheet.create({
     fontSize: width * 0.04,
     color: '#555',
   },
+  
   timeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -49,6 +55,11 @@ const styles = StyleSheet.create({
   },
   time: {
     fontSize: width * 0.04,
+    fontSize: 14,
+  },
+  assignedUsers: {
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
 

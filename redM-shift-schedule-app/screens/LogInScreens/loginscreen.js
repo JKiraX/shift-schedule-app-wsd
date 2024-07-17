@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import ContinueButton from "../../components/Buttons/ContinueButton";
+import { AuthContext } from "../../../server/AuthProvider";
 import ForgotPasswordScreen from "./forgotpassword";
 
 
@@ -21,11 +22,16 @@ const Stack = createNativeStackNavigator();
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login } = useContext(AuthContext);
   const navigation = useNavigation();
 
-  const handleLogin = () => {
-    console.log("Login pressed");
-    //navigation.navigate("Authentication");
+  const handleLogin = async () => {
+    try {
+      await login(email, password);
+      navigation.navigate("AdminHome");
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   };
 
   const handleForgotPassword = () => {
@@ -80,10 +86,7 @@ const AppLogin = () => {
       <Stack.Screen
         name="ForgotPassword"
         component={ForgotPasswordScreen}
-        options={{
-          headerTintColor: "#c82f2f",
-          headerTitle: "Forgot Password",
-        }}
+        options={{ headerTintColor: "#3D5A80", headerTitle: "Forgot Password" }}
       />
     </Stack.Navigator>
   );
@@ -112,7 +115,7 @@ const styles = StyleSheet.create({
     fontSize: width * 0.06,
     marginBottom: height * 0.05,
     fontWeight: "bold",
-    color: "#c82f2f",
+    color: "#3D5A80",
   },
   inputContainer: {
     flexDirection: "row",
