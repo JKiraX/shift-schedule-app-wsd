@@ -9,6 +9,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
+const sanitizeInput  = require("express-sanitizer"); // Use express-sanitizer for input sanitization
 
 const app = express();
 
@@ -19,10 +20,32 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again later.",
 });
 
+// Sanitize function (simple example)
+function sanitizeInput(input) {
+  if (typeof input === 'string') {
+    return input.replace(/[^a-zA-Z0-9 _\-]/g, ''); // Allow only alphanumeric, space, underscore, and hyphen
+  }
+  if (Array.isArray(input)) {
+    return input.map(sanitizeInput);
+  }
+  if (typeof input === 'object' && input !== null) {
+    return Object.keys(input).reduce((sanitized, key) => {
+      sanitized[key] = sanitizeInput(input[key]);
+      return sanitized;
+    }, {});
+  }
+  return input;
+}
+
 app.use((req, res, next) => {
+  const sanitizedHeaders = sanitizeInput(req.headers);
+  const sanitizedBody = sanitizeInput(req.body);
+  const sanitizedQuery = sanitizeInput(req.query);
+
   console.log(`Received ${req.method} request to ${req.url}`);
-  console.log("Request headers:", req.headers);
-  console.log("Request body:", req.body);
+  console.log("Sanitized Request headers:", sanitizedHeaders);
+  console.log("Sanitized Request body:", sanitizedBody);
+  console.log("Sanitized Request query:", sanitizedQuery);
   next();
 });
 
@@ -30,8 +53,6 @@ app.use(limiter);
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/api", scheduleRoutes);
-
 app.use("/api", scheduleRoutes);
 
 app.get("/users", async (req, res) => {
@@ -286,6 +307,7 @@ app.put("/api/schedules/switch", async (req, res) => {
       .json({ error: "Internal server error", details: error.message });
   }
 });
+
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
