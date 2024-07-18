@@ -11,7 +11,7 @@ import AdminScheduleScreen from "../../screens/AdminScreens/AdminSchedule";
 import AdminEmployeesScreen from "../../screens/AdminScreens/AdminEmployees";
 import AdminProfileScreen from "../../screens/AdminScreens/AdminProfile";
 import NotificationsScreen from "../../screens/notifications";
-import AnalyticsScreen from "../../screens/analytics";
+import ReportsScreen from "../../screens/report";
 
 // Screen names
 const AdminHome = "Home";
@@ -83,7 +83,7 @@ function TabNavigator() {
               size={25}
               style={{ paddingLeft: 15 }}
               color="#909090"
-              onPress={() => navigation.navigate("Analytics")}
+              onPress={() => navigation.navigate("Reports")}
             />
           ),
         }}
@@ -129,8 +129,8 @@ function AdminNav() {
         options={{ headerTintColor: "#c82f2f", headerTitleAlign: "center" }}
       />
       <Stack.Screen
-        name="Analytics"
-        component={AnalyticsScreen}
+        name="Reports"
+        component={ReportsScreen}
         options={{ headerTintColor: "#c82f2f", headerTitleAlign: "center" }}
       />
     </Stack.Navigator>
