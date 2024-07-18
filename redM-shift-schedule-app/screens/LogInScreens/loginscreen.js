@@ -7,15 +7,12 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
-  Platform,
-  Dimensions,
 } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import ContinueButton from "../../components/Buttons/ContinueButton";
 import { AuthContext } from "../../../server/AuthProvider";
 import ForgotPasswordScreen from "./forgotpassword";
-
 
 const Stack = createNativeStackNavigator();
 
@@ -41,19 +38,19 @@ const LoginScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.logoContainer}>
+      <View>
         <Image
           source={require("../../assets/RedMPS-Logo_Black (1).png")}
           style={styles.logo}
         />
       </View>
-      <Text style={styles.headerText}>Log in to continue</Text>
+      <Text style={styles.text}>Log in to continue</Text>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder="Email"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(text) => setEmail(text)}
           keyboardType="email-address"
           autoCapitalize="none"
         />
@@ -63,7 +60,7 @@ const LoginScreen = () => {
           style={styles.input}
           placeholder="Password"
           value={password}
-          onChangeText={setPassword}
+          onChangeText={(text) => setPassword(text)}
           secureTextEntry={true}
         />
       </View>
@@ -92,28 +89,22 @@ const AppLogin = () => {
   );
 };
 
-const { width, height } = Dimensions.get("window");
-
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 2,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white",
-    paddingHorizontal: 20,
-  },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: height * 0.05,
+    position: "relative",
+    backgroundColor:"white"
   },
   logo: {
-    width: width * 0.6,
-    height: width * 0.6,
-    resizeMode: "contain",
+    width: 270,
+    height: 270,
+    resizeMode: "center",
   },
-  headerText: {
-    fontSize: width * 0.06,
-    marginBottom: height * 0.05,
+  text: {
+    fontSize: 22,
+    marginBottom: 45,
     fontWeight: "bold",
     color: "#3D5A80",
   },
@@ -122,20 +113,31 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
-    marginBottom: height * 0.04,
-    width: "100%",
+    marginBottom: 40,
+    width: "95%",
+    justifyContent: "space-between",
   },
   input: {
     flex: 1,
-    paddingVertical: Platform.OS === "ios" ? 10 : 5,
-    paddingHorizontal: 10,
-    fontSize: width * 0.045,
+    paddingLeft: 10,
+    fontSize: 22,
+  },
+  button: {
+    backgroundColor: "blue",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
   },
   forgotPasswordText: {
-    fontSize: width * 0.04,
-    color: "rgba(200, 47, 47, 0.8)",
+    fontSize: 16,
+    color: "rgba(200, 47, 47,0.8)",
     textDecorationLine: "underline",
-    marginTop: height * 0.02,
+    marginTop: 10,
   },
 });
 
