@@ -7,8 +7,6 @@ import {
   SafeAreaView,
   Modal,
   TouchableOpacity,
-  Dimensions,
-  Platform,
 } from "react-native";
 import SmallButton from "../../components/Buttons/smallButton";
 import ContinueButton from "../../components/Buttons/ContinueButton";
@@ -16,44 +14,65 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ChangePasswordScreen from "../changePassword";
 
 const Stack = createNativeStackNavigator();
-const { width, height } = Dimensions.get("window");
 
 const ProfileScreenContent = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
-  const handleChangePassword = () => navigation.navigate("ChangePassword");
-  const handleLogout = () => setModalVisible(true);
+  const handleChangePassword = () => {
+    navigation.navigate("ChangePassword");
+  };
+
+  const handleLogout = () => {
+    setModalVisible(true);
+  };
+
   const handleModalConfirm = () => {
     console.log("Logout confirmed");
     setModalVisible(false);
   };
-  const handleModalCancel = () => setModalVisible(false);
 
-  const renderInputField = (label, placeholder) => (
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
-        style={styles.input}
-        placeholder={placeholder}
-        editable={false}
-      />
-    </View>
-  );
+  const handleModalCancel = () => {
+    setModalVisible(false);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      {renderInputField("Name", "User's full name")}
-      {renderInputField("Contact Number", "User's phone number")}
-      {renderInputField("Email", "User's email")}
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="User's full name"
+          editable={false}
+        />
+      </View>
 
-      <View style={styles.buttonContainer}>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Contact Number</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Users phone number"
+          editable={false}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Users email"
+          keyboardType="email-address"
+          editable={false}
+        />
+      </View>
+
+      <View style={styles.button}>
         <ContinueButton
           text="Change Password"
           onPress={handleChangePassword}
           style={styles.button}
         />
       </View>
-      <View style={styles.buttonContainer}>
+      <View style={styles.button}>
         <SmallButton
           text="Logout"
           onPress={handleLogout}
@@ -62,23 +81,61 @@ const ProfileScreenContent = ({ navigation }) => {
       </View>
 
       <Modal visible={modalVisible} transparent={true} animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalText}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0,0,0,0.5)",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#f2f2f2",
+              padding: 20,
+              borderRadius: 15,
+              width: 365,
+            }}
+          >
+            <Text style={{ fontSize: 18, marginBottom: 10 }}>
               You are logging out of your profile. Would you like to continue?
             </Text>
-            <View style={styles.modalButtonContainer}>
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                borderRadius: 15,
+                paddingTop: 20,
+              }}
+            >
               <TouchableOpacity
-                style={styles.modalButton}
+                style={{
+                  paddingHorizontal: 50,
+                  paddingVertical: 15,
+                  backgroundColor: "#c82f2f",
+                  borderRadius: 15,
+                  marginHorizontal: 10,
+                }}
                 onPress={handleModalCancel}
               >
-                <Text style={styles.modalButtonText}>Cancel</Text>
+                <Text style={{ color: "white", fontWeight: "bold" }}>
+                  Cancel
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.modalButton}
+                style={{
+                  paddingHorizontal: 50,
+                  paddingVertical: 15,
+                  backgroundColor: "#c82f2f",
+                  borderRadius: 15,
+                  marginHorizontal: 10,
+                }}
                 onPress={handleModalConfirm}
               >
-                <Text style={styles.modalButtonText}>Confirm</Text>
+                <Text style={{ color: "white", fontWeight: "bold" }}>
+                  Confirm
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -88,41 +145,43 @@ const ProfileScreenContent = ({ navigation }) => {
   );
 };
 
-const ProfileScreen = () => (
-  <Stack.Navigator initialRouteName="ProfileScreenContent">
-    <Stack.Screen
-      name="ProfileScreenContent"
-      component={ProfileScreenContent}
-      options={{
-        title: "Profile",
-        headerTintColor: "#c82f2f",
-        headerTitleAlign: "center",
-      }}
-    />
-    <Stack.Screen
-      name="ChangePassword"
-      component={ChangePasswordScreen}
-      options={{
-        title: "Change Password",
-        headerTintColor: "#c82f2f",
-        headerTitleAlign: "center",
-      }}
-    />
-  </Stack.Navigator>
-);
+const ProfileScreen = () => {
+  return (
+    <Stack.Navigator initialRouteName="ProfileScreenContent">
+      <Stack.Screen
+        name="ProfileScreenContent"
+        component={ProfileScreenContent}
+        options={{
+          title: "Profile",
+          headerTintColor: "#c82f2f",
+          headerTitleAlign: "center",
+        }}
+      />
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{
+          title: "Change Password",
+          headerTintColor: "#c82f2f",
+          headerTitleAlign: "center",
+        }}
+      />
+    </Stack.Navigator>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: width * 0.05,
+    padding: 20,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "white",
+    backgroundColor:"white",
   },
   inputContainer: {
-    marginBottom: height * 0.02,
-    width: width * 0.9,
-    maxWidth: 350,
+    marginBottom: 18,
+    width: 350,
+    borderRadius: 15,
   },
   label: {
     fontSize: 18,
@@ -139,46 +198,12 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   buttonContainer: {
-    marginBottom:10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
   },
   button: {
-    marginVertical: height * 0.02,
-    width: width * 0.9,
-    maxWidth: 350,
-    alignSelf: "center",
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContent: {
-    backgroundColor: "#f2f2f2",
-    padding: 20,
-    borderRadius: 15,
-    width: width * 0.9,
-    maxWidth: 365,
-  },
-  modalText: {
-    fontSize: 18,
     marginBottom: 10,
-  },
-  modalButtonContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 20,
-  },
-  modalButton: {
-    paddingHorizontal: width * 0.1,
-    paddingVertical: 15,
-    backgroundColor: "#c82f2f",
-    borderRadius: 15,
-    marginHorizontal: 10,
-  },
-  modalButtonText: {
-    color: "white",
-    fontWeight: "bold",
   },
 });
 
