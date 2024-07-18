@@ -13,6 +13,8 @@ import { useNavigation } from "@react-navigation/native";
 import ContinueButton from "../../components/Buttons/ContinueButton";
 import { AuthContext } from "../../../server/AuthProvider";
 import ForgotPasswordScreen from "./forgotpassword";
+import apiClient from "../../../server/apiClient";
+
 
 const Stack = createNativeStackNavigator();
 
