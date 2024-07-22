@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { View, Button, Text, Platform } from 'react-native';
+import { View, Button, Text, Platform, StyleSheet } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Permissions from 'expo-permissions';
- 
+
 async function registerForPushNotificationsAsync() {
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
@@ -12,20 +12,20 @@ async function registerForPushNotificationsAsync() {
       lightColor: '#FF231F7C',
     });
   }
- 
+
   const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
   let finalStatus = existingStatus;
- 
+
   if (existingStatus !== 'granted') {
     const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
     finalStatus = status;
   }
- 
+
   if (finalStatus !== 'granted') {
     alert('Failed to get push token for push notification!');
     return;
   }
- 
+
   try {
     const token = (await Notifications.getExpoPushTokenAsync()).data;
     console.log(token);
@@ -33,7 +33,7 @@ async function registerForPushNotificationsAsync() {
     console.log('Error getting push token:', error);
   }
 }
- 
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -41,17 +41,16 @@ Notifications.setNotificationHandler({
     shouldSetBadge: false,
   }),
 });
- 
+
 export default function App() {
   useEffect(() => {
     registerForPushNotificationsAsync();
   }, []);
- 
+
   const triggerShiftReminderNotification = () => {
-    // Calculate the time one hour before the shift starts
     const triggerTime = new Date();
     triggerTime.setHours(triggerTime.getHours() + 1);
- 
+
     Notifications.scheduleNotificationAsync({
       content: {
         title: 'Shift Reminder',
@@ -62,16 +61,35 @@ export default function App() {
       },
     });
   };
- 
+
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'white' }}>
+    <View style={styles.container}>
       <Text
         onPress={triggerShiftReminderNotification}
-        style={{ fontSize: 26, fontWeight: 'bold', marginBottom: 20 }}
+        style={styles.title}
       >
         Set Shift Reminder
       </Text>
-      <Button title="Trigger Notification" onPress={triggerShiftReminderNotification} />
+      <Button
+        title="Trigger Notification"
+        onPress={triggerShiftReminderNotification}
+      />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white',
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+});

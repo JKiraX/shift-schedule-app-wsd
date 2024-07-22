@@ -23,7 +23,7 @@ const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://192.168.5.22:3000/login', { email, password });
+      const response = await axios.post('http://10.2.44.68:3001/login', { email, password });
       const { token, user } = response.data;
       await AsyncStorage.setItem('token', token);
       await AsyncStorage.setItem('user', JSON.stringify(user));

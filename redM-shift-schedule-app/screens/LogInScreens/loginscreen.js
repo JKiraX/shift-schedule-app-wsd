@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
+  Platform,
+  Dimensions,
 } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
@@ -15,6 +17,7 @@ import { AuthContext } from "../../../server/AuthProvider";
 import ForgotPasswordScreen from "./forgotpassword";
 
 const Stack = createNativeStackNavigator();
+const { width, height } = Dimensions.get("window");
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -32,13 +35,12 @@ const LoginScreen = () => {
   };
 
   const handleForgotPassword = () => {
-    console.log("Forgot password");
     navigation.navigate("ForgotPassword");
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View>
+      <View style={styles.logoContainer}>
         <Image
           source={require("../../assets/RedMPS-Logo_Black (1).png")}
           style={styles.logo}
@@ -50,7 +52,7 @@ const LoginScreen = () => {
           style={styles.input}
           placeholder="Email"
           value={email}
-          onChangeText={(text) => setEmail(text)}
+          onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
         />
@@ -60,7 +62,7 @@ const LoginScreen = () => {
           style={styles.input}
           placeholder="Password"
           value={password}
-          onChangeText={(text) => setPassword(text)}
+          onChangeText={setPassword}
           secureTextEntry={true}
         />
       </View>
@@ -91,20 +93,26 @@ const AppLogin = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 2,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    position: "relative",
-    backgroundColor:"white"
+    backgroundColor: "white",
+    paddingTop: Platform.OS === "android" ? 25 : 0,
+  },
+  logoContainer: {
+    width: width * 0.7,
+    height: height * 0.3,
+    justifyContent: "center",
+    alignItems: "center",
   },
   logo: {
-    width: 270,
-    height: 270,
-    resizeMode: "center",
+    width: "100%",
+    height: "100%",
+    resizeMode: "contain",
   },
   text: {
-    fontSize: 22,
-    marginBottom: 45,
+    fontSize: width * 0.055,
+    marginBottom: height * 0.05,
     fontWeight: "bold",
     color: "#3D5A80",
   },
@@ -113,31 +121,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
-    marginBottom: 40,
-    width: "95%",
-    justifyContent: "space-between",
+    marginBottom: height * 0.04,
+    width: width * 0.9,
   },
   input: {
     flex: 1,
-    paddingLeft: 10,
-    fontSize: 22,
-  },
-  button: {
-    backgroundColor: "blue",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    textAlign: "center",
+    paddingLeft: width * 0.02,
+    fontSize: width * 0.05,
+    height: Platform.OS === "ios" ? 40 : 50,
   },
   forgotPasswordText: {
-    fontSize: 16,
-    color: "rgba(200, 47, 47,0.8)",
+    fontSize: width * 0.04,
+    color: "rgba(200, 47, 47, 0.8)",
     textDecorationLine: "underline",
-    marginTop: 10,
+    marginTop: height * 0.02,
   },
 });
 

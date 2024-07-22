@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import PropTypes from 'prop-types';
-import { Text, View, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, Modal, Dimensions } from "react-native";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 
-// Reusable Switch Button component
 const SwitchButton = ({ onPress }) => (
-  <TouchableOpacity onPress={onPress}>
-    <View style={styles.button}>
-      <Text style={styles.buttonText}>Switch</Text>
-    </View>
+  <TouchableOpacity onPress={onPress} style={styles.button}>
+    <Text style={styles.buttonText}>Switch</Text>
   </TouchableOpacity>
 );
 
@@ -16,7 +13,6 @@ SwitchButton.propTypes = {
   onPress: PropTypes.func.isRequired,
 };
 
-// ShiftCardChange component
 const ShiftCardChange = ({
   shiftId,
   shiftName,
@@ -44,7 +40,7 @@ const ShiftCardChange = ({
       const [year, month, day, shift_id] = shiftId.split("-");
       const date = `${year}-${month}-${day}`;
   
-      const response = await fetch('http://192.168.5.22/api/schedules/switch', {
+      const response = await fetch('http://10.2.44.68/api/schedules/switch', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -90,8 +86,8 @@ const ShiftCardChange = ({
       <View style={styles.timeContainer}>
         <Text style={styles.time}>Start: {startTime}</Text>
         <Text style={styles.time}>End: {endTime}</Text>
-        <SwitchButton onPress={handleSwitchPress} />
       </View>
+      <SwitchButton onPress={handleSwitchPress} />
       <Modal visible={modalVisible} transparent={true} animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -99,7 +95,7 @@ const ShiftCardChange = ({
               Please select employee to switch on the shift.
             </Text>
             <Text style={styles.modalSubtitle}>Switch User with:</Text>
-            <View style={{ alignItems: "center" }}>
+            <View style={styles.dropdownContainer}>
               <DropdownComponent
                 data={allUsers}
                 onSelect={handleSelect}
@@ -130,14 +126,17 @@ ShiftCardChange.propTypes = {
   onSwitchComplete: PropTypes.func.isRequired,
 };
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#f2f2f2",
     padding: 16,
     borderRadius: 15,
     marginVertical: 8,
-    width: 350,
-    alignItems: "stretch",
+    width: width * 0.9,
+    maxWidth: 350,
+    alignSelf: 'center',
   },
   shiftName: {
     fontSize: 18,
@@ -156,13 +155,15 @@ const styles = StyleSheet.create({
   assignedUsers: {
     fontSize: 16,
     fontWeight: "500",
+    marginBottom: 8,
   },
   button: {
     borderRadius: 15,
-    paddingVertical: 16,
+    paddingVertical: 12,
     paddingHorizontal: 15,
     backgroundColor: "#c82f2f",
-    marginTop: 8,
+    marginTop: 12,
+    alignSelf: 'flex-start',
   },
   buttonText: {
     color: "white",
@@ -179,7 +180,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#d3d3d3",
     padding: 20,
     borderRadius: 15,
-    width: 365,
+    width: width * 0.9,
+    maxWidth: 365,
   },
   modalTitle: {
     fontSize: 18,
@@ -188,15 +190,19 @@ const styles = StyleSheet.create({
   },
   modalSubtitle: {
     fontSize: 16,
+    marginBottom: 10,
+  },
+  dropdownContainer: {
+    alignItems: "center",
+    marginBottom: 20,
   },
   modalButtonContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    paddingTop: 20,
   },
   modalButton: {
-    paddingHorizontal: 50,
-    paddingVertical: 15,
+    paddingHorizontal: 30,
+    paddingVertical: 12,
     backgroundColor: "#c82f2f",
     borderRadius: 15,
     marginHorizontal: 10,

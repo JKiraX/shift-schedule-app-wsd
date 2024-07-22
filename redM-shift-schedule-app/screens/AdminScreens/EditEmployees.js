@@ -1,28 +1,28 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import SmallButton from '../../components/Buttons/smallButton';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Alert,
+  Platform,
+  Dimensions,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import SmallButton from "../../components/Buttons/smallButton";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+const { width, height } = Dimensions.get("window");
 
 const EditEmployeeScreen = () => {
-  const [name, setName] = useState('');
-  const [contact, setContact] = useState('');
-  const [email, setEmail] = useState('');
-  const navigation = useNavigation(); // Add this line to get the navigation object
+  const [name, setName] = useState("");
+  const [contact, setContact] = useState("");
+  const [email, setEmail] = useState("");
+  const navigation = useNavigation();
 
   const handleUpdate = () => {
-    // Add employee logic here
-    console.log("Employee details updated.");
-    Alert.alert("Employee details updated.", "", [
-      {
-        text: "OK",
-        onPress: () => navigation.goBack(),
-      },
-    ]);
-
-    // Validate the input values (optional)
     if (!name || !contact || !email) {
-      Alert.alert('Please fill in all fields.');
+      Alert.alert("Error", "Please fill in all fields.");
       return;
     }
 
@@ -30,66 +30,78 @@ const EditEmployeeScreen = () => {
     const employeeData = { name, contact, email };
     updateEmployee(employeeData);
 
-    // Clear the input fields (optional)
-    setName('');
-    setContact('');
-    setEmail('');
+    Alert.alert("Success", "Employee details updated.", [
+      { text: "OK", onPress: () => navigation.goBack() },
+    ]);
+
+    // Clear the input fields
+    setName("");
+    setContact("");
+    setEmail("");
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.formContainer}>
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          style={styles.input}
+        <InputField
+          label="Name"
           value={name}
-          onChangeText={(text) => setName(text)}
+          onChangeText={setName}
           placeholder="Enter name"
         />
-        <Text style={styles.label}>Phone Number</Text>
-        <TextInput
-          style={styles.input}
+        <InputField
+          label="Phone Number"
           value={contact}
-          onChangeText={(text) => setContact(text)}
+          onChangeText={setContact}
           placeholder="Enter phone number"
+          keyboardType="phone-pad"
         />
-        <Text style={styles.label}>E-mail</Text>
-        <TextInput
-          style={styles.input}
+        <InputField
+          label="E-mail"
           value={email}
-          onChangeText={(text) => setEmail(text)}
+          onChangeText={setEmail}
           placeholder="Enter email"
           keyboardType="email-address"
         />
-        <SmallButton text={"Update"} onPress={handleUpdate}/>
+        <SmallButton text="Update" onPress={handleUpdate} />
       </View>
     </SafeAreaView>
   );
 };
 
+const InputField = ({ label, ...props }) => (
+  <View style={styles.inputContainer}>
+    <Text style={styles.label}>{label}</Text>
+    <TextInput style={styles.input} {...props} />
+  </View>
+);
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor:"white"
+    backgroundColor: "white",
+    paddingTop: Platform.OS === "android" ? 25 : 0,
   },
   formContainer: {
-    padding: 20,
+    padding: width * 0.05,
+  },
+  inputContainer: {
+    marginBottom: height * 0.02,
   },
   label: {
     fontSize: 18,
     marginBottom: 6,
+    color: "#333",
   },
   input: {
-    height: 55,
+    height: Platform.OS === "ios" ? 55 : 50,
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
     backgroundColor: "#e9ecef",
-    width: "auto",
+    width: "100%",
     fontSize: 17,
-    marginBottom: 18,
   },
 });
 
