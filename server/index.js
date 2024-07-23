@@ -9,7 +9,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
-const sanitizeInput  = require("express-sanitizer"); // Use express-sanitizer for input sanitization
+const sanitizeInput = require("express-sanitizer");
 
 const app = express();
 
@@ -20,40 +20,20 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again later.",
 });
 
-// Sanitize function (simple example)
-function sanitizeInput(input) {
-  if (typeof input === 'string') {
-    return input.replace(/[^a-zA-Z0-9 _\-]/g, ''); // Allow only alphanumeric, space, underscore, and hyphen
-  }
-  if (Array.isArray(input)) {
-    return input.map(sanitizeInput);
-  }
-  if (typeof input === 'object' && input !== null) {
-    return Object.keys(input).reduce((sanitized, key) => {
-      sanitized[key] = sanitizeInput(input[key]);
-      return sanitized;
-    }, {});
-  }
-  return input;
-}
-
-app.use((req, res, next) => {
-  const sanitizedHeaders = sanitizeInput(req.headers);
-  const sanitizedBody = sanitizeInput(req.body);
-  const sanitizedQuery = sanitizeInput(req.query);
-
-  console.log(`Received ${req.method} request to ${req.url}`);
-  console.log("Sanitized Request headers:", sanitizedHeaders);
-  console.log("Sanitized Request body:", sanitizedBody);
-  console.log("Sanitized Request query:", sanitizedQuery);
-  next();
-});
-
 app.use(limiter);
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", scheduleRoutes);
+app.use(sanitizeInput());
+
+app.use((req, res, next) => {
+  console.log(`Received ${req.method} request to ${req.url}`);
+  console.log("Sanitized Request headers:", req.headers);
+  console.log("Sanitized Request body:", req.body);
+  console.log("Sanitized Request query:", req.query);
+  next();
+});
 
 app.get("/users", async (req, res) => {
   try {
@@ -121,21 +101,6 @@ app.get("/schedules", async (req, res) => {
   } catch (error) {
     console.error("Error fetching schedules:", error);
     res.status(500).send("Internal Server Error");
-  }
-});
-
-app.get("/users", async (req, res) => {
-  try {
-    const users = await db.any(`
-      SELECT user_id, user_name
-      FROM public1.users
-      WHERE admin = 1
-      ORDER BY user_name
-    `);
-    res.json(users);
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -317,7 +282,7 @@ app.post("/login", async (req, res) => {
       [email]
     );
     if (user && bcrypt.compareSync(password, user.password)) {
-      const token = jwt.sign({ id: user.user_id }, SECRET_KEY, {
+      const token = jwt.sign({ id: user.user_id }, process.env.SECRET_KEY, {
         expiresIn: "1h",
       });
       res.json({ token, user });
