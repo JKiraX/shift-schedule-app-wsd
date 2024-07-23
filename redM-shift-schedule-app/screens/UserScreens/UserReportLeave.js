@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   Text,
   View,
+  StyleSheet,
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
@@ -12,17 +13,15 @@ import {
   Alert,
   Pressable,
   Dimensions,
-  StyleSheet,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import DropdownComponent2 from "../../components/Dropdown/dropdownComponent2";
 import DropdownComponent3 from "../../components/Dropdown/dropdownComponent3";
 import SmallButton from "../../components/Buttons/smallButton";
 import dayjs from "dayjs";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from "@react-native-community/datetimepicker";
 
-const { width } = Dimensions.get('window');
-
+const { width } = Dimensions.get("window");
 const UserRequestLeaveScreen = () => {
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -30,47 +29,46 @@ const UserRequestLeaveScreen = () => {
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [overtime, setOvertime] = useState("");
-  
+
   const toggleDatepicker = () => {
     setShowPicker(!showPicker);
   };
-  
+
   const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setDate(currentDate);
-    if (Platform.OS === "android") {
+    if (event.type === "set") {
+      const currentDate = selectedDate || date;
+      setDate(currentDate);
+      if (Platform.OS === "android") {
+        toggleDatepicker();
+        setOvertime(currentDate.toDateString());
+      }
+    } else {
       toggleDatepicker();
-      setOvertime(currentDate.toDateString());
     }
   };
-  
+
   const confirmIOSDate = () => {
     setOvertime(date.toDateString());
     toggleDatepicker();
   };
-
   const overtimeShifts = [
     { key: "1", value: "Shift 1" },
     { key: "2", value: "Shift 2" },
     { key: "3", value: "Shift 3" },
     { key: "4", value: "Shift 4" },
   ];
-
   const handleOvertimeShifts = (selected) => {
     // Handle overtime shifts selection
   };
-
   const overtimeHours = [
     { key: "1", value: "1 Hour" },
     { key: "2", value: "2 Hours" },
     { key: "3", value: "3 Hours" },
     { key: "4", value: "4 Hours" },
   ];
-
   const handleOvertimeHours = (selected) => {
     // Handle overtime hours selection
   };
-
   // Leave functionality state variables
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -78,27 +76,33 @@ const UserRequestLeaveScreen = () => {
   const [leaveType, setLeaveType] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [markedDates, setMarkedDates] = useState({});
-
   const leaveTypes = [
     { key: "1", value: "Sick Leave" },
     { key: "2", value: "Annual Leave" },
     { key: "3", value: "Family Responsibility Leave" },
     { key: "4", value: "Study Leave" },
   ];
-
   const handleDayPress = (day) => {
     if (selectedTab === 1) {
       if (!startDate) {
         setStartDate(day.dateString);
         setEndDate(null);
         setMarkedDates({
-          [day.dateString]: { startingDay: true, color: "#c82f2f", textColor: "white" },
+          [day.dateString]: {
+            startingDay: true,
+            color: "#c82f2f",
+            textColor: "white",
+          },
         });
       } else if (day.dateString < startDate) {
         setStartDate(day.dateString);
         setEndDate(null);
         setMarkedDates({
-          [day.dateString]: { startingDay: true, color: "#c82f2f", textColor: "white" },
+          [day.dateString]: {
+            startingDay: true,
+            color: "#c82f2f",
+            textColor: "white",
+          },
         });
       } else {
         setEndDate(day.dateString);
@@ -106,7 +110,6 @@ const UserRequestLeaveScreen = () => {
       }
     }
   };
-
   const generateMarkedDates = (start, end) => {
     let dateRange = {};
     let currentDate = dayjs(start);
@@ -114,9 +117,17 @@ const UserRequestLeaveScreen = () => {
     while (currentDate.isBefore(endDate) || currentDate.isSame(endDate)) {
       const dateString = currentDate.format("YYYY-MM-DD");
       if (dateString === start) {
-        dateRange[dateString] = { startingDay: true, color: "#c82f2f", textColor: "white" };
+        dateRange[dateString] = {
+          startingDay: true,
+          color: "#c82f2f",
+          textColor: "white",
+        };
       } else if (dateString === end) {
-        dateRange[dateString] = { endingDay: true, color: "#c82f2f", textColor: "white" };
+        dateRange[dateString] = {
+          endingDay: true,
+          color: "#c82f2f",
+          textColor: "white",
+        };
       } else {
         dateRange[dateString] = { color: "#c82f2f", textColor: "white" };
       }
@@ -124,46 +135,44 @@ const UserRequestLeaveScreen = () => {
     }
     return dateRange;
   };
-
   const handleTextChange = (input) => {
     setJustification(input);
   };
-
   const handleSelectLeaveType = (selected) => {
     setLeaveType(selected);
   };
-
   const handleModal = () => {
     setModalVisible(true);
   };
-
   const handleModalConfirm = async () => {
     if (selectedTab === 1) {
       if (!leaveType || !startDate || !endDate || !justification) {
         Alert.alert("Error", "All fields are required.");
         return;
       }
-
       try {
         const userId = 1; // Assuming the user ID is known and set. Replace with actual user ID.
-        const response = await fetch(`http://192.168.5.61:3001/api/report-leave`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: userId,
-            type_of_leave: leaveType.value,
-            justification,
-            start_date: startDate,
-            end_date: endDate,
-          }),
-        });
-
+        const response = await fetch(
+          `http://192.168.5.61:3001/api/report-leave`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_id: userId,
+              type_of_leave: leaveType.value,
+              justification,
+              start_date: startDate,
+              end_date: endDate,
+            }),
+          }
+        );
         if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.statusText}`);
+          throw new Error(
+            `Network response was not ok: ${response.statusText}`
+          );
         }
-
         Alert.alert("Success", "Leave reported successfully.");
         setModalVisible(false);
         // Reset the form
@@ -182,11 +191,9 @@ const UserRequestLeaveScreen = () => {
       setModalVisible(false);
     }
   };
-
   const handleModalCancel = () => {
     setModalVisible(false);
   };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.tabContainer}>
@@ -194,13 +201,21 @@ const UserRequestLeaveScreen = () => {
           style={[styles.tabButton, selectedTab === 0 && styles.activeTab]}
           onPress={() => setSelectedTab(0)}
         >
-          <Text style={[styles.tabText, selectedTab === 0 && styles.activeTabText]}>Overtime</Text>
+          <Text
+            style={[styles.tabText, selectedTab === 0 && styles.activeTabText]}
+          >
+            Overtime
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tabButton, selectedTab === 1 && styles.activeTab]}
           onPress={() => setSelectedTab(1)}
         >
-          <Text style={[styles.tabText, selectedTab === 1 && styles.activeTabText]}>Leave</Text>
+          <Text
+            style={[styles.tabText, selectedTab === 1 && styles.activeTabText]}
+          >
+            Leave
+          </Text>
         </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -216,7 +231,7 @@ const UserRequestLeaveScreen = () => {
               {showPicker && (
                 <View>
                   {Platform.OS === "ios" ? (
-                    <>
+                    <View>
                       <DateTimePicker
                         mode="date"
                         display="spinner"
@@ -226,19 +241,27 @@ const UserRequestLeaveScreen = () => {
                       />
                       <View style={styles.iosPickerButtonContainer}>
                         <TouchableOpacity
-                          style={[styles.button, styles.pickerButton, { backgroundColor: "#11182711" }]}
+                          style={[
+                            styles.button,
+                            styles.pickerButton,
+                            { backgroundColor: "#11182711" },
+                          ]}
                           onPress={confirmIOSDate}
                         >
                           <Text>Confirm</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                          style={[styles.button, styles.pickerButton, { backgroundColor: "#11182711" }]}
+                          style={[
+                            styles.button,
+                            styles.pickerButton,
+                            { backgroundColor: "#11182711" },
+                          ]}
                           onPress={toggleDatepicker}
                         >
                           <Text>Cancel</Text>
                         </TouchableOpacity>
                       </View>
-                    </>
+                    </View>
                   ) : (
                     <DateTimePicker
                       mode="date"
@@ -263,16 +286,22 @@ const UserRequestLeaveScreen = () => {
                 </Pressable>
               )}
               <Text style={styles.label}>Which shift did you work?</Text>
-              <DropdownComponent3 data={overtimeShifts} onSelect={handleOvertimeShifts} />
-
-              <Text style={styles.label}>How many hours did you work overtime?</Text>
-              <DropdownComponent3 data={overtimeHours} onSelect={handleOvertimeHours} />
+              <DropdownComponent3
+                data={overtimeShifts}
+                onSelect={handleOvertimeShifts}
+              />
+              <Text style={styles.label}>
+                How many hours did you work overtime?
+              </Text>
+              <DropdownComponent3
+                data={overtimeHours}
+                onSelect={handleOvertimeHours}
+              />
               <View style={styles.submitButtonContainer}>
                 <SmallButton text="Submit" onPress={handleModal} />
               </View>
             </View>
           )}
-
           {selectedTab === 1 && (
             <View style={styles.formContainer}>
               <Text style={styles.sectionTitle}>Select Day(s) off:</Text>
@@ -285,7 +314,10 @@ const UserRequestLeaveScreen = () => {
                 onDayPress={handleDayPress}
               />
               <Text style={styles.sectionTitle}>Type of Leave:</Text>
-              <DropdownComponent2 data={leaveTypes} onSelect={handleSelectLeaveType} />
+              <DropdownComponent2
+                data={leaveTypes}
+                onSelect={handleSelectLeaveType}
+              />
               <Text style={styles.sectionTitle}>Justification:</Text>
               <TextInput
                 style={styles.textInput}
@@ -307,14 +339,23 @@ const UserRequestLeaveScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalText}>
-              All leave and overtime needs to be approved by a manager before reporting it on the app.
+              All leave and overtime needs to be approved by a manager before
+              reporting it on the app.
             </Text>
-            <Text style={styles.modalText2}>Please confirm only if it has been approved.</Text>
+            <Text style={styles.modalText2}>
+              Please confirm only if it has been approved.
+            </Text>
             <View style={styles.modalButtonContainer}>
-              <TouchableOpacity style={styles.modalButton} onPress={handleModalCancel}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={handleModalCancel}
+              >
                 <Text style={styles.modalButtonText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButton} onPress={handleModalConfirm}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={handleModalConfirm}
+              >
                 <Text style={styles.modalButtonText}>Confirm</Text>
               </TouchableOpacity>
             </View>
@@ -324,7 +365,6 @@ const UserRequestLeaveScreen = () => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -421,13 +461,13 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 18,
     marginBottom: 10,
-    textAlign:"center"
+    textAlign: "center",
   },
   modalText2: {
     fontSize: 18,
     marginBottom: 10,
-    textAlign:"center",
-    fontWeight:"bold"
+    textAlign: "center",
+    fontWeight: "bold",
   },
   modalButtonContainer: {
     flexDirection: "row",
@@ -471,12 +511,11 @@ const styles = StyleSheet.create({
   },
   pickerButton: {
     paddingHorizontal: 20,
-    paddingVertical:20,
-    borderRadius:15,
+    paddingVertical: 20,
+    borderRadius: 15,
   },
   submitButtonContainer: {
     marginTop: 20, // Adjust this value to increase or decrease the space
   },
 });
-
 export default UserRequestLeaveScreen;

@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from "react";
 import {
-  Text,
   View,
   StyleSheet,
   SafeAreaView,
   ScrollView,
   Platform,
-  Dimensions,
 } from "react-native";
 import CalendarStrip from "react-native-calendar-strip";
 import ShiftCard from "../../components/Cards/ShiftCard";
 import moment from "moment";
 
-const { width, height } = Dimensions.get("window");
-
 const UserHomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [shiftData, setShiftData] = useState([]);
+
+  useEffect(() => {
+    fetchShiftData(selectedDate);
+  }, [selectedDate]);
 
   const canScrollToDate = (date) => {
     const currentDate = moment().startOf("day");
@@ -30,10 +30,6 @@ const UserHomeScreen = ({ navigation }) => {
       dots: [{ color: "#EE6C4D", selectedDotColor: "#EE6C4D" }],
     },
   ];
-
-  useEffect(() => {
-    fetchShiftData(selectedDate);
-  }, [selectedDate]);
 
   const onDateSelected = (date) => {
     setSelectedDate(date);
@@ -59,11 +55,11 @@ const UserHomeScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <CalendarStrip
-        scrollable
-        style={styles.calendarStrip}
+    <CalendarStrip
+      scrollable
+      style={styles.calendarStrip}
         calendarHeaderStyle={styles.calendarHeader}
-        calendarColor={"white"}
+        calendarColor={styles.calendarColor.backgroundColor}
         dateNumberStyle={styles.dateNumber}
         dateNameStyle={styles.dateName}
         iconContainer={styles.iconContainer}
@@ -72,9 +68,10 @@ const UserHomeScreen = ({ navigation }) => {
         datesBlacklist={(date) => !canScrollToDate(date)}
         markedDates={markedDates}
       />
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <View style={styles.shiftCardsContainer}>
-          {shiftData.map((shift, index) => (
+
+<ScrollView contentContainerStyle={styles.scrollViewContent}>
+<View style={styles.shiftCardsContainer}>
+{shiftData.map((shift, index) => (
             <ShiftCard
               key={index}
               shiftName={shift.shift_name}
@@ -95,14 +92,17 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   calendarStrip: {
-    height: height * 0.15,
-    paddingTop: Platform.OS === "ios" ? 20 : 10,
+    height: 120,
+    paddingTop: 20,
     paddingBottom: 10,
   },
   calendarHeader: {
     color: "black",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  calendarColor: {
+    backgroundColor: "white",
   },
   dateNumber: {
     color: "black",
@@ -124,5 +124,4 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 });
-
 export default UserHomeScreen;

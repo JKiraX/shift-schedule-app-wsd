@@ -16,7 +16,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ChangePasswordScreen from "../changePassword";
 
 const Stack = createNativeStackNavigator();
-const { width, height } = Dimensions.get("window");
 
 const ProfileScreenContent = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -31,46 +30,50 @@ const ProfileScreenContent = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+          <View style={styles.content}>
         <InputField label="Name" placeholder="User's full name" />
         <InputField label="Contact Number" placeholder="User's phone number" />
         <InputField
           label="Email"
           placeholder="User's email"
           keyboardType="email-address"
-        />
-
+          />
         <View style={styles.buttonContainer}>
-          <ContinueButton
-            text="Change Password"
-            onPress={handleChangePassword}
-            style={styles.button}
-          />
-          <SmallButton
-            text="Logout"
-            onPress={handleLogout}
-            style={styles.button}
-          />
-        </View>
+        <ContinueButton
+          text="Change Password"
+          onPress={handleChangePassword}
+          style={styles.button}
+        />
       </View>
-
+      <View style={styles.buttonContainer}>
+        <SmallButton
+          text="Logout"
+          onPress={handleLogout}
+          style={styles.button}
+        />
+      </View>
       <LogoutModal
-        visible={modalVisible}
-        onCancel={handleModalCancel}
-        onConfirm={handleModalConfirm}
-      />
+          visible={modalVisible}
+          onConfirm={handleModalConfirm}
+          onCancel={handleModalCancel}
+        />
+      </View>
     </SafeAreaView>
   );
 };
-
-const InputField = ({ label, ...props }) => (
+const InputField = ({ label, placeholder, keyboardType }) => (
   <View style={styles.inputContainer}>
     <Text style={styles.label}>{label}</Text>
-    <TextInput style={styles.input} editable={false} {...props} />
+    <TextInput
+      style={styles.input}
+      placeholder={placeholder}
+      keyboardType={keyboardType}
+      editable={false}
+    />
   </View>
 );
 
-const LogoutModal = ({ visible, onCancel, onConfirm }) => (
+const LogoutModal = ({ visible, onConfirm, onCancel }) => (
   <Modal visible={visible} transparent={true} animationType="slide">
     <View style={styles.modalOverlay}>
       <View style={styles.modalContent}>
@@ -113,6 +116,8 @@ const ProfileScreen = () => (
   </Stack.Navigator>
 );
 
+const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -125,9 +130,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   inputContainer: {
-    marginBottom: height * 0.02,
-    width: width * 0.9,
-    maxWidth: 400,
+    marginBottom: 18,
+    width: "100%",
+    maxWidth: 350,
   },
   label: {
     fontSize: 18,
@@ -144,12 +149,10 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   buttonContainer: {
-    width: "100%",
-    alignItems: "center",
+    marginBottom:10,
   },
   button: {
-    marginVertical: 10,
-    width: "100%",
+    marginBottom: 10,
   },
   modalOverlay: {
     flex: 1,
@@ -161,23 +164,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#f2f2f2",
     padding: 20,
     borderRadius: 15,
-    width: width * 0.9,
-    maxWidth: 400,
+    width: Math.min(365, width * 0.9),
   },
   modalText: {
     fontSize: 18,
-    marginBottom: 20,
-    textAlign: "center",
+    marginBottom: 10,
   },
   modalButtons: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "center",
+    borderRadius: 15,
+    paddingTop: 20,
   },
   modalButton: {
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
     paddingVertical: 15,
     backgroundColor: "#c82f2f",
     borderRadius: 15,
+    marginHorizontal: 10,
   },
   modalButtonText: {
     color: "white",
