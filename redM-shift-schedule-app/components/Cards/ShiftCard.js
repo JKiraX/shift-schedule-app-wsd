@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 
+const { width, height } = Dimensions.get('window');
+
 const ShiftCard = ({ shiftName, startTime, endTime, assignedUsers }) => {
   return (
     <View style={styles.card}>
@@ -9,39 +11,45 @@ const ShiftCard = ({ shiftName, startTime, endTime, assignedUsers }) => {
       <View style={styles.timeContainer}>
         <Text style={styles.time}>Start: {startTime}</Text>
         <Text style={styles.time}>End: {endTime}</Text>
-      </View>
+        </View>
     </View>
   );
 };
 
-const { width } = Dimensions.get('window');
-
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#f2f2f2',
-    padding: 16,
+    backgroundColor: "#f2f2f2",
+    padding: width * 0.04,
     borderRadius: 15,
-    marginVertical: 8,
+    marginVertical: height * 0.01,
     width: width * 0.9,
-    maxWidth: 350,
-    alignSelf: 'center',
+    maxWidth: 400,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4,
   },
   shiftName: {
-    fontSize: 18,
+    fontSize: width * 0.045,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: height * 0.01,
   },
   assignedUsers: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 8,
+    fontSize: width * 0.04,
+    color: '#555',
   },
   timeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: height * 0.015,
   },
   time: {
-    fontSize: 14,
+    fontSize: 16,
+    fontSize: width * 0.04,
   },
 });
 

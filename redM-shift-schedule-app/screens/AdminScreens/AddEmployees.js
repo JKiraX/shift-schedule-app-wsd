@@ -35,7 +35,7 @@ const AddEmployeePage = () => {
 
     try {
       const response = await fetch(
-        "http://10.2.44.68:3001/api/add-employee",
+        "http://192.168.5.61:3001/api/add-employee",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

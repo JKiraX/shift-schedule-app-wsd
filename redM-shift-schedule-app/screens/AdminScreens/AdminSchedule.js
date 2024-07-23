@@ -61,7 +61,7 @@ const AdminScheduleScreen = () => {
       const userId = selectedUser ? selectedUser.key : null;
       const queryParams = `?dates=${dates}${userId ? `&userId=${userId}` : ""}`;
       const response = await fetch(
-        `http://10.2.44.68:3001/api/schedules${queryParams}`
+        `http://192.168.5.61:3001/api/schedules${queryParams}`
       );
       if (!response.ok)
         throw new Error(`Network response was not ok: ${response.status}`);

@@ -12,6 +12,7 @@ import {
   Alert,
   Pressable,
   Dimensions,
+  StyleSheet,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import DropdownComponent2 from "../../components/Dropdown/dropdownComponent2";
@@ -145,7 +146,7 @@ const UserRequestLeaveScreen = () => {
 
       try {
         const userId = 1; // Assuming the user ID is known and set. Replace with actual user ID.
-        const response = await fetch(`http://10.2.44.68:3001/api/report-leave`, {
+        const response = await fetch(`http://192.168.5.61:3001/api/report-leave`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -349,33 +350,45 @@ const styles = StyleSheet.create({
     height: 60,
     backgroundColor: "white",
     borderWidth: 0.5,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     borderRadius: 15,
-    marginVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 5,
+    marginTop: 10,
   },
   tabButton: {
     flex: 1,
-    height: "100%",
+    height: 50,
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: 15,
   },
   activeTab: {
-    backgroundColor: "#c82f2f",
+    backgroundColor: "rgba(200, 47, 47, 0.8)",
   },
   tabText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
+    color: "black",
   },
   activeTabText: {
     color: "white",
+  },
+  sectionTitle: {
+    color: "#c82f2f",
+    fontWeight: "bold",
+    fontSize: 22,
+    paddingTop: 10,
+    paddingBottom: 10,
+    textAlign: "left",
   },
   calendar: {
     width: width * 0.9,
     borderRadius: 15,
   },
   textInput: {
+    height: 100,
+    margin: 12,
     borderWidth: 1,
     padding: 10,
     textAlignVertical: "top",
@@ -383,7 +396,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderColor: "#c82f2f",
     backgroundColor: "white",
-    marginTop: 10,
   },
   textInput2: {
     height: 55,
@@ -398,10 +410,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
-    backgroundColor: "white",
+    backgroundColor: "#f2f2f2",
     padding: 20,
     borderRadius: 15,
     width: width * 0.9,
@@ -409,24 +421,26 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 18,
     marginBottom: 10,
-    textAlign: "center",
+    textAlign:"center"
   },
   modalText2: {
     fontSize: 18,
     marginBottom: 10,
-    textAlign: "center",
-    fontWeight: "bold",
+    textAlign:"center",
+    fontWeight:"bold"
   },
   modalButtonContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 20,
+    justifyContent: "center",
+    borderRadius: 15,
+    paddingTop: 20,
   },
   modalButton: {
     paddingHorizontal: 30,
     paddingVertical: 15,
     backgroundColor: "#c82f2f",
     borderRadius: 15,
+    marginHorizontal: 10,
   },
   modalButtonText: {
     color: "white",
@@ -437,11 +451,15 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     alignSelf: "flex-start",
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-    alignSelf: "flex-start",
+  input: {
+    height: 55,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: "#e9ecef",
+    width: "100%",
+    fontSize: 17,
   },
   datePicker: {
     height: 120,
@@ -450,23 +468,14 @@ const styles = StyleSheet.create({
   iosPickerButtonContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    width: "100%",
-    marginBottom: 10,
   },
   pickerButton: {
+    paddingHorizontal: 20,
     paddingVertical:20,
     borderRadius:15,
-    paddingHorizontal: 20,
-    backgroundColor: "#f0f0f0",
   },
   submitButtonContainer: {
-    marginTop: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-    alignSelf: "flex-start",
+    marginTop: 20, // Adjust this value to increase or decrease the space
   },
 });
 

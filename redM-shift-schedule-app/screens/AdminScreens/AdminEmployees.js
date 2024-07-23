@@ -29,7 +29,7 @@ const AdminEmployeeScreen = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("http://10.2.44.68:3001/api/users");
+      const response = await fetch("http://192.168.5.61:3001/api/users");
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(

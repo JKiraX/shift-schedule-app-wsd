@@ -43,7 +43,7 @@ const UserHomeScreen = ({ navigation }) => {
     try {
       const formattedDate = moment(date).format("YYYY-MM-DD");
       const response = await fetch(
-        `http://10.2.44.68:3001/schedules?date=${formattedDate}`
+        `http://192.168.5.61:3001/schedules?date=${formattedDate}`
       );
 
       if (response.ok) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -7,169 +7,182 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  Platform,
-} from 'react-native';
-import { Calendar } from 'react-native-calendars';
-import ShiftCard from '../../components/Cards/ShiftCard';
-import DropdownComponent from '../../components/Dropdown/dropdownComponent';
-import moment from 'moment';
+} from "react-native";
+import { Calendar } from "react-native-calendars";
+import ShiftCard from "../../components/Cards/ShiftCard";
+import DropdownComponent from "../../components/Dropdown/dropdownComponent";
+import moment from "moment";
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 const UserScheduleScreen = () => {
   const [selectedDates, setSelectedDates] = useState({});
   const [shiftData, setShiftData] = useState([]);
   const [markedDates, setMarkedDates] = useState({});
   const [selectedUser, setSelectedUser] = useState(null);
-  const [allUsers, setAllUsers] = useState([]);
+  const [users, setUsers] = useState([]);
   const [selectedTab, setSelectedTab] = useState(0);
 
   useEffect(() => {
     fetchUsers();
   }, []);
-
   useEffect(() => {
-    if (Object.keys(selectedDates).length > 0 && allUsers.length > 0) {
+    if (Object.keys(selectedDates).length > 0 && users.length > 0) {
       fetchShiftData();
     } else {
       setShiftData([]);
     }
-  }, [selectedDates, selectedUser, allUsers]);
-
+  }, [selectedDates, selectedUser, users]);
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://10.2.44.68:3001/users');
-      if (!response.ok) throw new Error('Failed to fetch users');
+      const response = await fetch(`http://192.168.5.61:3001/api/users`);
+      if (!response.ok)
+        throw new Error(`Network response was not ok: ${response.status}`);
       const data = await response.json();
-      const formattedUsers = data.map(user => ({
-        key: user.user_id?.toString() ?? `unknown-${Math.random()}`,
-        value: user.user_name ?? 'Unknown User',
-      }));
-      setAllUsers(formattedUsers);
+      setUsers(data.map((user) => ({ key: user.id, value: user.name })));
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error("Error fetching user data:", error.message);
     }
   };
-
   const fetchShiftData = async () => {
     try {
-      const dates = Object.keys(selectedDates).join(',');
+      const dates = Object.keys(selectedDates).join(",");
       const userId = selectedUser ? selectedUser.key : null;
-      const queryParams = `?dates=${dates}${userId ? `&userId=${userId}` : ''}`;
-      const response = await fetch(`http://10.2.44.68:3001/api/schedules${queryParams}`);
-      if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
+      const queryParams = `?dates=${dates}${userId ? `&userId=${userId}` : ""}`;
+      const response = await fetch(
+        `http://192.168.5.61:3001/api/schedules${queryParams}`
+      );
+      if (!response.ok)
+        throw new Error(`Network response was not ok: ${response.status}`);
       const data = await response.json();
       setShiftData(data);
     } catch (error) {
-      console.error('Error fetching shift data:', error.message);
+      console.error("Error fetching shift data:", error.message);
     }
   };
 
   const handleSelect = (selected) => {
-    const selectedUser = allUsers.find(user => user.value === selected);
-    setSelectedUser(selectedUser);
-  };
-
-  const handleDayPress = useCallback((day) => {
-    const dateString = day.dateString;
-    const newSelectedDates = { ...selectedDates };
+    setSelectedUser(selected);
+    const newMarkedDates = { ...markedDates };
 
     if (newSelectedDates[dateString]) {
       delete newSelectedDates[dateString];
+      delete newMarkedDates[dateString];
     } else {
-      newSelectedDates[dateString] = { selected: true, marked: true, dotColor: '#c82f2f' };
+      newSelectedDates[dateString] = { selected: true };
+      newMarkedDates[dateString] = {
+        selected: true,
+        selectedColor: "#c82f2f",
+        marked: true,
+        dotColor: "#c82f2f",
+        dotColor: "#c82f2f"
+      };
     }
-
+      
     setSelectedDates(newSelectedDates);
-    setMarkedDates(newSelectedDates);
-  }, [selectedDates]);
+    setMarkedDates(newMarkedDates);
+  };
 
-  const groupShiftsByDate = useCallback((shifts) => {
+  const groupShiftsByDate = (shifts) => {
     return shifts.reduce((acc, shift) => {
-      const date = shift.date ? moment(shift.date).format('YYYY-MM-DD') : null;
+      const date = shift.date ? moment(shift.date).format("YYYY-MM-DD") : null;
       if (date) {
         if (!acc[date]) acc[date] = [];
-        const shiftId = `${date}-${shift.user_id}-${shift.start_time}`;
-        acc[date].push({ ...shift, shiftId });
+        acc[date].push(shift);
       }
       return acc;
     }, {});
-  }, []);
+  };
 
   const groupedShiftData = groupShiftsByDate(shiftData);
 
-  const renderShifts = (date, groupedShiftData, selectedUser, allUsers) => {
+  const renderShifts = (date) => {
     if (selectedUser) {
-      const userShifts = groupedShiftData[date]?.filter(shift => shift.user_id === selectedUser.key);
+      const userShifts = groupedShiftData[date]?.filter(
+        (shift) => shift.user_id === selectedUser.key
+      );
       if (userShifts && userShifts.length > 0) {
-        return userShifts.map(shift => (
+        return userShifts.map((shift, index) => (
           <ShiftCard
-            key={shift.shiftId}
-            shiftId={shift.shiftId}
+            key={index}
             shiftName={shift.shift_name}
             startTime={shift.start_time}
             endTime={shift.end_time}
             assignedUsers={shift.user_name}
-            allUsers={allUsers}
           />
         ));
-      } else {
-        return <Text style={styles.noShiftsText}>No shifts available: On leave</Text>;
       }
-    } else if (groupedShiftData[date]?.length > 0) {
-      return groupedShiftData[date].map(shift => (
+      return (
+        <Text style={styles.noShiftsText}>No shifts available: On leave</Text>
+      );
+    }
+    if (groupedShiftData[date]?.length > 0) {
+      return groupedShiftData[date].map((shift, index) => (
         <ShiftCard
-          key={shift.shiftId}
-          shiftId={shift.shiftId}
+          key={index}
           shiftName={shift.shift_name}
           startTime={shift.start_time}
           endTime={shift.end_time}
           assignedUsers={shift.user_name}
-          allUsers={allUsers}
         />
       ));
-    } else {
-      return <Text style={styles.noShiftsText}>No shifts available</Text>;
     }
+    return <Text style={styles.noShiftsText}>No shifts available</Text>;
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <DropdownComponent
-        data={allUsers}
-        onSelect={(selected) => handleSelect(selected)}
-      />
+      <DropdownComponent data={users} onSelect={handleSelect} />
       <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tabButton, selectedTab === 0 && styles.selectedTab]}
+      <TouchableOpacity
+                style={[styles.tabButton, selectedTab === 0 && styles.selectedTab]}
           onPress={() => setSelectedTab(0)}
         >
-          <Text style={[styles.tabText, selectedTab === 0 && styles.selectedTabText]}>
+          <Text
+                      style={[
+              styles.tabText,
+              selectedTab === 0 && styles.selectedTabText,
+            ]}
+          >
             Shifts
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tabButton, selectedTab === 1 && styles.selectedTab]}
+                  style={[styles.tabButton, selectedTab === 1 && styles.selectedTab]}
           onPress={() => setSelectedTab(1)}
         >
-          <Text style={[styles.tabText, selectedTab === 1 && styles.selectedTabText]}>
+          <Text
+                      style={[
+              styles.tabText,
+              selectedTab === 1 && styles.selectedTabText,
+            ]}
+          >
             Leave
           </Text>
         </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <Calendar
-          style={styles.calendar}
-          enableSwipeMonths={true}
-          hideExtraDays={true}
-          markingType="multi-dot"
-          markedDates={markedDates}
-          onDayPress={handleDayPress}
-        />
+      <Calendar
+        style={styles.calendar}
+        enableSwipeMonths={true}
+        hideExtraDays={true}
+        markingType="dot"
+        markedDates={markedDates}
+        onDayPress={handleDayPress}
+        theme={{
+          selectedDayBackgroundColor: '#c82f2f',
+          selectedDayTextColor: '#ffffff',
+          todayTextColor: '#c82f2f',
+          dotColor: '#c82f2f',
+          arrowColor:"#c82f2f",
+          monthTextColor:"#c82f2f",
+          textMonthFontWeight:"bold"
+        }}
+      />
         {Object.keys(selectedDates).map((date) => (
           <View key={date} style={styles.dateContainer}>
-            <Text style={styles.dateHeader}>{moment(date).format('LL')}:</Text>
-            {renderShifts(date, groupedShiftData, selectedUser, allUsers)}
+            <Text style={styles.dateHeader}>{moment(date).format("LL")}:</Text>
+            {renderShifts(date)}
           </View>
         ))}
       </ScrollView>
@@ -180,65 +193,62 @@ const UserScheduleScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    backgroundColor: 'white',
-    paddingTop: Platform.OS === 'android' ? 25 : 0,
+    alignItems: "center",
+    backgroundColor: "white",
   },
   scrollViewContent: {
-    alignItems: 'center',
-    paddingBottom: 20,
+    alignItems: "center",
+    paddingTop: 10,
   },
   tabContainer: {
-    width: '90%',
+    width: width * 0.9,
+    maxWidth: 350,
     height: 60,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderWidth: 0.5,
     borderRadius: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 5,
     marginTop: 10,
-    marginBottom: 10,
   },
   tabButton: {
-    width: '48%',
+    flex: 1,
     height: 50,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 5,
   },
   selectedTab: {
-    backgroundColor: 'rgba(200, 47, 47, 0.8)',
+    backgroundColor: "rgba(200, 47, 47, 0.8)",
   },
   tabText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'black',
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "black",
   },
   selectedTabText: {
-    color: 'white',
+    color: "white",
   },
   calendar: {
-    width: '90%',
+    width: width * 0.9,
+    maxWidth: 350,
     borderRadius: 15,
-    marginBottom: 10,
   },
   dateContainer: {
-    width: '90%',
-    padding: 10,
-    marginBottom: 10,
+    width: "100%",
+    padding: 20,
   },
   dateHeader: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   noShiftsText: {
     fontSize: 16,
-    color: 'gray',
+    color: "gray",
   },
 });
-
 export default UserScheduleScreen;
