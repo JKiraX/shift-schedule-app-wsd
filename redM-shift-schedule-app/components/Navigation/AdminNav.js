@@ -11,7 +11,7 @@ import AdminScheduleScreen from "../../screens/AdminScreens/AdminSchedule";
 import AdminEmployeesScreen from "../../screens/AdminScreens/AdminEmployees";
 import AdminProfileScreen from "../../screens/AdminScreens/AdminProfile";
 import NotificationsScreen from "../../screens/notifications";
-import ReportsScreen from "../../screens/analytics";
+import AnalyticsScreen from "../../screens/analytics";
 
 // Screen names
 const AdminHome = "Home";

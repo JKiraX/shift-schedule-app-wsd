@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 18,
     width: "100%",
-    maxWidth: 350,
+    maxWidth: width * 9,
   },
   label: {
     fontSize: 16,

@@ -238,6 +238,7 @@ const UserRequestLeaveScreen = () => {
                         value={date}
                         onChange={onChange}
                         style={styles.datePicker}
+                        
                       />
                       <View style={styles.iosPickerButtonContainer}>
                         <TouchableOpacity
@@ -265,7 +266,7 @@ const UserRequestLeaveScreen = () => {
                   ) : (
                     <DateTimePicker
                       mode="date"
-                      display="default"
+                      display="spinner"
                       value={date}
                       onChange={onChange}
                       style={styles.datePicker}
@@ -312,6 +313,21 @@ const UserRequestLeaveScreen = () => {
                 markingType="period"
                 markedDates={markedDates}
                 onDayPress={handleDayPress}
+                theme={{
+                  selectedDayBackgroundColor: '#c82f2f',
+                  selectedDayTextColor: '#ffffff',
+                  todayTextColor: '#c82f2f',
+                  dotColor: '#c82f2f',
+                  arrowColor: "#c82f2f",
+                  monthTextColor: "#c82f2f",
+                  textMonthFontWeight: "bold",
+                  arrowColor: '#c82f2f',
+                  'stylesheet.calendar.header': {
+                    arrow: {
+                      padding: 10,
+              },
+            },
+          }}
               />
               <Text style={styles.sectionTitle}>Type of Leave:</Text>
               <DropdownComponent2
@@ -378,12 +394,15 @@ const styles = StyleSheet.create({
   },
   keyboardAvoidingView: {
     flex: 1,
-    width: "100%",
-    alignItems: "center",
-  },
-  formContainer: {
     width: width * 0.9,
     alignItems: "center",
+    padding: 20,
+  },
+  formContainer: {
+    flex:1,
+    width: width * 0.9,
+    alignItems: "center",
+
   },
   tabContainer: {
     width: width * 0.9,
@@ -490,6 +509,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 6,
     alignSelf: "flex-start",
+    padding: 10,
   },
   input: {
     height: 55,

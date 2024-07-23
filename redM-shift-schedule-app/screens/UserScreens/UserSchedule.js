@@ -26,6 +26,7 @@ const UserScheduleScreen = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
   useEffect(() => {
     if (Object.keys(selectedDates).length > 0 && users.length > 0) {
       fetchShiftData();
@@ -33,6 +34,7 @@ const UserScheduleScreen = () => {
       setShiftData([]);
     }
   }, [selectedDates, selectedUser, users]);
+
   const fetchUsers = async () => {
     try {
       const response = await fetch(`http://192.168.5.61:3001/api/users`);
@@ -44,6 +46,7 @@ const UserScheduleScreen = () => {
       console.error("Error fetching user data:", error.message);
     }
   };
+
   const fetchShiftData = async () => {
     try {
       const dates = Object.keys(selectedDates).join(",");
@@ -63,6 +66,11 @@ const UserScheduleScreen = () => {
 
   const handleSelect = (selected) => {
     setSelectedUser(selected);
+  };
+
+  const handleDayPress = (day) => {
+    const dateString = day.dateString;
+    const newSelectedDates = { ...selectedDates };
     const newMarkedDates = { ...markedDates };
 
     if (newSelectedDates[dateString]) {
@@ -75,7 +83,6 @@ const UserScheduleScreen = () => {
         selectedColor: "#c82f2f",
         marked: true,
         dotColor: "#c82f2f",
-        dotColor: "#c82f2f"
       };
     }
       
@@ -134,12 +141,12 @@ const UserScheduleScreen = () => {
     <SafeAreaView style={styles.container}>
       <DropdownComponent data={users} onSelect={handleSelect} />
       <View style={styles.tabContainer}>
-      <TouchableOpacity
-                style={[styles.tabButton, selectedTab === 0 && styles.selectedTab]}
+        <TouchableOpacity
+          style={[styles.tabButton, selectedTab === 0 && styles.selectedTab]}
           onPress={() => setSelectedTab(0)}
         >
           <Text
-                      style={[
+            style={[
               styles.tabText,
               selectedTab === 0 && styles.selectedTabText,
             ]}
@@ -148,11 +155,11 @@ const UserScheduleScreen = () => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-                  style={[styles.tabButton, selectedTab === 1 && styles.selectedTab]}
+          style={[styles.tabButton, selectedTab === 1 && styles.selectedTab]}
           onPress={() => setSelectedTab(1)}
         >
           <Text
-                      style={[
+            style={[
               styles.tabText,
               selectedTab === 1 && styles.selectedTabText,
             ]}
@@ -162,23 +169,30 @@ const UserScheduleScreen = () => {
         </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-      <Calendar
-        style={styles.calendar}
-        enableSwipeMonths={true}
-        hideExtraDays={true}
-        markingType="dot"
-        markedDates={markedDates}
-        onDayPress={handleDayPress}
-        theme={{
-          selectedDayBackgroundColor: '#c82f2f',
-          selectedDayTextColor: '#ffffff',
-          todayTextColor: '#c82f2f',
-          dotColor: '#c82f2f',
-          arrowColor:"#c82f2f",
-          monthTextColor:"#c82f2f",
-          textMonthFontWeight:"bold"
-        }}
-      />
+        <Calendar
+          style={styles.calendar}
+          enableSwipeMonths={true}
+          hideExtraDays={true}
+          markingType="dot"
+          markedDates={markedDates}
+          onDayPress={handleDayPress}
+          theme={{
+            selectedDayBackgroundColor: '#c82f2f',
+            selectedDayTextColor: '#ffffff',
+            todayTextColor: '#c82f2f',
+            dotColor: '#c82f2f',
+            arrowColor: "#c82f2f",
+            monthTextColor: "#c82f2f",
+            textMonthFontWeight: "bold",
+            // Add these lines to make the arrows red
+            arrowColor: '#c82f2f',
+            'stylesheet.calendar.header': {
+              arrow: {
+                padding: 10,
+              },
+            },
+          }}
+        />
         {Object.keys(selectedDates).map((date) => (
           <View key={date} style={styles.dateContainer}>
             <Text style={styles.dateHeader}>{moment(date).format("LL")}:</Text>
@@ -202,7 +216,6 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     width: width * 0.9,
-    maxWidth: 350,
     height: 60,
     backgroundColor: "white",
     borderWidth: 0.5,
@@ -251,4 +264,5 @@ const styles = StyleSheet.create({
     color: "gray",
   },
 });
+
 export default UserScheduleScreen;
