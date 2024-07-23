@@ -8,12 +8,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Dimensions,
   Platform,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
 import AddEmployeePage from "./AddEmployees";
 import EditEmployeeScreen from "./EditEmployees";
 
@@ -22,19 +22,14 @@ const Stack = createNativeStackNavigator();
 const AdminEmployeeScreen = () => {
   const [users, setUsers] = useState([]);
   const navigation = useNavigation();
-
   useEffect(() => {
     fetchUsers();
   }, []);
-
   const fetchUsers = async () => {
     try {
       const response = await fetch("http://192.168.5.61:3001/api/users");
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Network response was not ok: ${response.status} ${errorText}`
-        );
+        throw new Error(`Network response was not ok: ${response.status}`);
       }
       const data = await response.json();
       setUsers(data);
@@ -43,24 +38,35 @@ const AdminEmployeeScreen = () => {
       Alert.alert("Error", `Failed to fetch users: ${error.message}`);
     }
   };
-
-  const handleAdd = () => {
-    navigation.push("AddEmployees");
+  const handleDelete = async (userId) => {
+    try {
+      const response = await fetch(
+        `http://192.168.5.61:3001/api/users/${userId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (response.ok) {
+        setUsers((prevUsers) =>
+          prevUsers.filter((user) => user.user_id !== userId)
+        );
+      } else if (response.status === 404) {
+        Alert.alert("Error", "User not found");
+      } else {
+        throw new Error("Failed to delete user");
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      Alert.alert("Error", "Failed to delete user");
+    }
   };
-
-  const handleEdit = (user) => {
-    navigation.push("EditEmployee", { user });
-  };
-
   const renderUserItem = ({ item }) => (
     <View style={styles.userItem}>
-      <View>
-        <Text style={styles.userName}>{item.name}</Text>
-      </View>
+      <Text style={styles.userName}>{item.name}</Text>
       <View style={styles.actions}>
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => handleEdit(item)}
+          onPress={() => navigation.push("EditEmployee", { user: item })}
         >
           <MaterialCommunityIcons name="pencil" size={24} color="black" />
         </TouchableOpacity>
@@ -73,12 +79,14 @@ const AdminEmployeeScreen = () => {
       </View>
     </View>
   );
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.searchBar}>
         <TextInput style={styles.searchInput} placeholder="Search" />
-        <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.push("AddEmployees")}
+        >
           <Text style={styles.addButtonText}>Add User</Text>
         </TouchableOpacity>
       </View>
@@ -93,7 +101,6 @@ const AdminEmployeeScreen = () => {
     </SafeAreaView>
   );
 };
-
 const AdminEmployee = () => (
   <Stack.Navigator initialRouteName="AdminEmployeeScreen">
     <Stack.Screen
@@ -125,7 +132,7 @@ const AdminEmployee = () => (
     />
   </Stack.Navigator>
 );
-
+const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -139,7 +146,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    padding: Platform.OS === "ios" ? 15 : 10,
+    padding: 10,
     borderColor: "#ddd",
     borderWidth: 1,
     borderRadius: 15,
@@ -167,6 +174,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
+    marginBottom: 10,
+    borderRadius: 15,
   },
   userName: {
     fontSize: 18,
@@ -180,5 +189,4 @@ const styles = StyleSheet.create({
     padding: 5,
   },
 });
-
 export default AdminEmployee;
