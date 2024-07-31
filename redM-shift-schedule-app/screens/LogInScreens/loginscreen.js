@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,28 +9,78 @@ import {
   SafeAreaView,
   Platform,
   Dimensions,
+  Alert,
 } from "react-native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import ContinueButton from "../../components/Buttons/ContinueButton";
-import { AuthContext } from "../../../server/AuthProvider";
+import * as SecureStore from 'expo-secure-store';
+import apiClient from "../../../server/aspApiRoutes"; 
 import ForgotPasswordScreen from "./forgotpassword";
+import { CommonActions } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 const { width, height } = Dimensions.get("window");
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useContext(AuthContext);
   const navigation = useNavigation();
 
   const handleLogin = async () => {
     try {
-      await login(email, password);
-      navigation.navigate("AdminHome");
+      console.log("Sending login request with email:", email);
+  
+      const response = await apiClient.post("/api/authentication/login", {
+        email,
+        password,
+      });
+  
+      console.log("Full API response:", JSON.stringify(response, null, 2));
+  
+      if (response.status === 200 && response.data) {
+        const { id, email, token, userName, firstName, lastName, role } = response.data;
+  
+        console.log("Parsed response data:", { id, email, token, userName, firstName, lastName, role });
+  
+        // Store user data securely
+        await SecureStore.setItemAsync('userId', id.toString());
+        await SecureStore.setItemAsync('email', email);
+        await SecureStore.setItemAsync('token', token);
+        await SecureStore.setItemAsync('userName', userName);
+        await SecureStore.setItemAsync('firstName', firstName);
+        await SecureStore.setItemAsync('lastName', lastName);
+        await SecureStore.setItemAsync('role', role);
+  
+        // Navigate based on user role
+        if (navigation) {
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ 
+                name: role === 'Admin' ? 'AdminNav' : 'UserNav',
+                params: { userInfo: { firstName, lastName, email } }
+              }],
+            })
+          );
+        } else {
+          console.warn("Navigation object is not available. Unable to navigate.");
+        }
+      } else {
+        throw new Error("Invalid response from server");
+      }
     } catch (error) {
       console.error("Login failed:", error);
+  
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      if (error.response && error.response.status === 401) {
+        errorMessage = "Invalid email or password!";
+      } else if (error.response && error.response.data && error.response.data.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      Alert.alert("Login Failed", errorMessage);
     }
   };
 
@@ -85,7 +135,7 @@ const AppLogin = () => {
       <Stack.Screen
         name="ForgotPassword"
         component={ForgotPasswordScreen}
-        options={{ headerTintColor: "#3D5A80", headerTitle: "Forgot Password" }}
+        options={{ headerTintColor: "#c82f2f", headerTitle: "Forgot Password" }}
       />
     </Stack.Navigator>
   );
@@ -114,7 +164,7 @@ const styles = StyleSheet.create({
     fontSize: width * 0.055,
     marginBottom: height * 0.05,
     fontWeight: "bold",
-    color: "#3D5A80",
+    color: "#c82f2f",
   },
   inputContainer: {
     flexDirection: "row",

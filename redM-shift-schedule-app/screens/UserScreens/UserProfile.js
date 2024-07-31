@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,45 +14,80 @@ import SmallButton from "../../components/Buttons/smallButton";
 import ContinueButton from "../../components/Buttons/ContinueButton";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ChangePasswordScreen from "../changePassword";
+import * as SecureStore from 'expo-secure-store';
+import { CommonActions } from "@react-navigation/native";
 
 const Stack = createNativeStackNavigator();
 
-const ProfileScreenContent = ({ navigation }) => {
+const ProfileScreenContent = ({ navigation, route }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [userInfo, setUserInfo] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+  });
+
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      const firstName = await SecureStore.getItemAsync('firstName');
+      const lastName = await SecureStore.getItemAsync('lastName');
+      const email = await SecureStore.getItemAsync('email');
+      setUserInfo({ firstName, lastName, email });
+    };
+    loadUserInfo();
+  }, []);
 
   const handleChangePassword = () => navigation.navigate("ChangePassword");
+  
   const handleLogout = () => setModalVisible(true);
-  const handleModalConfirm = () => {
-    console.log("Logout confirmed");
-    setModalVisible(false);
+  
+  const handleModalConfirm = async () => {
+    try {
+      // Clear all stored user data
+      await SecureStore.deleteItemAsync('userId');
+      await SecureStore.deleteItemAsync('email');
+      await SecureStore.deleteItemAsync('token');
+      await SecureStore.deleteItemAsync('userName');
+      await SecureStore.deleteItemAsync('firstName');
+      await SecureStore.deleteItemAsync('lastName');
+      await SecureStore.deleteItemAsync('role');
+
+      // Navigate to Login screen and reset the navigation stack
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
+        })
+      );
+    } catch (error) {
+      console.error("Logout failed:", error);
+      Alert.alert("Logout Failed", "An unexpected error occurred. Please try again.");
+    }
   };
+
   const handleModalCancel = () => setModalVisible(false);
 
   return (
     <SafeAreaView style={styles.container}>
-          <View style={styles.content}>
-        <InputField label="Name" placeholder="User's full name" />
-        <InputField label="Contact Number" placeholder="User's phone number" />
-        <InputField
-          label="Email"
-          placeholder="User's email"
-          keyboardType="email-address"
-          />
+      <View style={styles.content}>
+        <InputField label="First Name" value={userInfo.firstName} />
+        <InputField label="Last Name" value={userInfo.lastName} />
+        <InputField label="Email" value={userInfo.email} />
         <View style={styles.buttonContainer}>
-        <ContinueButton
-          text="Change Password"
-          onPress={handleChangePassword}
-          style={styles.button}
-        />
-      </View>
-      <View style={styles.buttonContainer}>
-        <SmallButton
-          text="Logout"
-          onPress={handleLogout}
-          style={styles.button}
-        />
-      </View>
-      <LogoutModal
+          <ContinueButton
+            text="Change Password"
+            onPress={handleChangePassword}
+            style={styles.button}
+          />
+        </View>
+        <View style={styles.buttonContainer}>
+          <SmallButton
+            text="Logout"
+            onPress={handleLogout}
+            style={styles.button}
+          />
+        </View>
+        <LogoutModal
           visible={modalVisible}
           onConfirm={handleModalConfirm}
           onCancel={handleModalCancel}
@@ -61,13 +96,13 @@ const ProfileScreenContent = ({ navigation }) => {
     </SafeAreaView>
   );
 };
-const InputField = ({ label, placeholder, keyboardType }) => (
+
+const InputField = ({ label, value }) => (
   <View style={styles.inputContainer}>
     <Text style={styles.label}>{label}</Text>
     <TextInput
       style={styles.input}
-      placeholder={placeholder}
-      keyboardType={keyboardType}
+      value={value}
       editable={false}
     />
   </View>
