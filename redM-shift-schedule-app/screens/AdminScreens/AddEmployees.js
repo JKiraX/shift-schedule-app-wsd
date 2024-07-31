@@ -44,7 +44,12 @@ const AddEmployeePage = () => {
           { text: "OK", onPress: () => navigation.goBack() },
         ]);
       } else {
-        Alert.alert("Error", response.data.errors ? JSON.stringify(response.data.errors) : response.data.error);
+        Alert.alert(
+          "Error",
+          response.data.errors
+            ? JSON.stringify(response.data.errors)
+            : response.data.error
+        );
       }
     } catch (error) {
       console.error("Error:", error);
@@ -74,6 +79,18 @@ const AddEmployeePage = () => {
     </View>
   );
 
+  const PasswordRequirements = () => (
+    <View style={styles.requirementsContainer}>
+      <Text style={styles.requirementsTitle}>Password Requirements:</Text>
+      <Text style={styles.requirementsText}>• At least 8 characters long</Text>
+      <Text style={styles.requirementsText}>• At least 1 number</Text>
+      <Text style={styles.requirementsText}>
+        • At least 1 special character
+      </Text>
+      <Text style={styles.requirementsText}>• At least 1 capital letter</Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -82,8 +99,18 @@ const AddEmployeePage = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollViewContainer}>
           <View style={styles.formContainer}>
-            {renderInputField("First Name", firstName, setFirstName, "Enter first name")}
-            {renderInputField("Last Name", lastName, setLastName, "Enter last name")}
+            {renderInputField(
+              "First Name",
+              firstName,
+              setFirstName,
+              "Enter first name"
+            )}
+            {renderInputField(
+              "Last Name",
+              lastName,
+              setLastName,
+              "Enter last name"
+            )}
             {renderInputField(
               "E-mail",
               email,
@@ -92,6 +119,8 @@ const AddEmployeePage = () => {
               false,
               "email-address"
             )}
+            <PasswordRequirements />
+
             {renderInputField(
               "Password",
               newPassword,
@@ -148,6 +177,21 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#e9ecef",
     fontSize: 17,
+  },
+  requirementsContainer: {
+    marginBottom: 20,
+    backgroundColor: "#f0f0f0",
+    padding: 10,
+    borderRadius: 5,
+  },
+  requirementsTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  requirementsText: {
+    fontSize: 14,
+    marginBottom: 2,
   },
 });
 

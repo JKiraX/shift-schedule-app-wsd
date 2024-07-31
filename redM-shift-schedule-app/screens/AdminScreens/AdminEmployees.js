@@ -11,58 +11,120 @@ import {
   Dimensions,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AddEmployeePage from "./AddEmployees";
 import EditEmployeeScreen from "./EditEmployees";
 import apiClient from "../../../server/aspApiRoutes";
+import * as SecureStore from "expo-secure-store";
 
 const Stack = createNativeStackNavigator();
 
 const AdminEmployeeScreen = () => {
   const [users, setUsers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (isFocused) {
+      fetchUsers();
+      getCurrentUser();
+    }
+  }, [isFocused]);
 
-  const fetchUsers = async () => {
+  const getCurrentUser = async () => {
     try {
-      const response = await apiClient.get("/api/Authentication");
-      const data = await response.json();
-      setUsers(data);
+      const email = await SecureStore.getItemAsync("email");
+      const role = await SecureStore.getItemAsync("role");
+      const id = await SecureStore.getItemAsync("userId");
+      setCurrentUser({ email, role, id });
     } catch (error) {
-      console.error("Error fetching users:", error);
-      Alert.alert("Error", `Failed to fetch users: ${error.message}`);
+      console.error("Error fetching current user:", error);
     }
   };
 
-  const handleDelete = async (userId) => {
+  const fetchUsers = async () => {
     try {
-      const response = await apiClient.delete(`/api/Authentication/${userId}`);
-      if (response.ok) {
-        setUsers((prevUsers) =>
-          prevUsers.filter((user) => user.id !== userId)
-        );
+      const response = await apiClient.get("/api/authentication");
+      const sortedUsers = response.data.sort((a, b) =>
+        a.firstName.localeCompare(b.firstName)
+      );
+      setUsers(sortedUsers);
+      setFilteredUsers(sortedUsers);
+    } catch (error) {
+      console.error(
+        "Error fetching users:",
+        error.response ? error.response.data : error.message
+      );
+      Alert.alert(
+        "Error",
+        `Failed to fetch users: ${
+          error.response ? error.response.data : error.message
+        }`
+      );
+    }
+  };
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    if (query) {
+      const filtered = users.filter((user) =>
+        `${user.firstName} ${user.lastName}`
+          .toLowerCase()
+          .includes(query.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    } else {
+      setFilteredUsers(users);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!id) {
+      Alert.alert("Error", "Invalid user ID");
+      return;
+    }
+
+    try {
+      const response = await apiClient.delete(`/api/authentication/${id}`);
+      if (response.status === 200) {
+        fetchUsers(); // Refresh the list after deletion
       } else if (response.status === 404) {
         Alert.alert("Error", "User not found");
       } else {
         throw new Error("Failed to delete user");
       }
     } catch (error) {
-      console.error("Error deleting user:", error);
-      Alert.alert("Error", "Failed to delete user");
+      console.error(
+        "Error deleting user:",
+        error.response ? error.response.data : error.message
+      );
+      Alert.alert(
+        "Error",
+        `Failed to delete user: ${
+          error.response ? error.response.data : error.message
+        }`
+      );
     }
   };
 
   const renderUserItem = ({ item }) => (
     <View style={styles.userItem}>
-      <Text style={styles.userName}>{`${item.firstName} ${item.lastName}`}</Text>
+      <Text
+        style={styles.userName}
+      >{`${item.firstName} ${item.lastName}`}</Text>
       <View style={styles.actions}>
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => navigation.push("EditEmployee", { user: item })}
+          onPress={() =>
+            navigation.navigate("EditEmployee", {
+              employee: item,
+              currentUser: currentUser,
+            })
+          }
         >
           <MaterialCommunityIcons name="pencil" size={24} color="black" />
         </TouchableOpacity>
@@ -79,7 +141,12 @@ const AdminEmployeeScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.searchBar}>
-        <TextInput style={styles.searchInput} placeholder="Search" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search"
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.push("AddEmployees")}
@@ -88,8 +155,10 @@ const AdminEmployeeScreen = () => {
         </TouchableOpacity>
       </View>
       <FlatList
-        data={users}
-        keyExtractor={(item) => item.id.toString()}
+        data={filteredUsers}
+        keyExtractor={(item) =>
+          item.id ? item.id.toString() : Math.random().toString()
+        }
         renderItem={renderUserItem}
         contentContainerStyle={styles.userList}
       />
@@ -128,6 +197,7 @@ const AdminEmployee = () => (
     />
   </Stack.Navigator>
 );
+
 const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
@@ -185,4 +255,5 @@ const styles = StyleSheet.create({
     padding: 5,
   },
 });
+
 export default AdminEmployee;

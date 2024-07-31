@@ -42,6 +42,16 @@ const ChangePasswordScreen = () => {
     </View>
   );
 
+  const PasswordRequirements = () => (
+    <View style={styles.requirementsContainer}>
+      <Text style={styles.requirementsTitle}>Password Requirements:</Text>
+      <Text style={styles.requirementsText}>• At least 8 characters long</Text>
+      <Text style={styles.requirementsText}>• At least 1 number</Text>
+      <Text style={styles.requirementsText}>• At least 1 special character</Text>
+      <Text style={styles.requirementsText}>• At least 1 capital letter</Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -49,6 +59,9 @@ const ChangePasswordScreen = () => {
         style={styles.keyboardAvoidingView}
       >
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
+
+        <PasswordRequirements />
+        
           {renderInputField(
             "Current Password",
             currentPassword,
@@ -67,6 +80,7 @@ const ChangePasswordScreen = () => {
             setConfirmPassword,
             "Confirm new password"
           )}
+          
           <ContinueButton text="Change password" onPress={handleChangePassword} />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -91,7 +105,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 18,
     width: "100%",
-    maxWidth: width * 9,
+    maxWidth: width * 0.9,
   },
   label: {
     fontSize: 16,
@@ -107,6 +121,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#e9ecef",
     width: "100%",
     fontSize: 16,
+  },
+  requirementsContainer: {
+    marginBottom: 20,
+    backgroundColor: "#f0f0f0",
+    padding: 10,
+    borderRadius: 5,
+    width: "100%",
+  },
+  requirementsTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  requirementsText: {
+    fontSize: 14,
+    marginBottom: 2,
   },
 });
 
