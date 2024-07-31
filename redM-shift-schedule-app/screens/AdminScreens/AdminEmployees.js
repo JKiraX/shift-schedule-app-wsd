@@ -9,28 +9,27 @@ import {
   StyleSheet,
   Alert,
   Dimensions,
-  Platform,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AddEmployeePage from "./AddEmployees";
 import EditEmployeeScreen from "./EditEmployees";
+import apiClient from "../../../server/aspApiRoutes";
 
 const Stack = createNativeStackNavigator();
 
 const AdminEmployeeScreen = () => {
   const [users, setUsers] = useState([]);
   const navigation = useNavigation();
+
   useEffect(() => {
     fetchUsers();
   }, []);
+
   const fetchUsers = async () => {
     try {
-      const response = await fetch("http://192.168.5.61:3001/api/users");
-      if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.status}`);
-      }
+      const response = await apiClient.get("/api/Authentication");
       const data = await response.json();
       setUsers(data);
     } catch (error) {
@@ -38,17 +37,13 @@ const AdminEmployeeScreen = () => {
       Alert.alert("Error", `Failed to fetch users: ${error.message}`);
     }
   };
+
   const handleDelete = async (userId) => {
     try {
-      const response = await fetch(
-        `http://192.168.5.61:3001/api/users/${userId}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await apiClient.delete(`/api/Authentication/${userId}`);
       if (response.ok) {
         setUsers((prevUsers) =>
-          prevUsers.filter((user) => user.user_id !== userId)
+          prevUsers.filter((user) => user.id !== userId)
         );
       } else if (response.status === 404) {
         Alert.alert("Error", "User not found");
@@ -60,9 +55,10 @@ const AdminEmployeeScreen = () => {
       Alert.alert("Error", "Failed to delete user");
     }
   };
+
   const renderUserItem = ({ item }) => (
     <View style={styles.userItem}>
-      <Text style={styles.userName}>{item.name}</Text>
+      <Text style={styles.userName}>{`${item.firstName} ${item.lastName}`}</Text>
       <View style={styles.actions}>
         <TouchableOpacity
           style={styles.actionButton}
@@ -72,13 +68,14 @@ const AdminEmployeeScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => handleDelete(item.user_id)}
+          onPress={() => handleDelete(item.id)}
         >
           <MaterialCommunityIcons name="delete" size={24} color="black" />
         </TouchableOpacity>
       </View>
     </View>
   );
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.searchBar}>
@@ -92,15 +89,14 @@ const AdminEmployeeScreen = () => {
       </View>
       <FlatList
         data={users}
-        keyExtractor={(item) =>
-          item.user_id ? item.user_id.toString() : Math.random().toString()
-        }
+        keyExtractor={(item) => item.id.toString()}
         renderItem={renderUserItem}
         contentContainerStyle={styles.userList}
       />
     </SafeAreaView>
   );
 };
+
 const AdminEmployee = () => (
   <Stack.Navigator initialRouteName="AdminEmployeeScreen">
     <Stack.Screen
