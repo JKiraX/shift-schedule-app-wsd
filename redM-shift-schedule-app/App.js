@@ -1,14 +1,22 @@
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-//import UserNav from "./components/Navigation/UserNav";
-//import AdminNav from './components/Navigation/AdminNav';
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import UserNav from "./components/Navigation/UserNav";
+import AdminNav from './components/Navigation/AdminNav';
 import AppLogin from "./screens/LogInScreens/loginscreen";
+
+const Stack = createNativeStackNavigator();
+
 export default function App() {
   return (
     <NavigationContainer>
       <StatusBar style="auto" />
-      <AppLogin />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={AppLogin} />
+        <Stack.Screen name="AdminNav" component={AdminNav} />
+        <Stack.Screen name="UserNav" component={UserNav} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }

@@ -13,14 +13,10 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import ContinueButton from "../../components/Buttons/ContinueButton";
-//import axios from "axios";
 import * as SecureStore from 'expo-secure-store';
-import AdminNav from "../../components/Navigation/AdminNav";
-import UserNav from "../../components/Navigation/UserNav";
 import apiClient from "../../../server/aspApiRoutes"; 
 import ForgotPasswordScreen from "./forgotpassword";
 import { CommonActions } from "@react-navigation/native";
-
 
 const { width, height } = Dimensions.get("window");
 
@@ -59,7 +55,10 @@ const LoginScreen = () => {
           navigation.dispatch(
             CommonActions.reset({
               index: 0,
-              routes: [{ 'role': role === 'Admin' ? AdminNav : UserNav }],
+              routes: [{ 
+                name: role === 'Admin' ? 'AdminNav' : 'UserNav',
+                params: { userInfo: { firstName, lastName, email } }
+              }],
             })
           );
         } else {
