@@ -17,7 +17,9 @@ import * as SecureStore from 'expo-secure-store';
 import apiClient from "../../../server/aspApiRoutes"; 
 import ForgotPasswordScreen from "./forgotpassword";
 import { CommonActions } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 
+const Stack = createStackNavigator();
 const { width, height } = Dimensions.get("window");
 
 const LoginScreen = () => {
@@ -83,7 +85,7 @@ const LoginScreen = () => {
   };
 
   const handleForgotPassword = () => {
-    navigation.navigate(ForgotPasswordScreen);
+    navigation.navigate("ForgotPassword");
   };
 
   return (
@@ -119,6 +121,23 @@ const LoginScreen = () => {
         <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
       </TouchableOpacity>
     </SafeAreaView>
+  );
+};
+
+const AppLogin = () => {
+  return (
+    <Stack.Navigator initialRouteName="Login">
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{ headerTintColor: "#c82f2f", headerTitle: "Forgot Password" }}
+      />
+    </Stack.Navigator>
   );
 };
 
@@ -169,4 +188,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default AppLogin;

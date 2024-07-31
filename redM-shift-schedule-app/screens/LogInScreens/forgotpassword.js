@@ -11,6 +11,7 @@ import {
   Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import apiClient from "../../../server/aspApiRoutes";
 
 const { width, height } = Dimensions.get("window");
 
@@ -18,16 +19,34 @@ const ForgotPasswordScreen = () => {
   const [email, setEmail] = useState("");
   const navigation = useNavigation();
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (email.trim() === "") {
       Alert.alert("Error", "Please enter your email.");
       return;
     }
-    // Your logic to send the reset password link goes here
-    Alert.alert(
-      "Reset Password",
-      "A password reset link has been sent to your email."
-    );
+
+    try {
+      const response = await apiClient.post("/api/authentication/forgot-password", {
+        email,
+      });
+
+      if (response.status === 200) {
+        Alert.alert(
+          "Reset Password",
+          "A password reset link has been sent to your email."
+        );
+      } else {
+        throw new Error("Unexpected response from server");
+      }
+    } catch (error) {
+      let errorMessage = "An error occurred while processing your request.";
+      if (error.response && error.response.data && error.response.data.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      Alert.alert("Error", errorMessage);
+    }
   };
 
   return (
