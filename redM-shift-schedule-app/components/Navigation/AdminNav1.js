@@ -38,7 +38,7 @@ function TabNavigator() {
           } else if (rn === AdminSchedule) {
             iconName = focused ? "calendar" : "calendar-outline";
           } else if (rn === UserRequestLeave) {
-            iconName = focused ? "account-group" : "account-group-outline";
+            iconName = focused ? "note-edit" : "note-edit-outline";
           } else if (rn === UserProfile) {
             iconName = focused ? "account" : "account-outline";
           }
@@ -96,11 +96,7 @@ function TabNavigator() {
       <Tab.Screen
         name={UserRequestLeave}
         component={UserRequestLeaveScreen}
-        options={{
-          headerTintColor: "#c82f2f",
-          headerTitleAlign: "center",
-          headerShown: false,
-        }}
+        options={{ headerTintColor: "#c82f2f", headerTitleAlign: "center" }}
       />
       <Tab.Screen
         name={UserProfile}
