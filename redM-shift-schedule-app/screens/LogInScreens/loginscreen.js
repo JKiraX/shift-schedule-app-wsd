@@ -54,11 +54,18 @@ const LoginScreen = () => {
   
         // Navigate based on user role
         if (navigation) {
+          let routeName;
+          if (role === 'Admin') {
+            routeName = email === 'riza.mia@redmps.com' ? 'AdminNav' : 'AdminNav1';
+          } else {
+            routeName = 'UserNav';
+          }
+
           navigation.dispatch(
             CommonActions.reset({
               index: 0,
               routes: [{ 
-                name: role === 'Admin' ? 'AdminNav' : 'UserNav',
+                name: routeName,
                 params: { userInfo: { firstName, lastName, email } }
               }],
             })

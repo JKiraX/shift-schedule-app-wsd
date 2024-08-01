@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,30 +12,63 @@ import {
   ScrollView,
 } from "react-native";
 import ContinueButton from "../components/Buttons/ContinueButton";
+import * as SecureStore from 'expo-secure-store';
+import apiClient from "../../server/aspApiRoutes";
 
 const { width } = Dimensions.get("window");
 
 const ChangePasswordScreen = () => {
-  const [currentPassword, setCurrentPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleChangePassword = () => {
-    if (newPassword !== confirmPassword) {
-      Alert.alert("Error", "New password and confirm password do not match");
-    } else {
-      Alert.alert("Success", "Password changed successfully");
-      // Handle password change logic here
+  useEffect(() => {
+    const fetchEmail = async () => {
+      const storedEmail = await SecureStore.getItemAsync('email');
+      if (storedEmail) {
+        setEmail(storedEmail);
+      }
+    };
+    fetchEmail();
+  }, []);
+
+  const handleChangePassword = async () => {
+    try {
+      const response = await apiClient.put("/api/authentication/update-password", {
+        email,
+        oldPassword,
+        newPassword
+      });
+
+      if (response.status === 200) {
+        Alert.alert("Success", "Password changed successfully",[
+          { text: "OK", onPress: () => navigation.goBack() },
+        ]);
+        setOldPassword("");
+        setNewPassword("");
+        
+      } else {
+        throw new Error("Failed to change password");
+      }
+    } catch (error) {
+      console.error("Change password failed:", error);
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      if (error.response && error.response.data && error.response.data.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      Alert.alert("Change Password Failed", errorMessage);
     }
   };
 
-  const renderInputField = (label, value, setValue, placeholder) => (
+  const renderInputField = (label, value, setValue, placeholder, secureTextEntry = true) => (
     <View style={styles.inputContainer}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
         style={styles.input}
         placeholder={placeholder}
-        secureTextEntry
+        secureTextEntry={secureTextEntry}
         value={value}
         onChangeText={setValue}
       />
@@ -50,10 +83,17 @@ const ChangePasswordScreen = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           {renderInputField(
-            "Current Password",
-            currentPassword,
-            setCurrentPassword,
-            "Enter current password"
+            "Email",
+            email,
+            setEmail,
+            "Your email",
+            false
+          )}
+          {renderInputField(
+            "Old Password",
+            oldPassword,
+            setOldPassword,
+            "Enter old password"
           )}
           {renderInputField(
             "New Password",
@@ -61,12 +101,7 @@ const ChangePasswordScreen = () => {
             setNewPassword,
             "Enter new password"
           )}
-          {renderInputField(
-            "Confirm New Password",
-            confirmPassword,
-            setConfirmPassword,
-            "Confirm new password"
-          )}
+          
           <ContinueButton text="Change password" onPress={handleChangePassword} />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -91,7 +126,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 18,
     width: "100%",
-    maxWidth: width * 9,
+    maxWidth: width * 0.9,
   },
   label: {
     fontSize: 16,
