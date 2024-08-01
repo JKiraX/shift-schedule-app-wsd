@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Alert,
   Dimensions,
+  Modal,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
@@ -25,6 +26,8 @@ const AdminEmployeeScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const navigation = useNavigation();
   const isFocused = useIsFocused();
 
@@ -82,16 +85,28 @@ const AdminEmployeeScreen = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!id) {
+  const handleDeleteConfirmation = (user) => {
+    setUserToDelete(user);
+    setModalVisible(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setModalVisible(false);
+    setUserToDelete(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete || !userToDelete.id) {
       Alert.alert("Error", "Invalid user ID");
       return;
     }
 
     try {
-      const response = await apiClient.delete(`/api/authentication/${id}`);
+      const response = await apiClient.delete(`/api/authentication/${userToDelete.id}`);
       if (response.status === 200) {
         fetchUsers(); // Refresh the list after deletion
+        setModalVisible(false);
+        setUserToDelete(null);
       } else if (response.status === 404) {
         Alert.alert("Error", "User not found");
       } else {
@@ -130,12 +145,32 @@ const AdminEmployeeScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => handleDelete(item.id)}
+          onPress={() => handleDeleteConfirmation(item)}
         >
           <MaterialCommunityIcons name="delete" size={24} color="black" />
         </TouchableOpacity>
       </View>
     </View>
+  );
+
+  const DeleteConfirmationModal = ({ visible, onConfirm, onCancel, userName }) => (
+    <Modal visible={visible} transparent={true} animationType="slide">
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalText}>
+            Are you sure you want to permanently delete the user {userName}?
+          </Text>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity style={styles.modalButton} onPress={onCancel}>
+              <Text style={styles.modalButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.modalButton, styles.deleteButton]} onPress={onConfirm}>
+              <Text style={styles.modalButtonText}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 
   return (
@@ -161,6 +196,12 @@ const AdminEmployeeScreen = () => {
         }
         renderItem={renderUserItem}
         contentContainerStyle={styles.userList}
+      />
+      <DeleteConfirmationModal
+        visible={modalVisible}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        userName={userToDelete ? `${userToDelete.firstName} ${userToDelete.lastName}` : ''}
       />
     </SafeAreaView>
   );
@@ -253,6 +294,39 @@ const styles = StyleSheet.create({
   actionButton: {
     marginLeft: 15,
     padding: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#f2f2f2",
+    padding: 20,
+    borderRadius: 15,
+    width: Math.min(365, width * 0.9),
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    borderRadius: 15,
+    paddingTop: 20,
+  },
+  modalButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: "#c82f2f",
+    borderRadius: 15,
+    marginHorizontal: 10,
+  },
+  modalButtonText: {
+    color: "white",
+    fontWeight: "bold",
   },
 });
 
