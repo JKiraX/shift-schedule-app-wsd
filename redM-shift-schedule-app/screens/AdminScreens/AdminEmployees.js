@@ -9,80 +9,179 @@ import {
   StyleSheet,
   Alert,
   Dimensions,
-  Platform,
+  Modal,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AddEmployeePage from "./AddEmployees";
 import EditEmployeeScreen from "./EditEmployees";
+import apiClient from "../../../server/aspApiRoutes";
+import * as SecureStore from "expo-secure-store";
 
 const Stack = createNativeStackNavigator();
 
 const AdminEmployeeScreen = () => {
   const [users, setUsers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
+
   useEffect(() => {
-    fetchUsers();
-  }, []);
-  const fetchUsers = async () => {
+    if (isFocused) {
+      fetchUsers();
+      getCurrentUser();
+    }
+  }, [isFocused]);
+
+  const getCurrentUser = async () => {
     try {
-      const response = await fetch("http://192.168.5.61:3001/api/users");
-      if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.status}`);
-      }
-      const data = await response.json();
-      setUsers(data);
+      const email = await SecureStore.getItemAsync("email");
+      const role = await SecureStore.getItemAsync("role");
+      const id = await SecureStore.getItemAsync("userId");
+      setCurrentUser({ email, role, id });
     } catch (error) {
-      console.error("Error fetching users:", error);
-      Alert.alert("Error", `Failed to fetch users: ${error.message}`);
+      console.error("Error fetching current user:", error);
     }
   };
-  const handleDelete = async (userId) => {
+
+  const fetchUsers = async () => {
     try {
-      const response = await fetch(
-        `http://192.168.5.61:3001/api/users/${userId}`,
-        {
-          method: "DELETE",
-        }
+      const response = await apiClient.get("/api/authentication");
+      const sortedUsers = response.data.sort((a, b) =>
+        a.firstName.localeCompare(b.firstName)
       );
-      if (response.ok) {
-        setUsers((prevUsers) =>
-          prevUsers.filter((user) => user.user_id !== userId)
-        );
+      setUsers(sortedUsers);
+      setFilteredUsers(sortedUsers);
+    } catch (error) {
+      console.error(
+        "Error fetching users:",
+        error.response ? error.response.data : error.message
+      );
+      Alert.alert(
+        "Error",
+        `Failed to fetch users: ${
+          error.response ? error.response.data : error.message
+        }`
+      );
+    }
+  };
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    if (query) {
+      const filtered = users.filter((user) =>
+        `${user.firstName} ${user.lastName}`
+          .toLowerCase()
+          .includes(query.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    } else {
+      setFilteredUsers(users);
+    }
+  };
+
+  const handleDeleteConfirmation = (user) => {
+    setUserToDelete(user);
+    setModalVisible(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setModalVisible(false);
+    setUserToDelete(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete || !userToDelete.id) {
+      Alert.alert("Error", "Invalid user ID");
+      return;
+    }
+
+    try {
+      const response = await apiClient.delete(`/api/authentication/${userToDelete.id}`);
+      if (response.status === 200) {
+        fetchUsers(); // Refresh the list after deletion
+        setModalVisible(false);
+        setUserToDelete(null);
       } else if (response.status === 404) {
         Alert.alert("Error", "User not found");
       } else {
         throw new Error("Failed to delete user");
       }
     } catch (error) {
-      console.error("Error deleting user:", error);
-      Alert.alert("Error", "Failed to delete user");
+      console.error(
+        "Error deleting user:",
+        error.response ? error.response.data : error.message
+      );
+      Alert.alert(
+        "Error",
+        `Failed to delete user: ${
+          error.response ? error.response.data : error.message
+        }`
+      );
     }
   };
+
   const renderUserItem = ({ item }) => (
     <View style={styles.userItem}>
-      <Text style={styles.userName}>{item.name}</Text>
+      <Text
+        style={styles.userName}
+      >{`${item.firstName} ${item.lastName}`}</Text>
       <View style={styles.actions}>
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => navigation.push("EditEmployee", { user: item })}
+          onPress={() =>
+            navigation.navigate("EditEmployee", {
+              employee: item,
+              currentUser: currentUser,
+            })
+          }
         >
           <MaterialCommunityIcons name="pencil" size={24} color="black" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => handleDelete(item.user_id)}
+          onPress={() => handleDeleteConfirmation(item)}
         >
           <MaterialCommunityIcons name="delete" size={24} color="black" />
         </TouchableOpacity>
       </View>
     </View>
   );
+
+  const DeleteConfirmationModal = ({ visible, onConfirm, onCancel, userName }) => (
+    <Modal visible={visible} transparent={true} animationType="slide">
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalText}>
+            Are you sure you want to permanently delete the user {userName}?
+          </Text>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity style={styles.modalButton} onPress={onCancel}>
+              <Text style={styles.modalButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.modalButton, styles.deleteButton]} onPress={onConfirm}>
+              <Text style={styles.modalButtonText}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.searchBar}>
-        <TextInput style={styles.searchInput} placeholder="Search" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search"
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.push("AddEmployees")}
@@ -91,16 +190,23 @@ const AdminEmployeeScreen = () => {
         </TouchableOpacity>
       </View>
       <FlatList
-        data={users}
+        data={filteredUsers}
         keyExtractor={(item) =>
-          item.user_id ? item.user_id.toString() : Math.random().toString()
+          item.id ? item.id.toString() : Math.random().toString()
         }
         renderItem={renderUserItem}
         contentContainerStyle={styles.userList}
       />
+      <DeleteConfirmationModal
+        visible={modalVisible}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        userName={userToDelete ? `${userToDelete.firstName} ${userToDelete.lastName}` : ''}
+      />
     </SafeAreaView>
   );
 };
+
 const AdminEmployee = () => (
   <Stack.Navigator initialRouteName="AdminEmployeeScreen">
     <Stack.Screen
@@ -132,6 +238,7 @@ const AdminEmployee = () => (
     />
   </Stack.Navigator>
 );
+
 const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
@@ -188,5 +295,39 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     padding: 5,
   },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#f2f2f2",
+    padding: 20,
+    borderRadius: 15,
+    width: Math.min(365, width * 0.9),
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    borderRadius: 15,
+    paddingTop: 20,
+  },
+  modalButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: "#c82f2f",
+    borderRadius: 15,
+    marginHorizontal: 10,
+  },
+  modalButtonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
 });
+
 export default AdminEmployee;
