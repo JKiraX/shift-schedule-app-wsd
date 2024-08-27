@@ -25,6 +25,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     flexDirection: 'column',
     justifyContent: 'space-between',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4,
   },
   contentContainer: {
     flex: 1,
