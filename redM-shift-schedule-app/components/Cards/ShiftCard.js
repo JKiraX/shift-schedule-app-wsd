@@ -1,55 +1,51 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
-
-const { width, height } = Dimensions.get('window');
+import { View, Text, StyleSheet } from 'react-native';
 
 const ShiftCard = ({ shiftName, startTime, endTime, assignedUsers }) => {
   return (
     <View style={styles.card}>
-      <Text style={styles.shiftName}>{shiftName}</Text>
-      <Text style={styles.assignedUsers}>{assignedUsers}</Text>
-      <View style={styles.timeContainer}>
-        <Text style={styles.time}>Start: {startTime}</Text>
-        <Text style={styles.time}>End: {endTime}</Text>
+      <View style={styles.contentContainer}>
+        <Text style={styles.shiftName}>{shiftName}</Text>
+        <View style={styles.usersContainer}>
+          {assignedUsers.map((user, index) => (
+            <Text key={index} style={styles.assignedUser}>{user}</Text>
+          ))}
+        </View>
       </View>
+      <Text style={styles.time}>{startTime} - {endTime}</Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#f2f2f2",
-    padding: width * 0.04,
-    borderRadius: 15,
-    marginVertical: height * 0.01,
-    width: width * 0.9,
-    maxWidth: 400,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.23,
-    shadowRadius: 2.62,
-    elevation: 4,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  contentContainer: {
+    flex: 1,
   },
   shiftName: {
-    fontSize: width * 0.045,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: height * 0.01,
+    marginBottom: 8,
   },
-  assignedUsers: {
-    fontSize: width * 0.04,
-    color: '#555',
+  usersContainer: {
+    marginBottom: 8,
   },
-  timeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: height * 0.015,
+  assignedUser: {
+    fontSize: 16,
+    marginBottom: 4,
   },
   time: {
     fontSize: 16,
-    fontSize: width * 0.04,
+    color: '#666',
+    alignSelf: 'flex-end',
+    marginTop: 8,
   },
 });
 

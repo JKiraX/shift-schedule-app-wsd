@@ -38,6 +38,24 @@ const UserHomeScreen = ({ navigation }) => {
     fetchShiftData(date);
   };
 
+  const groupShiftsByShiftName = (shifts) => {
+    if (!Array.isArray(shifts)) {
+      console.error("Shifts is not an array:", shifts);
+      return [];
+    }
+  
+    return shifts.reduce((acc, shift) => {
+      if (!acc[shift.shift_name]) {
+        acc[shift.shift_name] = {
+          ...shift,
+          assigned_users: [],
+        };
+      }
+      acc[shift.shift_name].assigned_users.push(shift.assigned_users);
+      return acc;
+    }, {});
+  };
+  
   const fetchShiftData = async (date) => {
     setIsLoading(true);
     try {
@@ -45,10 +63,19 @@ const UserHomeScreen = ({ navigation }) => {
       const response = await fetch(
         `http://192.168.5.22:3001/schedules?date=${formattedDate}`
       );
-
+  
       if (response.ok) {
-        const data = await response.json();
-        setShiftData(data.data || []);  // Ensure you are using data from the API response
+        const responseData = await response.json();
+        console.log("Raw data from API:", responseData);
+        
+        if (responseData.success && Array.isArray(responseData.data)) {
+          const groupedShifts = groupShiftsByShiftName(responseData.data);
+          console.log("Grouped shifts:", groupedShifts);
+          setShiftData(Object.values(groupedShifts));
+        } else {
+          console.error("Unexpected data format:", responseData);
+          setShiftData([]);
+        }
       } else {
         console.error("Error fetching shift data:", response.status);
         setShiftData([]);
