@@ -153,7 +153,7 @@ const UserRequestLeaveScreen = () => {
       try {
         const userId = 1; // Assuming the user ID is known and set. Replace with actual user ID.
         const response = await fetch(
-          `http://192.168.5.61:3001/api/report-leave`,
+          `http://192.168.5.22:3001/api/report-leave`,
           {
             method: "POST",
             headers: {

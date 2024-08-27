@@ -11,7 +11,7 @@ const ShiftCard = ({ shiftName, startTime, endTime, assignedUsers }) => {
       <View style={styles.timeContainer}>
         <Text style={styles.time}>Start: {startTime}</Text>
         <Text style={styles.time}>End: {endTime}</Text>
-        </View>
+      </View>
     </View>
   );
 };
