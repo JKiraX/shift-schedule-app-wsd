@@ -39,7 +39,7 @@ const UserScheduleScreen = () => {
     try {
       console.log("Fetching users from:", `http://192.168.5.22:3001/users`);
       const response = await fetch(`http://192.168.5.22:3001/users`);
-      console.log("Response status:", response.status);
+      // console.log("Response status:", response.status);
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Network response was not ok: ${response.status}, ${errorText}`);
@@ -90,7 +90,7 @@ const UserScheduleScreen = () => {
         const userIdParam = selectedUser ? `&userId=${selectedUser.key}` : "";
         const url = `http://192.168.5.22:3001/schedules?date=${formattedDate}${userIdParam}`;
 
-        console.log("Fetching data from:", url);
+        // console.log("Fetching data from:", url);
 
         const response = await fetch(url);
 

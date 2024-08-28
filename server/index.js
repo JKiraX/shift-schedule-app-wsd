@@ -2,20 +2,20 @@ const express = require("express");
 const moment = require("moment-timezone");
 const bodyParser = require("body-parser");
 const db = require("./db"); // Assuming `db` is your pg-promise instance
-const rateLimit = require("express-rate-limit");
+// const rateLimit = require("express-rate-limit");
 const sanitizeInput = require("express-sanitizer");
 const cors = require("cors");
 const app = express();
 
-// Define the rate limit rule
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: "Too many requests from this IP, please try again later.",
-});
+// // Define the rate limit rule
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100, // limit each IP to 100 requests per windowMs
+//   message: "Too many requests from this IP, please try again later.",
+// });
 
 app.use(cors());
-app.use(limiter);
+// app.use(limiter);
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -170,70 +170,34 @@ app.post("/api/report-leave", async (req, res) => {
 
 // PUT switch schedule route
 app.put("/api/schedules/switch", async (req, res) => {
-  const { date, shift_id, user_id } = req.body;
+  const { work_date, shift_id, current_user_id, new_user_id } = req.body;
 
-  if (!date || !shift_id || !user_id) {
-    return res
-      .status(400)
-      .json({ error: "All fields (date, shift_id, user_id) are required" });
+  if (!work_date || !shift_id || !current_user_id || !new_user_id) {
+    return res.status(400).json({ error: "All fields (work_date, shift_id, current_user_id, new_user_id) are required" });
   }
 
   try {
-    const parsedShiftId = parseInt(shift_id, 10);
-
-    const validShift = await db.oneOrNone(
-      `
-      SELECT * FROM public.shifts WHERE shift_id = $1
-    `,
-      [parsedShiftId]
-    );
+    // Check if the shift exists
+    const validShift = await db.oneOrNone(`
+      SELECT * FROM public.schedules WHERE work_date = $1 AND shift_id = $2 AND user_id = $3
+    `, [work_date, shift_id, current_user_id]);
 
     if (!validShift) {
-      return res
-        .status(400)
-        .json({ error: "Invalid shift_id. This shift does not exist." });
+      return res.status(400).json({ error: "Invalid shift or current user. This shift does not exist for the current user." });
     }
 
-    const schedule = await db.oneOrNone(
-      `
-      SELECT * FROM public.schedules WHERE work_date = $1 AND shift_id = $2
-    `,
-      [date, parsedShiftId]
-    );
-
-    if (!schedule) {
-      return res
-        .status(404)
-        .json({ error: "Schedule not found for the given date and shift." });
-    }
-
-    const updatedSchedule = await db.one(
-      `
+    // Update the schedule with the new user
+    const updatedSchedule = await db.one(`
       UPDATE public.schedules SET user_id = $1 WHERE work_date = $2 AND shift_id = $3 RETURNING *;
-    `,
-      [user_id, date, parsedShiftId]
-    );
+    `, [new_user_id, work_date, shift_id]);
 
-    const userResult = await db.one(
-      `
-      SELECT "firstName", "lastName" FROM public.appuser WHERE "Id" = $1
-    `,
-      [user_id]
-    );
-
-    const response = {
-      ...updatedSchedule,
-      user_name: `${userResult.firstName} ${userResult.lastName}`,
-    };
-
-    res.json({ success: true, data: response });
+    res.json({ success: true, data: updatedSchedule });
   } catch (error) {
     console.error("Error switching schedule:", error);
-    res
-      .status(500)
-      .json({ error: "Internal server error", details: error.message });
+    res.status(500).json({ error: "Internal server error", details: error.message });
   }
 });
+
 
 // 404 handler
 app.use((req, res, next) => {

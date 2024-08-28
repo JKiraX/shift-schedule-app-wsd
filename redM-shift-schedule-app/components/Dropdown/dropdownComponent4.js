@@ -3,10 +3,10 @@ import { Dimensions, Text, View, StyleSheet, useWindowDimensions } from "react-n
 import { SelectList } from "react-native-dropdown-select-list";
 import { MaterialIcons } from "@expo/vector-icons";
 
+const { width, height } = Dimensions.get('window');
 
-
-const DropdownComponent = ({ data = [], onSelect }) => {
-
+const DropdownComponent4 = ({ data = [], onSelect }) => {
+const { width: windowWidth } = useWindowDimensions();
  
   const [selected, setSelected] = useState("");
   
@@ -53,7 +53,8 @@ const styles = StyleSheet.create({
     borderColor: "#c82f2f",
     borderWidth: 1,
     borderRadius: 15,
- 
+    width: width * 0.9,
+    maxWidth: 400,
 
   
   },

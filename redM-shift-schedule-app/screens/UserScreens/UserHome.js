@@ -69,11 +69,11 @@ const UserHomeScreen = ({ navigation }) => {
   
       if (response.ok) {
         const responseData = await response.json();
-        console.log("Raw data from API:", responseData);
+        // console.log("Raw data from API:", responseData);
         
         if (responseData.success && Array.isArray(responseData.data)) {
           const groupedShifts = groupShiftsByShiftName(responseData.data);
-          console.log("Grouped shifts:", groupedShifts);
+          // console.log("Grouped shifts:", groupedShifts);
           setShiftData(Object.values(groupedShifts));
         } else {
           console.error("Unexpected data format:", responseData);
