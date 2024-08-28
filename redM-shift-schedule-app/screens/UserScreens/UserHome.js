@@ -6,14 +6,17 @@ import {
   ScrollView,
   ActivityIndicator,
   Text,
+  Dimensions,
 } from "react-native";
 import CalendarStrip from "react-native-calendar-strip";
 import ShiftCard from "../../components/Cards/ShiftCard";
 import moment from "moment";
 
+const { width, height } = Dimensions.get("window");
+
 const UserHomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [shiftData, setShiftData] = useState([]);
+  const [shiftData, setShiftData] = useState([]) ;
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -115,7 +118,7 @@ const UserHomeScreen = ({ navigation }) => {
                 shiftName={shift.shift_name}
                 startTime={shift.start_time}
                 endTime={shift.end_time}
-                assignedUsers={shift.assigned_users}  // Handle multiple users correctly
+                assignedUsers={shift.assigned_users} 
               />
             ))
           ) : (

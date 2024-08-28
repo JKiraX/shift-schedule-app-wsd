@@ -1,7 +1,73 @@
 import React, { useState } from "react";
-import { Text, View, TouchableOpacity, Modal, StyleSheet, Platform } from "react-native";
-import DropdownComponent from "../../components/Dropdown/dropdownComponent";
-import PropTypes from "prop-types";
+import { Text, View, TouchableOpacity, Modal, StyleSheet } from "react-native";
+
+
+const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleSwitchPress = () => setModalVisible(true);
+  const handleSwitch = () => {
+    console.log("Switch action triggered");
+    setModalVisible(false);
+  };
+
+  const handleCancel = () => setModalVisible(false);
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.contentContainer}>
+        <Text style={styles.shiftName}>{shiftName}</Text>
+        <View style={styles.usersContainer}>
+          {assignedUsers.map((user, index) => (
+            <Text key={index} style={styles.assignedUser}>
+              {user}
+            </Text>
+          ))}
+        </View>
+      </View>
+      <Text style={styles.time}>
+        {startTime} - {endTime}
+      </Text>
+      <SwitchButton onPress={handleSwitchPress} />
+
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={handleCancel}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Switch Shift</Text>
+            <Text style={styles.modalSubtitle}>
+              Select a user to switch shifts:
+            </Text>
+
+            {/* Placeholder for dropdown component, replace with actual component */}
+            <View style={styles.dropdownContainer}>
+              <Text>Dropdown Component Placeholder</Text>
+            </View>
+
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={handleSwitch}
+              >
+                <Text style={styles.modalButtonText}>Switch</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={handleCancel}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+};
 
 const SwitchButton = ({ onPress }) => (
   <TouchableOpacity onPress={onPress} style={styles.button}>
@@ -9,76 +75,8 @@ const SwitchButton = ({ onPress }) => (
   </TouchableOpacity>
 );
 
-const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers, allUsers }) => {
-  const [modalVisible, setModalVisible] = useState(false);
 
-  const handleSwitchPress = () => setModalVisible(true);
-  const handleSwitch = () => {
-    console.log("Switch");
-    setModalVisible(false);
-  };
 
-  const handleCancel = () => setModalVisible(false);
-  const handleSelect = (selected) => console.log(selected);
-
-  return (
-    <View style={styles.card}>
-      <Text style={styles.shiftName}>{shiftName}</Text>
-      {assignedUsers ? (
-        typeof assignedUsers === "string" ? (
-          <Text style={styles.userText}>{assignedUsers}</Text>
-        ) : (
-          assignedUsers.map((user, index) => (
-            <Text key={index} style={styles.userText}>{user}</Text>
-          ))
-        )
-      ) : (
-        <Text style={styles.userText}>No assigned users</Text>
-      )}
-      <View style={styles.timeContainer}>
-        <Text style={styles.time}>Start: {startTime}</Text>
-        <Text style={styles.time}>End: {endTime}</Text>
-        <SwitchButton onPress={handleSwitchPress} />
-      </View>
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              Please select employee to switch on the shift.
-            </Text>
-            <Text style={styles.modalSubtitle}>Switch User 1 with:</Text>
-            <View style={styles.dropdownContainer}>
-              <DropdownComponent data={allUsers} onSelect={handleSelect} />
-            </View>
-            <View style={styles.modalButtonContainer}>
-            <TouchableOpacity style={styles.modalButton} onPress={handleCancel}>
-                <Text style={styles.modalButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButton} onPress={handleSwitch}>
-                <Text style={styles.modalButtonText}>Switch</Text>
-              </TouchableOpacity>
-            </View>
-            </View>
-        </View>
-      </Modal>
-    </View>
-  );
-};
-ShiftCardChange.propTypes = {
-  shiftName: PropTypes.string.isRequired,
-  startTime: PropTypes.string.isRequired,
-  endTime: PropTypes.string.isRequired,
-  assignedUsers: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.arrayOf(PropTypes.string),
-  ]),
-  allUsers: PropTypes.arrayOf(
-    PropTypes.shape({
-      key: PropTypes.number.isRequired,
-      value: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-};
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#f2f2f2",
@@ -92,9 +90,10 @@ const styles = StyleSheet.create({
   shiftName: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 8,
+    marginBottom: 6,
+    // paddingBottom: 2,
   },
-  userText: {
+  assignedUser: {
     fontSize: 16,
     marginBottom: 4,
   },
@@ -103,11 +102,15 @@ const styles = StyleSheet.create({
   },
   time: {
     fontSize: 16,
-    marginBottom: 4,
+    color: '#666',
+    alignSelf: 'flex-end',
+    marginTop: 5,
+
+    fontWeight: "500"
   },
   button: {
     borderRadius: 15,
-    paddingVertical: 16,
+    paddingVertical: 10,
     paddingHorizontal: 15,
     backgroundColor: "#c82f2f",
     marginTop: 8,
