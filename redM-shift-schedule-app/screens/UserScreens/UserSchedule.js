@@ -17,8 +17,8 @@ import moment from "moment";
 const { width } = Dimensions.get("window");
 
 const UserScheduleScreen = () => {
-  const [selectedDate, setSelectedDate] = useState({});
-  const [shiftData, setShiftData] = useState([]);
+  const [selectedDates, setSelectedDates] = useState({});
+  const [shiftData, setShiftData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [markedDates, setMarkedDates] = useState({});
   const [selectedUser, setSelectedUser] = useState(null);
@@ -30,27 +30,42 @@ const UserScheduleScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedDate) {
-      fetchShiftData(selectedDate);
+    if (Object.keys(selectedDates).length > 0) {
+      fetchShiftDataForMultipleDates(Object.keys(selectedDates));
     }
-  }, [selectedDate, selectedUser]);
+  }, [selectedDates, selectedUser]);
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`http://192.168.5.22:3001/api/users`);
-      if (!response.ok)
-        throw new Error(`Network response was not ok: ${response.status}`);
-      const data = await response.json();
-      setUsers(data.map((user) => ({ key: user.id, value: user.name })));
+      console.log("Fetching users from:", `http://192.168.5.22:3001/users`);
+      const response = await fetch(`http://192.168.5.22:3001/users`);
+      console.log("Response status:", response.status);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Network response was not ok: ${response.status}, ${errorText}`);
+      }
+      const responseData = await response.json();
+      console.log("Received data:", responseData);
+      
+      if (responseData.success && Array.isArray(responseData.data)) {
+        setUsers(responseData.data.map((user) => ({
+          key: user.user_id,
+          value: `${user.first_name} ${user.last_name}`
+        })));
+      } else {
+        console.error("Received data is not in the expected format:", responseData);
+        setUsers([]);
+      }
     } catch (error) {
       console.error("Error fetching user data:", error.message);
     }
   };
+  
 
   const groupShiftsByShiftName = (shifts) => {
     if (!Array.isArray(shifts)) {
       console.error("Shifts is not an array:", shifts);
-      return [];
+      return {};
     }
 
     return shifts.reduce((acc, shift) => {
@@ -65,79 +80,123 @@ const UserScheduleScreen = () => {
     }, {});
   };
 
-  const fetchShiftData = async (date) => {
+  const fetchShiftDataForMultipleDates = async (dates) => {
     setIsLoading(true);
-    try {
-      const formattedDate = moment(date).format("YYYY-MM-DD");
-      const userIdParam = selectedUser ? `&userId=${selectedUser.key}` : "";
-      const url = `http://192.168.5.22:3001/schedules?date=${formattedDate}${userIdParam}`;
+    const newShiftData = {};
 
-      console.log("Fetching data from:", url);
+    for (const date of dates) {
+      try {
+        const formattedDate = moment(date).format("YYYY-MM-DD");
+        const userIdParam = selectedUser ? `&userId=${selectedUser.key}` : "";
+        const url = `http://192.168.5.22:3001/schedules?date=${formattedDate}${userIdParam}`;
 
-      const response = await fetch(url);
+        console.log("Fetching data from:", url);
 
-      if (response.ok) {
-        const responseData = await response.json();
-        console.log("Raw data from API:", responseData);
+        const response = await fetch(url);
 
-        if (responseData.success && Array.isArray(responseData.data)) {
-          const groupedShifts = groupShiftsByShiftName(responseData.data);
-          console.log("Grouped shifts:", groupedShifts);
-          setShiftData(Object.values(groupedShifts));
+        if (response.ok) {
+          const responseData = await response.json();
+          console.log(
+            "Raw data from API for date",
+            formattedDate,
+            ":",
+            responseData
+          );
+
+          if (responseData.success && Array.isArray(responseData.data)) {
+            const groupedShifts = groupShiftsByShiftName(responseData.data);
+            console.log(
+              "Grouped shifts for date",
+              formattedDate,
+              ":",
+              groupedShifts
+            );
+            newShiftData[formattedDate] = Object.values(groupedShifts);
+          } else {
+            console.error(
+              "Unexpected data format for date",
+              formattedDate,
+              ":",
+              responseData
+            );
+            newShiftData[formattedDate] = [];
+          }
         } else {
-          console.error("Unexpected data format:", responseData);
-          setShiftData([]);
+          console.error(
+            "Error fetching shift data for date",
+            formattedDate,
+            ":",
+            response.status
+          );
+          newShiftData[formattedDate] = [];
         }
-      } else {
-        console.error("Error fetching shift data:", response.status);
-        setShiftData([]);
+      } catch (error) {
+        console.error("Error fetching shift data for date", date, ":", error);
+        newShiftData[date] = [];
       }
-    } catch (error) {
-      console.error("Error fetching shift data:", error);
-      setShiftData([]);
-    } finally {
-      setIsLoading(false);
     }
+
+    setShiftData(newShiftData);
+    setIsLoading(false);
   };
+
   const handleSelect = (selected) => {
     setSelectedUser(selected);
   };
 
   const handleDayPress = (day) => {
     const dateString = day.dateString;
-    setSelectedDate(dateString);
+    const newSelectedDates = { ...selectedDates };
+    const newMarkedDates = { ...markedDates };
 
-    setMarkedDates({
-      [dateString]: {
+    if (newSelectedDates[dateString]) {
+      delete newSelectedDates[dateString];
+      delete newMarkedDates[dateString];
+    } else {
+      newSelectedDates[dateString] = true;
+      newMarkedDates[dateString] = {
         selected: true,
         selectedColor: "#c82f2f",
         marked: true,
         dotColor: "#c82f2f",
-      },
-    });
+      };
+    }
+
+    setSelectedDates(newSelectedDates);
+    setMarkedDates(newMarkedDates);
   };
 
   const renderShifts = () => {
     if (isLoading) {
-      return <ActivityIndicator size="large" color="#0000ff" />;
+      return <ActivityIndicator size="large" color="#c82f2f" />;
     }
-    if (shiftData.length === 0) {
-      return (
-        <Text style={styles.noShiftsText}>
-          No shifts available for this date.
-        </Text>
-      );
-    }
-    return shiftData.map((shift, index) => (
-      <ShiftCard
-        key={index}
-        shiftName={shift.shift_name}
-        startTime={shift.start_time}
-        endTime={shift.end_time}
-        assignedUsers={shift.assigned_users}
-      />
+
+    return Object.entries(selectedDates).map(([date, _]) => (
+      <View key={date} style={styles.dateContainer}>
+        <Text style={styles.dateHeader}>{moment(date).format("LL")}:</Text>
+        {shiftData[date] && shiftData[date].length > 0 ? (
+          shiftData[date].map((shift, index) => (
+            <ShiftCard
+              key={`${date}-${index}`}
+              shiftName={shift.shift_name}
+              startTime={shift.start_time}
+              endTime={shift.end_time}
+              assignedUsers={
+                Array.isArray(shift.assigned_users)
+                  ? shift.assigned_users.flat()
+                  : [] // Provide an empty array if not an array
+              }
+            />
+          ))
+        ) : (
+          <Text style={styles.noShiftsText}>
+            No shifts available for this date.
+          </Text>
+        )}
+      </View>
     ));
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <DropdownComponent data={users} onSelect={handleSelect} />
@@ -193,14 +252,7 @@ const UserScheduleScreen = () => {
             },
           }}
         />
-        <View style={styles.dateContainer}>
-          {selectedDate && (
-            <Text style={styles.dateHeader}>
-              {moment(selectedDate).format("LL")}:
-            </Text>
-          )}
-          {renderShifts()}
-        </View>
+        {renderShifts()}
       </ScrollView>
     </SafeAreaView>
   );

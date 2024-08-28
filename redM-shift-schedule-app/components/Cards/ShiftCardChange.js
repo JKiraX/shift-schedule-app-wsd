@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Text, View, TouchableOpacity, Modal, StyleSheet } from "react-native";
 
-
-const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers }) => {
+const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [] }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleSwitchPress = () => setModalVisible(true);
@@ -18,11 +17,15 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers }) => {
       <View style={styles.contentContainer}>
         <Text style={styles.shiftName}>{shiftName}</Text>
         <View style={styles.usersContainer}>
-          {assignedUsers.map((user, index) => (
-            <Text key={index} style={styles.assignedUser}>
-              {user}
-            </Text>
-          ))}
+          {Array.isArray(assignedUsers) ? (
+            assignedUsers.map((user, index) => (
+              <Text key={index} style={styles.assignedUser}>
+                {user}
+              </Text>
+            ))
+          ) : (
+            <Text style={styles.assignedUser}>No users assigned</Text>
+          )}
         </View>
       </View>
       <Text style={styles.time}>
@@ -69,13 +72,12 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers }) => {
   );
 };
 
+
 const SwitchButton = ({ onPress }) => (
   <TouchableOpacity onPress={onPress} style={styles.button}>
     <Text style={styles.buttonText}>Switch</Text>
   </TouchableOpacity>
 );
-
-
 
 const styles = StyleSheet.create({
   card: {
@@ -102,11 +104,11 @@ const styles = StyleSheet.create({
   },
   time: {
     fontSize: 16,
-    color: '#666',
-    alignSelf: 'flex-end',
+    color: "#666",
+    alignSelf: "flex-end",
     marginTop: 5,
 
-    fontWeight: "500"
+    fontWeight: "500",
   },
   button: {
     borderRadius: 15,
