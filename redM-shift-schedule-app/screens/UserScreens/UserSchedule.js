@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
-import ShiftCard from "../../components/Cards/ShiftCardChange";
+import ShiftCard from "../../components/Cards/ShiftCard";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import moment from "moment";
 
@@ -21,7 +21,7 @@ const UserScheduleScreen = () => {
   const [shiftData, setShiftData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [markedDates, setMarkedDates] = useState({});
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState("");
   const [users, setUsers] = useState([]);
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -37,19 +37,16 @@ const UserScheduleScreen = () => {
 
   const fetchUsers = async () => {
     try {
-      console.log("Fetching users from:", `http://192.168.5.22:3001/users`);
       const response = await fetch(`http://192.168.5.22:3001/users`);
-      // console.log("Response status:", response.status);
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Network response was not ok: ${response.status}, ${errorText}`);
       }
       const responseData = await response.json();
-      console.log("Received data:", responseData);
 
       if (responseData.success && Array.isArray(responseData.data)) {
         setUsers(responseData.data.map((user) => ({
-          key: user.user_id,
+          key: user.user_id.toString(),
           value: `${user.first_name} ${user.last_name}`
         })));
       } else {
@@ -60,7 +57,6 @@ const UserScheduleScreen = () => {
       console.error("Error fetching user data:", error.message);
     }
   };
-
 
   const groupShiftsByShiftName = (shifts) => {
     if (!Array.isArray(shifts)) {
@@ -87,30 +83,24 @@ const UserScheduleScreen = () => {
     for (const date of dates) {
       try {
         const formattedDate = moment(date).format("YYYY-MM-DD");
-        const userIdParam = selectedUser ? `&userId=${selectedUser.key}` : "";
-        const url = `http://192.168.5.22:3001/schedules?date=${formattedDate}${userIdParam}`;
+        let url = `http://192.168.5.22:3001/schedules?date=${formattedDate}`;
+        
+        if (selectedUser) {
+          const selectedUserObject = users.find(user => user.value === selectedUser);
+          if (selectedUserObject) {
+            url += `&userId=${selectedUserObject.key}`;
+          }
+        }
 
-        // console.log("Fetching data from:", url);
+        console.log("Fetching data from URL:", url);
 
         const response = await fetch(url);
 
         if (response.ok) {
           const responseData = await response.json();
-          console.log(
-            "Raw data from API for date",
-            formattedDate,
-            ":",
-            responseData
-          );
 
           if (responseData.success && Array.isArray(responseData.data)) {
             const groupedShifts = groupShiftsByShiftName(responseData.data);
-            console.log(
-              "Grouped shifts for date",
-              formattedDate,
-              ":",
-              groupedShifts
-            );
             newShiftData[formattedDate] = Object.values(groupedShifts);
           } else {
             console.error(
@@ -122,11 +112,13 @@ const UserScheduleScreen = () => {
             newShiftData[formattedDate] = [];
           }
         } else {
+          const errorText = await response.text();
           console.error(
             "Error fetching shift data for date",
             formattedDate,
             ":",
-            response.status
+            response.status,
+            errorText
           );
           newShiftData[formattedDate] = [];
         }
@@ -141,7 +133,11 @@ const UserScheduleScreen = () => {
   };
 
   const handleSelect = (selected) => {
+    console.log("Selected user:", selected);
     setSelectedUser(selected);
+    if (Object.keys(selectedDates).length > 0) {
+      fetchShiftDataForMultipleDates(Object.keys(selectedDates));
+    }
   };
 
   const handleDayPress = (day) => {
@@ -184,7 +180,7 @@ const UserScheduleScreen = () => {
               assignedUsers={
                 Array.isArray(shift.assigned_users)
                   ? shift.assigned_users.flat()
-                  : [] // Provide an empty array if not an array
+                  : []
               }
             />
           ))
@@ -197,37 +193,11 @@ const UserScheduleScreen = () => {
     ));
   };
 
+
   return (
     <SafeAreaView style={styles.container}>
       <DropdownComponent data={users} onSelect={handleSelect} />
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tabButton, selectedTab === 0 && styles.selectedTab]}
-          onPress={() => setSelectedTab(0)}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              selectedTab === 0 && styles.selectedTabText,
-            ]}
-          >
-            Shifts
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tabButton, selectedTab === 1 && styles.selectedTab]}
-          onPress={() => setSelectedTab(1)}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              selectedTab === 1 && styles.selectedTabText,
-            ]}
-          >
-            Leave
-          </Text>
-        </TouchableOpacity>
-      </View>
+      
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <Calendar
           style={styles.calendar}
@@ -244,7 +214,6 @@ const UserScheduleScreen = () => {
             arrowColor: "#c82f2f",
             monthTextColor: "#c82f2f",
             textMonthFontWeight: "bold",
-            arrowColor: "#c82f2f",
             "stylesheet.calendar.header": {
               arrow: {
                 padding: 10,
