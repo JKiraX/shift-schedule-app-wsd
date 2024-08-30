@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.23,
     shadowRadius: 2.62,
     elevation: 4,
-    width: 350,
+    minWidth: 350,
   },
   contentContainer: {
     flex: 1,

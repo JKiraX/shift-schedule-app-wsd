@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -13,6 +13,7 @@ import {
   Alert,
   Pressable,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import DropdownComponent2 from "../../components/Dropdown/dropdownComponent2";
@@ -20,15 +21,40 @@ import DropdownComponent3 from "../../components/Dropdown/dropdownComponent3";
 import SmallButton from "../../components/Buttons/smallButton";
 import dayjs from "dayjs";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import * as SecureStore from "expo-secure-store";
+import { format, addMinutes } from 'date-fns';
 
 const { width } = Dimensions.get("window");
+
 const UserRequestLeaveScreen = () => {
   const [selectedTab, setSelectedTab] = useState(0);
-
-  // Overtime page functionality
+  const [isLoading, setIsLoading] = useState(false);
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [overtime, setOvertime] = useState("");
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    getUserId();
+  }, []);
+
+  const getUserId = async () => {
+    try {
+      const storedUserId = await SecureStore.getItemAsync("userId");
+      if (storedUserId) {
+        setUserId(storedUserId);
+      } else {
+        // Handle the case where user is not logged in
+        Alert.alert(
+          "Error",
+          "User not logged in. Please log in and try again."
+        );
+        // You might want to redirect to the login screen here
+      }
+    } catch (error) {
+      console.error("Error retrieving user ID:", error);
+    }
+  };
 
   const toggleDatepicker = () => {
     setShowPicker(!showPicker);
@@ -84,37 +110,49 @@ const UserRequestLeaveScreen = () => {
   ];
   const handleDayPress = (day) => {
     if (selectedTab === 1) {
-      if (!startDate) {
-        setStartDate(day.dateString);
+      const selectedDate = day.dateString;
+      
+      if (!startDate || (startDate && endDate)) {
+        // Start a new selection
+        setStartDate(selectedDate);
         setEndDate(null);
         setMarkedDates({
-          [day.dateString]: {
+          [selectedDate]: {
             startingDay: true,
+            endingDay: true,
             color: "#c82f2f",
             textColor: "white",
           },
         });
-      } else if (day.dateString < startDate) {
-        setStartDate(day.dateString);
-        setEndDate(null);
-        setMarkedDates({
-          [day.dateString]: {
-            startingDay: true,
-            color: "#c82f2f",
-            textColor: "white",
-          },
-        });
-      } else {
-        setEndDate(day.dateString);
-        setMarkedDates(generateMarkedDates(startDate, day.dateString));
+      } else if (startDate && !endDate) {
+        // Complete the selection
+        if (selectedDate < startDate) {
+          // If selected date is before start date, start a new selection
+          setStartDate(selectedDate);
+          setEndDate(null);
+          setMarkedDates({
+            [selectedDate]: {
+              startingDay: true,
+              endingDay: true,
+              color: "#c82f2f",
+              textColor: "white",
+            },
+          });
+        } else {
+          // Complete the range selection
+          setEndDate(selectedDate);
+          setMarkedDates(generateMarkedDates(startDate, selectedDate));
+        }
       }
     }
   };
+
   const generateMarkedDates = (start, end) => {
     let dateRange = {};
     let currentDate = dayjs(start);
     const endDate = dayjs(end);
-    while (currentDate.isBefore(endDate) || currentDate.isSame(endDate)) {
+    
+    while (currentDate.isBefore(endDate) || currentDate.isSame(endDate, 'day')) {
       const dateString = currentDate.format("YYYY-MM-DD");
       if (dateString === start) {
         dateRange[dateString] = {
@@ -133,8 +171,21 @@ const UserRequestLeaveScreen = () => {
       }
       currentDate = currentDate.add(1, "day");
     }
+
+    // If start and end are the same, mark it as both starting and ending
+    if (start === end) {
+      dateRange[start] = {
+        startingDay: true,
+        endingDay: true,
+        color: "#c82f2f",
+        textColor: "white",
+      };
+    }
+
     return dateRange;
   };
+
+
   const handleTextChange = (input) => {
     setJustification(input);
   };
@@ -146,57 +197,67 @@ const UserRequestLeaveScreen = () => {
   };
   const handleModalConfirm = async () => {
     if (selectedTab === 1) {
-      if (!leaveType || !startDate || !endDate || !justification) {
-        Alert.alert("Error", "All fields are required.");
+      if (!leaveType || !startDate || !justification) {
+        Alert.alert("Error", "Please fill in all required fields: Leave Type, Date, and Justification.");
         return;
       }
+      if (!userId) {
+        Alert.alert("Error", "User ID not found. Please log in and try again.");
+        return;
+      }
+      setIsLoading(true);
       try {
-        const userId = 1; // Assuming the user ID is known and set. Replace with actual user ID.
-        const response = await fetch(
-          `http://192.168.5.61:3001/api/report-leave`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              user_id: userId,
-              type_of_leave: leaveType.value,
-              justification,
-              start_date: startDate,
-              end_date: endDate,
-            }),
-          }
-        );
+        // Get current date and adjust for South African time zone (UTC+2)
+        const now = new Date();
+        const saTime = addMinutes(now, now.getTimezoneOffset() + 120);
+        const formattedReportedAt = format(saTime, "yyyy-MM-dd'T'HH:mm:ss");
+
+        const response = await fetch(`http://192.168.5.22:3001/api/report-leave`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: userId,
+            type_of_leave: leaveType.value,
+            justification,
+            start_date: startDate,
+            end_date: endDate || startDate,  // Use startDate if endDate is not set (single day)
+            reported_at: formattedReportedAt,
+          }),
+        });
         if (!response.ok) {
-          throw new Error(
-            `Network response was not ok: ${response.statusText}`
-          );
+          throw new Error(`Network response was not ok: ${response.statusText}`);
         }
+        const result = await response.json();
         Alert.alert("Success", "Leave reported successfully.");
-        setModalVisible(false);
-        // Reset the form
-        setStartDate(null);
-        setEndDate(null);
-        setMarkedDates({});
-        setJustification("");
-        setLeaveType(null);
+        resetForm();
       } catch (error) {
         console.error("Error reporting leave:", error.message);
-        Alert.alert("Error", "Failed to report leave.");
+        Alert.alert("Error", "Failed to report leave. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
     } else {
-      // Handle overtime submission (without API call)
       Alert.alert("Success", "Overtime request submitted.");
-      setModalVisible(false);
     }
-  };
+    setModalVisible(false);
+  };  
   const handleModalCancel = () => {
     setModalVisible(false);
   };
+
+
+  const resetForm = () => {
+    setStartDate(null);
+    setEndDate(null);
+    setMarkedDates({});
+    setJustification("");
+    setLeaveType(null);
+  };
+  
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.tabContainer}>
+      
         <TouchableOpacity
           style={[styles.tabButton, selectedTab === 0 && styles.activeTab]}
           onPress={() => setSelectedTab(0)}
@@ -238,7 +299,6 @@ const UserRequestLeaveScreen = () => {
                         value={date}
                         onChange={onChange}
                         style={styles.datePicker}
-                        
                       />
                       <View style={styles.iosPickerButtonContainer}>
                         <TouchableOpacity
@@ -314,20 +374,20 @@ const UserRequestLeaveScreen = () => {
                 markedDates={markedDates}
                 onDayPress={handleDayPress}
                 theme={{
-                  selectedDayBackgroundColor: '#c82f2f',
-                  selectedDayTextColor: '#ffffff',
-                  todayTextColor: '#c82f2f',
-                  dotColor: '#c82f2f',
+                  selectedDayBackgroundColor: "#c82f2f",
+                  selectedDayTextColor: "#ffffff",
+                  todayTextColor: "#c82f2f",
+                  dotColor: "#c82f2f",
                   arrowColor: "#c82f2f",
                   monthTextColor: "#c82f2f",
                   textMonthFontWeight: "bold",
-                  arrowColor: '#c82f2f',
-                  'stylesheet.calendar.header': {
+                  arrowColor: "#c82f2f",
+                  "stylesheet.calendar.header": {
                     arrow: {
                       padding: 10,
-              },
-            },
-          }}
+                    },
+                  },
+                }}
               />
               <Text style={styles.sectionTitle}>Type of Leave:</Text>
               <DropdownComponent2
@@ -361,6 +421,7 @@ const UserRequestLeaveScreen = () => {
             <Text style={styles.modalText2}>
               Please confirm only if it has been approved.
             </Text>
+            
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 style={styles.modalButton}
@@ -374,6 +435,7 @@ const UserRequestLeaveScreen = () => {
               >
                 <Text style={styles.modalButtonText}>Confirm</Text>
               </TouchableOpacity>
+              {isLoading && <ActivityIndicator size="large" color="#c82f2f" />}
             </View>
           </View>
         </View>
@@ -399,10 +461,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   formContainer: {
-    flex:1,
+    flex: 1,
     width: width * 0.9,
     alignItems: "center",
-
   },
   tabContainer: {
     width: width * 0.9,

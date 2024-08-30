@@ -128,19 +128,30 @@ const SwitchButton = ({ onPress }) => (
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#f2f2f2",
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
     padding: 16,
-    borderRadius: 15,
-    marginVertical: 8,
-    width: "112%",
-    maxWidth: 350,
-    alignSelf: "center",
+    marginBottom: 16,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4,
+    minWidth: 350,
   },
   shiftName: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 6,
     // paddingBottom: 2,
+  },
+  contentContainer: {
+    flex: 1,
   },
   assignedUser: {
     fontSize: 16,

@@ -107,13 +107,11 @@ app.get("/schedules", async (req, res) => {
     console.log("Fetched schedules:", schedules);
 
     if (schedules.length === 0) {
-      return res
-        .status(200)
-        .json({
-          success: true,
-          data: [],
-          message: "No schedules found for the given date(s)",
-        });
+      return res.status(200).json({
+        success: true,
+        data: [],
+        message: "No schedules found for the given date(s)",
+      });
     }
 
     // Map data to align with ShiftCard props
@@ -173,31 +171,48 @@ app.put("/api/schedules/switch", async (req, res) => {
   const { work_date, shift_id, current_user_id, new_user_id } = req.body;
 
   if (!work_date || !shift_id || !current_user_id || !new_user_id) {
-    return res.status(400).json({ error: "All fields (work_date, shift_id, current_user_id, new_user_id) are required" });
+    return res
+      .status(400)
+      .json({
+        error:
+          "All fields (work_date, shift_id, current_user_id, new_user_id) are required",
+      });
   }
 
   try {
     // Check if the shift exists
-    const validShift = await db.oneOrNone(`
+    const validShift = await db.oneOrNone(
+      `
       SELECT * FROM public.schedules WHERE work_date = $1 AND shift_id = $2 AND user_id = $3
-    `, [work_date, shift_id, current_user_id]);
+    `,
+      [work_date, shift_id, current_user_id]
+    );
 
     if (!validShift) {
-      return res.status(400).json({ error: "Invalid shift or current user. This shift does not exist for the current user." });
+      return res
+        .status(400)
+        .json({
+          error:
+            "Invalid shift or current user. This shift does not exist for the current user.",
+        });
     }
 
     // Update the schedule with the new user
-    const updatedSchedule = await db.one(`
+    const updatedSchedule = await db.one(
+      `
       UPDATE public.schedules SET user_id = $1 WHERE work_date = $2 AND shift_id = $3 RETURNING *;
-    `, [new_user_id, work_date, shift_id]);
+    `,
+      [new_user_id, work_date, shift_id]
+    );
 
     res.json({ success: true, data: updatedSchedule });
   } catch (error) {
     console.error("Error switching schedule:", error);
-    res.status(500).json({ error: "Internal server error", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Internal server error", details: error.message });
   }
 });
-
 
 // 404 handler
 app.use((req, res, next) => {
