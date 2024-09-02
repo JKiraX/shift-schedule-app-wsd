@@ -1,9 +1,17 @@
 {
   "expo": {
+    
     "name": "redM-shift-schedule-app",
     "slug": "redM-shift-schedule-app",
     "version": "1.0.0",
-    "platforms": ["ios", "android"],
+    "ios": {
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -12,17 +20,22 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "permissions": ["NOTIFICATIONS"],
+        "permissions": [
+          "NOTIFICATIONS"
+        ],
         "backgroundColor": "#ffffff"
       }
     },
+    
     "notification": {
       "iosDisplayInForeground": true,
       "android": {
@@ -32,6 +45,10 @@
       "web": {
         "favicon": "./assets/favicon.png"
       }
-    }
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
+}
 }
