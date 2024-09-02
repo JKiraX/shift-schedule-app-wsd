@@ -1,17 +1,9 @@
 {
   "expo": {
-    
     "name": "redM-shift-schedule-app",
     "slug": "redM-shift-schedule-app",
     "version": "1.0.0",
-    "ios": {
-      "config": {
-        "usesNonExemptEncryption": false
-      },
-    "platforms": [
-      "ios",
-      "android"
-    ],
+    "platforms": ["ios", "android"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,22 +12,22 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "permissions": [
-          "NOTIFICATIONS"
-        ],
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": ["NOTIFICATIONS"],
+      "package": "com.redm_professional.redmshiftschedulerapp",
+      "googleServicesFile": "./google-services.json"
     },
-    
     "notification": {
       "iosDisplayInForeground": true,
       "android": {
@@ -46,24 +38,12 @@
         "favicon": "./assets/favicon.png"
       }
     },
-    "plugins": [
-      "expo-secure-store"
-    ]
-  }
-}
-}
-{
-  "expo": {
+    "plugins": ["expo-secure-store"],
     "extra": {
       "eas": {
         "projectId": "66d951a2-7ce2-4270-9e30-f58bd5949cf6"
       }
     },
-    "owner": "redm_professional",
-    "slug": "redm-shift-scheduler-app",
-    "android": {
-      "package": "com.redm_professional.redmshiftschedulerapp",
-      "googleServicesFile": "./google-services.json"
-    }
+    "owner": "redm_professional"
   }
 }

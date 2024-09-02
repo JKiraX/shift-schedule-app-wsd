@@ -44,6 +44,7 @@
     "express": "^4.19.2",
     "express-rate-limit": "^7.3.1",
     "express-sanitizer": "^1.0.6",
+    "git-filter-repo": "^0.0.30",
     "json5": "^2.2.3",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
