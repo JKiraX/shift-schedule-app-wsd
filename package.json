@@ -19,7 +19,7 @@
     "@reduxjs/toolkit": "^2.2.3",
     "ajv": "^6.12.3",
     "ansi-html": "^0.0.8",
-    "axios": "^1.7.2",
+    "axios": "^1.7.4",
     "babel-plugin-polyfill-corejs2": "^0.4.6",
     "babel-plugin-polyfill-corejs3": "^0.8.5",
     "babel-plugin-polyfill-es-shims": "^0.10.0",
