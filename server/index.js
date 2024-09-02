@@ -1,30 +1,24 @@
 const express = require("express");
 const moment = require("moment-timezone");
 const bodyParser = require("body-parser");
-const db = require("./db");
-const generateSchedules = require("./scheduleGenerator");
-const checkAndGenerateSchedules = require("./checkAndGenerateSchedules");
-const scheduleRoutes = require("./scheduleRoutes");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const cors = require("cors");
-const rateLimit = require("express-rate-limit");
+const db = require("./db"); // Assuming `db` is your pg-promise instance
+// const rateLimit = require("express-rate-limit");
 const sanitizeInput = require("express-sanitizer");
-
+const cors = require("cors");
 const app = express();
 
-// Define the rate limit rule
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: "Too many requests from this IP, please try again later.",
-});
+// // Define the rate limit rule
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100, // limit each IP to 100 requests per windowMs
+//   message: "Too many requests from this IP, please try again later.",
+// });
 
-app.use(limiter);
+app.use(cors());
+// app.use(limiter);
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/api", scheduleRoutes);
 app.use(sanitizeInput());
 
 app.use((req, res, next) => {
@@ -35,28 +29,33 @@ app.use((req, res, next) => {
   next();
 });
 
+// GET users route
 app.get("/users", async (req, res) => {
   try {
+    console.log("Fetching users...");
     const users = await db.any(`
-      SELECT user_id, user_name
-      FROM public1.users
-      WHERE admin = 1
-      ORDER BY user_name
+        SELECT u."Id" AS user_id, u."firstName" AS first_name, u."lastName" AS last_name
+        FROM public.appuser u
+        JOIN public.identityuserrole iur ON u."Id" = iur."UserId"
+        WHERE iur."RoleId" = 2
+        ORDER BY u."firstName";
+
     `);
-    res.json(users);
+    console.log("Fetched users:", users);
+    res.json({ success: true, data: users });
   } catch (error) {
     console.error("Error fetching users:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", details: error.message });
   }
 });
 
-app.use((req, res, next) => {
-  console.log("No route matched for", req.method, req.url);
-  next();
-});
-
+// GET schedules route
 app.get("/schedules", async (req, res) => {
   const { date, dates, userId } = req.query;
+
+  console.log("Received request with params:", { date, dates, userId });
 
   if (!date && !dates) {
     return res
@@ -71,100 +70,68 @@ app.get("/schedules", async (req, res) => {
     dateList = dates.split(",");
   }
 
+  console.log("Date list:", dateList);
+
   try {
     let schedules;
+    let query;
+    let params;
+
     if (userId) {
-      schedules = await db.any(
-        `
-        SELECT s.date, u.user_name AS user_name, sh.name AS shift_name, sh.start_time, sh.end_time, s.user_id
-        FROM public1.schedules s
-        JOIN public1.users u ON s.user_id = u.user_id
-        JOIN public1.shifts sh ON s.shift_id = sh.shift_id
-        WHERE s.date IN ($1:csv) AND u.user_id = $2
-      `,
-        [dateList, userId]
-      );
+      query = `
+        SELECT s.work_date, u."firstName" AS first_name, u."lastName" AS last_name, sh.shift_name, sh.start_time, sh.end_time, s.user_id
+        FROM public.schedules s
+        JOIN public.appuser u ON s.user_id = u."Id"
+        JOIN public.shifts sh ON s.shift_id = sh.shift_id
+        WHERE s.work_date IN ($1:csv) AND s.user_id = $2
+        ORDER BY s.work_date ASC, sh.start_time ASC
+      `;
+      params = [dateList, userId];
     } else {
-      schedules = await db.any(
-        `
-        SELECT s.date, u.user_name AS user_name, sh.name AS shift_name, sh.start_time, sh.end_time, s.user_id
-        FROM public1.schedules s
-        JOIN public1.users u ON s.user_id = u.user_id
-        JOIN public1.shifts sh ON s.shift_id = sh.shift_id
-        WHERE s.date IN ($1:csv)
-      `,
-        [dateList]
-      );
+      query = `
+        SELECT s.work_date, u."firstName" AS first_name, u."lastName" AS last_name, sh.shift_name, sh.start_time, sh.end_time, s.user_id
+        FROM public.schedules s
+        JOIN public.appuser u ON s.user_id = u."Id"
+        JOIN public.shifts sh ON s.shift_id = sh.shift_id
+        WHERE s.work_date IN ($1:csv)
+        ORDER BY s.work_date ASC, sh.start_time ASC
+      `;
+      params = [dateList];
     }
 
-    res.json(schedules);
+    console.log("Executing query:", query);
+    console.log("With parameters:", params);
+
+    schedules = await db.any(query, params);
+
+    console.log("Fetched schedules:", schedules);
+
+    if (schedules.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: [],
+        message: "No schedules found for the given date(s)",
+      });
+    }
+
+    // Map data to align with ShiftCard props
+    const formattedSchedules = schedules.map((schedule) => ({
+      shift_name: schedule.shift_name,
+      start_time: schedule.start_time,
+      end_time: schedule.end_time,
+      assigned_users: `${schedule.first_name} ${schedule.last_name}`,
+    }));
+
+    res.json({ success: true, data: formattedSchedules });
   } catch (error) {
     console.error("Error fetching schedules:", error);
-    res.status(500).send("Internal Server Error");
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", details: error.message });
   }
 });
 
-app.get("/api/schedules/id", async (req, res) => {
-  const { date, shift_id } = req.query;
-
-  if (!date || !shift_id) {
-    return res
-      .status(400)
-      .json({ error: "Both date and shift_id are required" });
-  }
-
-  try {
-    const schedule = await db.oneOrNone(
-      `
-      SELECT schedules_id
-      FROM public1.schedules
-      WHERE date = $1 AND shift_id = $2
-    `,
-      [date, shift_id]
-    );
-
-    if (!schedule) {
-      return res.status(404).json({ error: "No matching schedule found" });
-    }
-
-    res.json({ schedules_id: schedule.schedules_id });
-  } catch (error) {
-    console.error("Error fetching schedule_id:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-app.post("/criteria", async (req, res) => {
-  const { user_id, day_of_week, max_shifts_per_week } = req.body;
-  try {
-    const userExists = await db.oneOrNone(
-      "SELECT 1 FROM public1.users WHERE user_id = $1",
-      [user_id]
-    );
-    if (!userExists) {
-      return res.status(400).json({ message: "User does not exist" });
-    }
-    await db.none(
-      "INSERT INTO public1.criteria (user_id, day_of_week, max_shifts_per_week) VALUES ($1, $2, $3)",
-      [user_id, day_of_week, max_shifts_per_week]
-    );
-    res.sendStatus(201);
-  } catch (error) {
-    console.error("Error inserting criteria:", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-app.post("/generate-schedules", async (req, res) => {
-  try {
-    await generateSchedules();
-    res.status(200).send("Schedules generated successfully.");
-  } catch (error) {
-    console.error("Error generating schedules:", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
+// POST report leave route
 app.post("/api/report-leave", async (req, res) => {
   const { user_id, type_of_leave, justification, start_date, end_date } =
     req.body;
@@ -183,88 +150,62 @@ app.post("/api/report-leave", async (req, res) => {
   }
 
   try {
-    const query = `
-      INSERT INTO public1.reports (user_id, type_of_leave, justification, start_date, end_date, reported_at)
+    const result = await db.one(
+      `
+      INSERT INTO public.report_leave (user_id, type_of_leave, justification_message, start_date, end_date, reported_at)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *;
-    `;
-    const values = [
-      user_id,
-      type_of_leave,
-      justification,
-      start_date,
-      end_date,
-      reportedAt,
-    ];
-    const result = await db.one(query, values);
+    `,
+      [user_id, type_of_leave, justification, start_date, end_date, reportedAt]
+    );
 
-    res.status(201).json(result);
+    res.status(201).json({ success: true, data: result });
   } catch (err) {
     console.error("Error reporting leave:", err);
     res.status(500).json({ error: "Failed to report leave" });
   }
 });
 
+// PUT switch schedule route
 app.put("/api/schedules/switch", async (req, res) => {
-  const { date, shift_id, user_id } = req.body;
+  const { work_date, shift_id, current_user_id, new_user_id } = req.body;
 
-  console.log("Received switch request:", { date, shift_id, user_id });
-
-  if (!date || !shift_id || !user_id) {
+  if (!work_date || !shift_id || !current_user_id || !new_user_id) {
     return res
       .status(400)
-      .json({ error: "All fields (date, shift_id, user_id) are required" });
+      .json({
+        error:
+          "All fields (work_date, shift_id, current_user_id, new_user_id) are required",
+      });
   }
 
   try {
-    const parsedDate = date.split("-").slice(0, 3).join("-");
-    const parsedShiftId = parseInt(shift_id, 10);
-
-    console.log("Parsed data:", { parsedDate, parsedShiftId, user_id });
-
-    // Check if the shift_id is valid
+    // Check if the shift exists
     const validShift = await db.oneOrNone(
-      "SELECT * FROM public1.shifts WHERE shift_id = $1",
-      [parsedShiftId]
+      `
+      SELECT * FROM public.schedules WHERE work_date = $1 AND shift_id = $2 AND user_id = $3
+    `,
+      [work_date, shift_id, current_user_id]
     );
+
     if (!validShift) {
       return res
         .status(400)
-        .json({ error: "Invalid shift_id. This shift does not exist." });
+        .json({
+          error:
+            "Invalid shift or current user. This shift does not exist for the current user.",
+        });
     }
 
-    // Find the schedule
-    const schedule = await db.oneOrNone(
-      "SELECT * FROM public1.schedules WHERE date = $1 AND shift_id = $2",
-      [parsedDate, parsedShiftId]
-    );
-
-    console.log("Schedule check result:", schedule);
-
-    if (!schedule) {
-      return res
-        .status(404)
-        .json({ error: "Schedule not found for the given date and shift." });
-    }
-
-    // Update the schedule
+    // Update the schedule with the new user
     const updatedSchedule = await db.one(
-      "UPDATE public1.schedules SET user_id = $1 WHERE date = $2 AND shift_id = $3 RETURNING *",
-      [user_id, parsedDate, parsedShiftId]
+      `
+      UPDATE public.schedules SET user_id = $1 WHERE work_date = $2 AND shift_id = $3 RETURNING *;
+    `,
+      [new_user_id, work_date, shift_id]
     );
 
-    console.log("Updated schedule:", updatedSchedule);
-
-    // Get the user name
-    const userResult = await db.one(
-      "SELECT user_name FROM public1.users WHERE user_id = $1",
-      [user_id]
-    );
-
-    const response = { ...updatedSchedule, user_name: userResult.user_name };
-    console.log("Sending response:", response);
-
-    res.json(response);
+    res.json({ success: true, data: updatedSchedule });
   } catch (error) {
     console.error("Error switching schedule:", error);
     res
@@ -273,31 +214,13 @@ app.put("/api/schedules/switch", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await db.oneOrNone(
-      "SELECT * FROM public1.users WHERE email = $1",
-      [email]
-    );
-    if (user && bcrypt.compareSync(password, user.password)) {
-      const token = jwt.sign({ id: user.user_id }, process.env.SECRET_KEY, {
-        expiresIn: "1h",
-      });
-      res.json({ token, user });
-    } else {
-      res.status(401).json({ error: "Invalid email or password" });
-    }
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
+// 404 handler
+app.use((req, res, next) => {
+  console.log("No route matched for", req.method, req.url);
+  res.status(404).json({ error: "Not Found" });
 });
 
 const PORT = process.env.PORT || 3001;
-
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  checkAndGenerateSchedules();
 });
