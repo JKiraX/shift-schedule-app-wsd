@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "66d951a2-7ce2-4270-9e30-f58bd5949cf6"
+      }
+    },
+    "owner": "redm_professional",
+    "slug": "redm-shift-scheduler-app",
+    "android": {
+      "package": "com.redm_professional.redmshiftschedulerapp",
+      "googleServicesFile": "./google-services.json"
+    }
+  }
+}

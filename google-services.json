@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "903831392092",
+    "project_id": "redmps-schedular",
+    "storage_bucket": "redmps-schedular.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903831392092:android:a986792883e805d98b7b99",
+        "android_client_info": {
+          "package_name": "com.shift.scheduler"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnrsIy4DqsEdfyOGHGIbz1ToM2U8lsdpk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

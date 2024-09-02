@@ -1,95 +1,98 @@
-import React, { useEffect } from 'react';
-import { View, Button, Text, Platform, StyleSheet } from 'react-native';
-import * as Notifications from 'expo-notifications';
-import * as Permissions from 'expo-permissions';
+// // NotificationsPage.js
+// import React, { useEffect, useState } from 'react';
+// import { View, Text, Button, Platform, Alert } from 'react-native';
+// import * as Notifications from 'expo-notifications';
+// import 'firebase/messaging';
 
-async function registerForPushNotificationsAsync() {
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-    });
-  }
+// const NotificationsPage = () => {
+//     const [expoPushToken, setExpoPushToken] = useState('');
+//     const [notification, setNotification] = useState(false);
 
-  const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
-  let finalStatus = existingStatus;
+//     useEffect(() => {
+//         registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
 
-  if (existingStatus !== 'granted') {
-    const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
-    finalStatus = status;
-  }
+//         const notificationListener = Notifications.addNotificationReceivedListener(notification => {
+//             setNotification(notification);
+//         });
 
-  if (finalStatus !== 'granted') {
-    alert('Failed to get push token for push notification!');
-    return;
-  }
+//         const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
+//             console.log(response);
+//         });
 
-  try {
-    const token = (await Notifications.getExpoPushTokenAsync()).data;
-    console.log(token);
-  } catch (error) {
-    console.log('Error getting push token:', error);
-  }
-}
+//         return () => {
+//             Notifications.removeNotificationSubscription(notificationListener);
+//             Notifications.removeNotificationSubscription(responseListener);
+//         };
+//     }, []);
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+//     async function registerForPushNotificationsAsync() {
+//         let token;
+//         const { status: existingStatus } = await Notifications.getPermissionsAsync();
+//         let finalStatus = existingStatus;
 
-export default function App() {
-  useEffect(() => {
-    registerForPushNotificationsAsync();
-  }, []);
+//         if (existingStatus !== 'granted') {
+//             const { status } = await Notifications.requestPermissionsAsync();
+//             finalStatus = status;
+//         }
 
-  const triggerShiftReminderNotification = () => {
-    const triggerTime = new Date();
-    triggerTime.setHours(triggerTime.getHours() + 1);
+//         if (finalStatus !== 'granted') {
+//             Alert.alert('Failed to get push token for push notification!');
+//             return;
+//         }
 
-    Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Shift Reminder',
-        body: 'Your shift will start in one hour.',
-      },
-      trigger: {
-        date: triggerTime,
-      },
-    });
-  };
+//         token = (await Notifications.getExpoPushTokenAsync()).data;
+//         console.log(token);
 
-  return (
-    <View style={styles.container}>
-      <Text
-        onPress={triggerShiftReminderNotification}
-        style={styles.title}
-      >
-        Set Shift Reminder
-      </Text>
-      <Button
-        title="Trigger Notification"
-        onPress={triggerShiftReminderNotification}
-      />
-    </View>
-  );
-}
+//         if (Platform.OS === 'android') {
+//             await Notifications.setNotificationChannelAsync('default', {
+//                 name: 'default',
+//                 importance: Notifications.AndroidImportance.MAX,
+//                 vibrationPattern: [0, 250, 250, 250],
+//                 lightColor: '#FF231F7C',
+//             });
+//         }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-});
+//         return token;
+//     }
+
+//     async function sendPushNotification(expoPushToken) {
+//         const message = {
+//             to: expoPushToken,
+//             sound: 'default',
+//             title: 'Test Notification',
+//             body: 'This is a test notification',
+//             data: { someData: 'goes here' },
+//         };
+
+//         await fetch('https://exp.host/--/api/v2/push/send', {
+//             method: 'POST',
+//             headers: {
+//                 Accept: 'application/json',
+//                 'Content-Type': 'application/json',
+//             },
+//             body: JSON.stringify(message),
+//         });
+//     }
+
+//     return (
+//         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+//             <Text>Your Expo Push Token: {expoPushToken}</Text>
+//             <View style={{ height: 20 }} />
+//             <Button
+//                 title="Press to Send Notification"
+//                 onPress={async () => {
+//                     await sendPushNotification(expoPushToken);
+//                 }}
+//             />
+//             {notification && (
+//                 <View style={{ marginTop: 20 }}>
+//                     <Text>Title: {notification.request.content.title} </Text>
+//                     <Text>Body: {notification.request.content.body}</Text>
+//                     <Text>Data: {JSON.stringify(notification.request.content.data)}</Text>
+//                 </View>
+//             )}
+//         </View>
+//     );
+// };
+
+// export default NotificationsPage;
