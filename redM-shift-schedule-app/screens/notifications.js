@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Button, Text, Platform, StyleSheet } from 'react-native';
 import * as Notifications from 'expo-notifications';
-import * as Permissions from 'expo-permissions';
+
 
 async function registerForPushNotificationsAsync() {
   if (Platform.OS === 'android') {
