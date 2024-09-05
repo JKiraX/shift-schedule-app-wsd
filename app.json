@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "RedShift",
+    "name": "ShiftX",
     "slug": "redm-shift-scheduler-app",
     "owner": "redm_professional",
     "version": "1.0.0",
@@ -14,10 +14,10 @@
       "android"
     ],
     "orientation": "portrait",
-    "icon": "redM-shift-schedule-app/assets/calendar3.png",
+    "icon": "redM-shift-schedule-app/assets/calendar2.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "redM-shift-schedule-app/assets/calendar3.png",
+      "image": "redM-shift-schedule-app/assets/calendar2.png",
       "resizeMode": "contain",
       "backgroundColor": "#f5f5f5"
     },
@@ -26,7 +26,7 @@
     ],
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "redM-shift-schedule-app/assets/calendar3.png",
+        "foregroundImage": "redM-shift-schedule-app/assets/calendar2.png",
         "backgroundColor": "#f5f5f5"
       },
       "package": "com.redshift.android"
