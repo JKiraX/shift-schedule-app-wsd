@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import {
-  Text,
   View,
   StyleSheet,
   SafeAreaView,
   ScrollView,
-  Platform,
+  ActivityIndicator,
+  Text,
   Dimensions,
 } from "react-native";
 import CalendarStrip from "react-native-calendar-strip";
@@ -16,7 +16,8 @@ const { width, height } = Dimensions.get("window");
 
 const AdminHomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [shiftData, setShiftData] = useState([]);
+  const [shiftData, setShiftData] = useState([]) ;
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchShiftData(selectedDate);
@@ -37,9 +38,29 @@ const AdminHomeScreen = ({ navigation }) => {
 
   const onDateSelected = (date) => {
     setSelectedDate(date);
+    fetchShiftData(date);
+  };
+
+  const groupShiftsByShiftName = (shifts) => {
+    if (!Array.isArray(shifts)) {
+      console.error("Shifts is not an array:", shifts);
+      return [];
+    }
+
+    return shifts.reduce((acc, shift) => {
+      if (!acc[shift.shift_name]) {
+        acc[shift.shift_name] = {
+          ...shift,
+          assigned_users: [],
+        };
+      }
+      acc[shift.shift_name].assigned_users.push(shift.assigned_users);
+      return acc;
+    }, {});
   };
 
   const fetchShiftData = async (date) => {
+    setIsLoading(true);
     try {
       const formattedDate = moment(date).format("YYYY-MM-DD");
       const response = await fetch(
@@ -47,23 +68,36 @@ const AdminHomeScreen = ({ navigation }) => {
       );
 
       if (response.ok) {
-        const data = await response.json();
-        setShiftData(data);
+        const responseData = await response.json();
+        // console.log("Raw data from API:", responseData);
+
+        if (responseData.success && Array.isArray(responseData.data)) {
+          const groupedShifts = groupShiftsByShiftName(responseData.data);
+          // console.log("Grouped shifts:", groupedShifts);
+          setShiftData(Object.values(groupedShifts));
+        } else {
+          console.error("Unexpected data format:", responseData);
+          setShiftData([]);
+        }
       } else {
         console.error("Error fetching shift data:", response.status);
+        setShiftData([]);
       }
     } catch (error) {
       console.error("Error fetching shift data:", error);
+      setShiftData([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <CalendarStrip
-        scrollable
+        scrollable={true}
         style={styles.calendarStrip}
         calendarHeaderStyle={styles.calendarHeader}
-        calendarColor={"white"}
+        calendarColor={styles.calendarColor.backgroundColor}
         dateNumberStyle={styles.dateNumber}
         dateNameStyle={styles.dateName}
         iconContainer={styles.iconContainer}
@@ -75,15 +109,23 @@ const AdminHomeScreen = ({ navigation }) => {
 
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.shiftCardsContainer}>
-          {shiftData.map((shift, index) => (
-            <ShiftCard
-              key={index}
-              shiftName={shift.shift_name}
-              startTime={shift.start_time}
-              endTime={shift.end_time}
-              assignedUsers={shift.user_name}
-            />
-          ))}
+          {isLoading ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : shiftData.length > 0 ? (
+            shiftData.map((shift, index) => (
+              <ShiftCard
+                key={index}
+                shiftName={shift.shift_name}
+                startTime={shift.start_time}
+                endTime={shift.end_time}
+                assignedUsers={shift.assigned_users} 
+              />
+            ))
+          ) : (
+            <Text style={styles.noShiftsText}>
+              No shifts available for this date.
+            </Text>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -96,14 +138,17 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   calendarStrip: {
-    height: height * 0.15,
-    paddingTop: Platform.OS === "ios" ? 20 : 10,
+    height: 120,
+    paddingTop: 20,
     paddingBottom: 10,
   },
   calendarHeader: {
     color: "black",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  calendarColor: {
+    backgroundColor: "white",
   },
   dateNumber: {
     color: "black",
@@ -122,7 +167,12 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   shiftCardsContainer: {
-    padding: width * 0.05,
+    padding: 20,
+  },
+  noShiftsText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 

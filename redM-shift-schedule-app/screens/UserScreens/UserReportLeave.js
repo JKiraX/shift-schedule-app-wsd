@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -13,6 +13,7 @@ import {
   Alert,
   Pressable,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import DropdownComponent2 from "../../components/Dropdown/dropdownComponent2";
@@ -20,15 +21,84 @@ import DropdownComponent3 from "../../components/Dropdown/dropdownComponent3";
 import SmallButton from "../../components/Buttons/smallButton";
 import dayjs from "dayjs";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import * as SecureStore from "expo-secure-store";
+import { format, addMinutes } from "date-fns";
 
 const { width } = Dimensions.get("window");
-const UserRequestLeaveScreen = () => {
-  const [selectedTab, setSelectedTab] = useState(0);
 
-  // Overtime page functionality
+const UserRequestLeaveScreen = () => {
+  const [userId, setUserId] = useState(null);
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
+  const [selectedShift, setSelectedShift] = useState(null);
+  const [overtimeHours, setOvertimeHours] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [shift, setShifts] = useState([]);
+  const [selectedTab, setSelectedTab] = useState(0);
   const [overtime, setOvertime] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    getUserId();
+    fetchShifts();
+  }, []);
+
+  const getUserId = async () => {
+    try {
+      const storedUserId = await SecureStore.getItemAsync("userId");
+      if (storedUserId) {
+        setUserId(parseInt(storedUserId, 10));
+        console.log("Fetched user_id:", parseInt(storedUserId, 10));
+      } else {
+        Alert.alert(
+          "Error",
+          "User not logged in. Please log in and try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error retrieving user ID:", error);
+    }
+  };
+
+  const fetchShifts = async () => {
+    setIsLoading(true);
+    try {
+      console.log("Fetching shifts data...");
+      const response = await fetch("http://192.168.5.22:3001/api/shifts");
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Shifts data received:", data);
+
+      if (data.success) {
+        const formattedShifts = data.data.map((shift) => ({
+          key: shift.shift_id.toString(),
+          value: shift.shift_name,
+        }));
+        console.log("Formatted shifts:", formattedShifts);
+        setShifts(formattedShifts);
+      } else {
+        throw new Error(data.error || "Failed to fetch shifts");
+      }
+    } catch (error) {
+      console.error("Error fetching shifts:", error.message);
+      Alert.alert("Error", "Failed to fetch shifts. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleShiftSelect = (selected) => {
+    console.log("Selected shift:", selected);
+    setSelectedShift(selected);
+  };
+
+  const handleOvertimeHours = (selected) => {
+    console.log("Overtime hours selected:", selected);
+    setOvertimeHours(parseInt(selected.value, 10));
+  };
 
   const toggleDatepicker = () => {
     setShowPicker(!showPicker);
@@ -51,24 +121,79 @@ const UserRequestLeaveScreen = () => {
     setOvertime(date.toDateString());
     toggleDatepicker();
   };
-  const overtimeShifts = [
-    { key: "1", value: "Shift 1" },
-    { key: "2", value: "Shift 2" },
-    { key: "3", value: "Shift 3" },
-    { key: "4", value: "Shift 4" },
-  ];
-  const handleOvertimeShifts = (selected) => {
-    // Handle overtime shifts selection
+
+  const handleSubmit = async () => {
+    console.log("Submit button pressed");
+    console.log("Current state:", {
+      userId,
+      selectedShift,
+      date,
+      overtimeHours,
+    });
+
+    if (!userId || !selectedShift || overtimeHours === null) {
+      console.log("Missing fields:", {
+        userId: !userId,
+        selectedShift: !selectedShift,
+        overtimeHours: overtimeHours === null,
+      });
+      Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      const formattedDate = format(date, "yyyy-MM-dd");
+
+      const requestBody = {
+        userId: userId,
+        shiftId: parseInt(selectedShift.key, 10),
+        workDate: formattedDate,
+        overtimeHours: overtimeHours,
+      };
+
+      console.log("Submitting data:", requestBody);
+
+      const response = await fetch(
+        "http://192.168.5.22:3001/api/update-overtime",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      const result = await response.json();
+      console.log("Server response:", result);
+
+      if (result.success) {
+        Alert.alert("Success", "Overtime hours logged successfully.");
+        // Reset form
+        setDate(new Date());
+        setSelectedShift(null);
+        setOvertimeHours(null);
+      } else {
+        setErrorMessage(result.error || "Failed to update overtime");
+      }
+    } catch (error) {
+      console.error("Error updating overtime:", error);
+      setErrorMessage("Failed to log overtime. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
-  const overtimeHours = [
-    { key: "1", value: "1 Hour" },
-    { key: "2", value: "2 Hours" },
-    { key: "3", value: "3 Hours" },
-    { key: "4", value: "4 Hours" },
+
+  const overtimeOptions = [
+    { key: "1", value: 1 },
+    { key: "2", value: 2 },
+    { key: "3", value: 3 },
+    { key: "4", value: 4 },
   ];
-  const handleOvertimeHours = (selected) => {
-    // Handle overtime hours selection
-  };
+
   // Leave functionality state variables
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -84,37 +209,52 @@ const UserRequestLeaveScreen = () => {
   ];
   const handleDayPress = (day) => {
     if (selectedTab === 1) {
-      if (!startDate) {
-        setStartDate(day.dateString);
+      const selectedDate = day.dateString;
+
+      if (!startDate || (startDate && endDate)) {
+        // Start a new selection
+        setStartDate(selectedDate);
         setEndDate(null);
         setMarkedDates({
-          [day.dateString]: {
+          [selectedDate]: {
             startingDay: true,
+            endingDay: true,
             color: "#c82f2f",
             textColor: "white",
           },
         });
-      } else if (day.dateString < startDate) {
-        setStartDate(day.dateString);
-        setEndDate(null);
-        setMarkedDates({
-          [day.dateString]: {
-            startingDay: true,
-            color: "#c82f2f",
-            textColor: "white",
-          },
-        });
-      } else {
-        setEndDate(day.dateString);
-        setMarkedDates(generateMarkedDates(startDate, day.dateString));
+      } else if (startDate && !endDate) {
+        // Complete the selection
+        if (selectedDate < startDate) {
+          // If selected date is before start date, start a new selection
+          setStartDate(selectedDate);
+          setEndDate(null);
+          setMarkedDates({
+            [selectedDate]: {
+              startingDay: true,
+              endingDay: true,
+              color: "#c82f2f",
+              textColor: "white",
+            },
+          });
+        } else {
+          // Complete the range selection
+          setEndDate(selectedDate);
+          setMarkedDates(generateMarkedDates(startDate, selectedDate));
+        }
       }
     }
   };
+
   const generateMarkedDates = (start, end) => {
     let dateRange = {};
     let currentDate = dayjs(start);
     const endDate = dayjs(end);
-    while (currentDate.isBefore(endDate) || currentDate.isSame(endDate)) {
+
+    while (
+      currentDate.isBefore(endDate) ||
+      currentDate.isSame(endDate, "day")
+    ) {
       const dateString = currentDate.format("YYYY-MM-DD");
       if (dateString === start) {
         dateRange[dateString] = {
@@ -133,8 +273,20 @@ const UserRequestLeaveScreen = () => {
       }
       currentDate = currentDate.add(1, "day");
     }
+
+    // Allows for singular date selection
+    if (start === end) {
+      dateRange[start] = {
+        startingDay: true,
+        endingDay: true,
+        color: "#c82f2f",
+        textColor: "white",
+      };
+    }
+
     return dateRange;
   };
+
   const handleTextChange = (input) => {
     setJustification(input);
   };
@@ -145,26 +297,41 @@ const UserRequestLeaveScreen = () => {
     setModalVisible(true);
   };
   const handleModalConfirm = async () => {
-    if (selectedTab === 1) {
-      if (!leaveType || !startDate || !endDate || !justification) {
-        Alert.alert("Error", "All fields are required.");
+    if (selectedTab === 0) {
+// Overtime form submission
+      await handleSubmit();
+    } else if (selectedTab === 1) {
+// Leave form submission
+      if (!leaveType || !startDate || !justification) {
+        Alert.alert(
+          "Error",
+          "Please fill in all required fields: Leave Type, Date, and Justification."
+        );
         return;
       }
+      if (!userId) {
+        Alert.alert("Error", "User ID not found. Please log in and try again.");
+        return;
+      }
+      setIsLoading(true);
       try {
-        const userId = 1; // Assuming the user ID is known and set. Replace with actual user ID.
+        // Get current date and adjust for South African time zone (UTC+2)
+        const now = new Date();
+        const saTime = addMinutes(now, now.getTimezoneOffset() + 120);
+        const formattedReportedAt = format(saTime, "yyyy-MM-dd'T'HH:mm:ss");
+
         const response = await fetch(
-          `http://192.168.5.61:3001/api/report-leave`,
+          `http://192.168.5.22:3001/api/report-leave`,
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               user_id: userId,
               type_of_leave: leaveType.value,
               justification,
               start_date: startDate,
-              end_date: endDate,
+              end_date: endDate || startDate,
+              reported_at: formattedReportedAt,
             }),
           }
         );
@@ -173,27 +340,31 @@ const UserRequestLeaveScreen = () => {
             `Network response was not ok: ${response.statusText}`
           );
         }
+        const result = await response.json();
         Alert.alert("Success", "Leave reported successfully.");
-        setModalVisible(false);
-        // Reset the form
-        setStartDate(null);
-        setEndDate(null);
-        setMarkedDates({});
-        setJustification("");
-        setLeaveType(null);
+        resetForm();
       } catch (error) {
         console.error("Error reporting leave:", error.message);
-        Alert.alert("Error", "Failed to report leave.");
+        Alert.alert("Error", "Failed to report leave. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
-    } else {
-      // Handle overtime submission (without API call)
-      Alert.alert("Success", "Overtime request submitted.");
-      setModalVisible(false);
     }
+    setModalVisible(false);
   };
+
   const handleModalCancel = () => {
     setModalVisible(false);
   };
+
+  const resetForm = () => {
+    setStartDate(null);
+    setEndDate(null);
+    setMarkedDates({});
+    setJustification("");
+    setLeaveType(null);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.tabContainer}>
@@ -238,7 +409,6 @@ const UserRequestLeaveScreen = () => {
                         value={date}
                         onChange={onChange}
                         style={styles.datePicker}
-                        
                       />
                       <View style={styles.iosPickerButtonContainer}>
                         <TouchableOpacity
@@ -286,23 +456,29 @@ const UserRequestLeaveScreen = () => {
                   />
                 </Pressable>
               )}
+
               <Text style={styles.label}>Which shift did you work?</Text>
-              <DropdownComponent3
-                data={overtimeShifts}
-                onSelect={handleOvertimeShifts}
-              />
+
+              <DropdownComponent3 data={shift} onSelect={handleShiftSelect} />
+
               <Text style={styles.label}>
                 How many hours did you work overtime?
               </Text>
               <DropdownComponent3
-                data={overtimeHours}
+                data={overtimeOptions}
                 onSelect={handleOvertimeHours}
               />
+
+              {errorMessage ? (
+                <Text style={styles.errorMessage}>{errorMessage}</Text>
+              ) : null}
+
               <View style={styles.submitButtonContainer}>
                 <SmallButton text="Submit" onPress={handleModal} />
               </View>
             </View>
           )}
+
           {selectedTab === 1 && (
             <View style={styles.formContainer}>
               <Text style={styles.sectionTitle}>Select Day(s) off:</Text>
@@ -314,20 +490,20 @@ const UserRequestLeaveScreen = () => {
                 markedDates={markedDates}
                 onDayPress={handleDayPress}
                 theme={{
-                  selectedDayBackgroundColor: '#c82f2f',
-                  selectedDayTextColor: '#ffffff',
-                  todayTextColor: '#c82f2f',
-                  dotColor: '#c82f2f',
+                  selectedDayBackgroundColor: "#c82f2f",
+                  selectedDayTextColor: "#ffffff",
+                  todayTextColor: "#c82f2f",
+                  dotColor: "#c82f2f",
                   arrowColor: "#c82f2f",
                   monthTextColor: "#c82f2f",
                   textMonthFontWeight: "bold",
-                  arrowColor: '#c82f2f',
-                  'stylesheet.calendar.header': {
+                  arrowColor: "#c82f2f",
+                  "stylesheet.calendar.header": {
                     arrow: {
                       padding: 10,
-              },
-            },
-          }}
+                    },
+                  },
+                }}
               />
               <Text style={styles.sectionTitle}>Type of Leave:</Text>
               <DropdownComponent2
@@ -361,6 +537,7 @@ const UserRequestLeaveScreen = () => {
             <Text style={styles.modalText2}>
               Please confirm only if it has been approved.
             </Text>
+
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 style={styles.modalButton}
@@ -374,6 +551,7 @@ const UserRequestLeaveScreen = () => {
               >
                 <Text style={styles.modalButtonText}>Confirm</Text>
               </TouchableOpacity>
+              {isLoading && <ActivityIndicator size="large" color="#c82f2f" />}
             </View>
           </View>
         </View>
@@ -387,6 +565,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "white",
   },
+
+  errorMessage: {
+    color: "red",
+    marginTop: 10,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+
   scrollViewContent: {
     flexGrow: 1,
     alignItems: "center",
@@ -399,10 +585,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   formContainer: {
-    flex:1,
+    flex: 1,
     width: width * 0.9,
     alignItems: "center",
-
   },
   tabContainer: {
     width: width * 0.9,
@@ -535,7 +720,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   submitButtonContainer: {
-    marginTop: 20, // Adjust this value to increase or decrease the space
+    marginTop: 20,
   },
 });
 export default UserRequestLeaveScreen;
