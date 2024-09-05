@@ -2,10 +2,10 @@ import { StatusBar } from "expo-status-bar";
 import * as React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import UserNav from "./components/Navigation/UserNav";
-import AdminNav from './components/Navigation/AdminNav';
-import AdminNav1 from "./components/Navigation/AdminNav1";
-import AppLogin from "./screens/LogInScreens/loginscreen";
+import UserNav from "./redM-shift-schedule-app/components/Navigation/UserNav";
+import AdminNav from './redM-shift-schedule-app/components/Navigation/AdminNav';
+import AdminNav1 from "./redM-shift-schedule-app/components/Navigation/AdminNav1";
+import AppLogin from "./redM-shift-schedule-app/screens/LogInScreens/loginscreen";
 
 const Stack = createNativeStackNavigator();
 
