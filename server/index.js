@@ -166,17 +166,82 @@ app.post("/api/report-leave", async (req, res) => {
   }
 });
 
+app.put("/api/update-overtime", async (req, res) => {
+  const { userId, shiftId, workDate, overtimeHours } = req.body;
+
+  if (!userId || !shiftId || !workDate || overtimeHours === undefined) {
+    return res
+      .status(400)
+      .json({ success: false, error: "All fields are required" });
+  }
+
+  try {
+    const result = await db.oneOrNone(
+      `
+      UPDATE public.schedules 
+      SET schedule_hours = schedule_hours + $1 
+      WHERE user_id = $2 AND shift_id = $3 AND work_date = $4 
+      RETURNING *
+    `,
+      [overtimeHours, userId, shiftId, workDate]
+    );
+
+    if (result) {
+      res.status(200).json({
+        success: true,
+        message: "Overtime hours updated successfully",
+        data: result,
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error:
+          "No matching schedule found. Please check your input and try again.",
+      });
+    }
+  } catch (error) {
+    console.error("Error updating overtime hours:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        error: "Failed to update overtime hours",
+        details: error.message,
+      });
+  }
+});
+
+// New route for fetching shifts
+app.get("/api/shifts", async (req, res) => {
+  try {
+    const shifts = await db.any(`
+      SELECT shift_id, shift_name, start_time, end_time 
+      FROM public.shifts 
+      ORDER BY start_time
+    `);
+    console.log("Fetched shifts:", shifts); // For debugging
+    res.json({ success: true, data: shifts });
+  } catch (error) {
+    console.error("Error fetching shifts:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        error: "Internal Server Error",
+        details: error.message,
+      });
+  }
+});
+
 // PUT switch schedule route
 app.put("/api/schedules/switch", async (req, res) => {
   const { work_date, shift_id, current_user_id, new_user_id } = req.body;
 
   if (!work_date || !shift_id || !current_user_id || !new_user_id) {
-    return res
-      .status(400)
-      .json({
-        error:
-          "All fields (work_date, shift_id, current_user_id, new_user_id) are required",
-      });
+    return res.status(400).json({
+      error:
+        "All fields (work_date, shift_id, current_user_id, new_user_id) are required",
+    });
   }
 
   try {
@@ -189,12 +254,10 @@ app.put("/api/schedules/switch", async (req, res) => {
     );
 
     if (!validShift) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Invalid shift or current user. This shift does not exist for the current user.",
-        });
+      return res.status(400).json({
+        error:
+          "Invalid shift or current user. This shift does not exist for the current user.",
+      });
     }
 
     // Update the schedule with the new user

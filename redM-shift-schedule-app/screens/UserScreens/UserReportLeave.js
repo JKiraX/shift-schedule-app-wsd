@@ -22,38 +22,82 @@ import SmallButton from "../../components/Buttons/smallButton";
 import dayjs from "dayjs";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as SecureStore from "expo-secure-store";
-import { format, addMinutes } from 'date-fns';
+import { format, addMinutes } from "date-fns";
 
 const { width } = Dimensions.get("window");
 
 const UserRequestLeaveScreen = () => {
-  const [selectedTab, setSelectedTab] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState(null);
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
+  const [selectedShift, setSelectedShift] = useState(null);
+  const [overtimeHours, setOvertimeHours] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [shift, setShifts] = useState([]);
+  const [selectedTab, setSelectedTab] = useState(0);
   const [overtime, setOvertime] = useState("");
-  const [userId, setUserId] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     getUserId();
+    fetchShifts();
   }, []);
 
   const getUserId = async () => {
     try {
       const storedUserId = await SecureStore.getItemAsync("userId");
       if (storedUserId) {
-        setUserId(storedUserId);
+        setUserId(parseInt(storedUserId, 10));
+        console.log("Fetched user_id:", parseInt(storedUserId, 10));
       } else {
-        // Handle the case where user is not logged in
         Alert.alert(
           "Error",
           "User not logged in. Please log in and try again."
         );
-        // You might want to redirect to the login screen here
       }
     } catch (error) {
       console.error("Error retrieving user ID:", error);
     }
+  };
+
+  const fetchShifts = async () => {
+    setIsLoading(true);
+    try {
+      console.log("Fetching shifts data...");
+      const response = await fetch("http://192.168.5.22:3001/api/shifts");
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Shifts data received:", data);
+
+      if (data.success) {
+        const formattedShifts = data.data.map((shift) => ({
+          key: shift.shift_id.toString(),
+          value: shift.shift_name,
+        }));
+        console.log("Formatted shifts:", formattedShifts);
+        setShifts(formattedShifts);
+      } else {
+        throw new Error(data.error || "Failed to fetch shifts");
+      }
+    } catch (error) {
+      console.error("Error fetching shifts:", error.message);
+      Alert.alert("Error", "Failed to fetch shifts. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleShiftSelect = (selected) => {
+    console.log("Selected shift:", selected);
+    setSelectedShift(selected);
+  };
+
+  const handleOvertimeHours = (selected) => {
+    console.log("Overtime hours selected:", selected);
+    setOvertimeHours(parseInt(selected.value, 10));
   };
 
   const toggleDatepicker = () => {
@@ -77,24 +121,79 @@ const UserRequestLeaveScreen = () => {
     setOvertime(date.toDateString());
     toggleDatepicker();
   };
-  const overtimeShifts = [
-    { key: "1", value: "Shift 1" },
-    { key: "2", value: "Shift 2" },
-    { key: "3", value: "Shift 3" },
-    { key: "4", value: "Shift 4" },
-  ];
-  const handleOvertimeShifts = (selected) => {
-    // Handle overtime shifts selection
+
+  const handleSubmit = async () => {
+    console.log("Submit button pressed");
+    console.log("Current state:", {
+      userId,
+      selectedShift,
+      date,
+      overtimeHours,
+    });
+
+    if (!userId || !selectedShift || overtimeHours === null) {
+      console.log("Missing fields:", {
+        userId: !userId,
+        selectedShift: !selectedShift,
+        overtimeHours: overtimeHours === null,
+      });
+      Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      const formattedDate = format(date, "yyyy-MM-dd");
+
+      const requestBody = {
+        userId: userId,
+        shiftId: parseInt(selectedShift.key, 10),
+        workDate: formattedDate,
+        overtimeHours: overtimeHours,
+      };
+
+      console.log("Submitting data:", requestBody);
+
+      const response = await fetch(
+        "http://192.168.5.22:3001/api/update-overtime",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      const result = await response.json();
+      console.log("Server response:", result);
+
+      if (result.success) {
+        Alert.alert("Success", "Overtime hours logged successfully.");
+        // Reset form
+        setDate(new Date());
+        setSelectedShift(null);
+        setOvertimeHours(null);
+      } else {
+        setErrorMessage(result.error || "Failed to update overtime");
+      }
+    } catch (error) {
+      console.error("Error updating overtime:", error);
+      setErrorMessage("Failed to log overtime. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
-  const overtimeHours = [
-    { key: "1", value: "1 Hour" },
-    { key: "2", value: "2 Hours" },
-    { key: "3", value: "3 Hours" },
-    { key: "4", value: "4 Hours" },
+
+  const overtimeOptions = [
+    { key: "1", value: 1 },
+    { key: "2", value: 2 },
+    { key: "3", value: 3 },
+    { key: "4", value: 4 },
   ];
-  const handleOvertimeHours = (selected) => {
-    // Handle overtime hours selection
-  };
+
   // Leave functionality state variables
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -111,7 +210,7 @@ const UserRequestLeaveScreen = () => {
   const handleDayPress = (day) => {
     if (selectedTab === 1) {
       const selectedDate = day.dateString;
-      
+
       if (!startDate || (startDate && endDate)) {
         // Start a new selection
         setStartDate(selectedDate);
@@ -151,8 +250,11 @@ const UserRequestLeaveScreen = () => {
     let dateRange = {};
     let currentDate = dayjs(start);
     const endDate = dayjs(end);
-    
-    while (currentDate.isBefore(endDate) || currentDate.isSame(endDate, 'day')) {
+
+    while (
+      currentDate.isBefore(endDate) ||
+      currentDate.isSame(endDate, "day")
+    ) {
       const dateString = currentDate.format("YYYY-MM-DD");
       if (dateString === start) {
         dateRange[dateString] = {
@@ -172,7 +274,7 @@ const UserRequestLeaveScreen = () => {
       currentDate = currentDate.add(1, "day");
     }
 
-    // If start and end are the same, mark it as both starting and ending
+    // Allows for singular date selection
     if (start === end) {
       dateRange[start] = {
         startingDay: true,
@@ -185,7 +287,6 @@ const UserRequestLeaveScreen = () => {
     return dateRange;
   };
 
-
   const handleTextChange = (input) => {
     setJustification(input);
   };
@@ -196,9 +297,16 @@ const UserRequestLeaveScreen = () => {
     setModalVisible(true);
   };
   const handleModalConfirm = async () => {
-    if (selectedTab === 1) {
+    if (selectedTab === 0) {
+// Overtime form submission
+      await handleSubmit();
+    } else if (selectedTab === 1) {
+// Leave form submission
       if (!leaveType || !startDate || !justification) {
-        Alert.alert("Error", "Please fill in all required fields: Leave Type, Date, and Justification.");
+        Alert.alert(
+          "Error",
+          "Please fill in all required fields: Leave Type, Date, and Justification."
+        );
         return;
       }
       if (!userId) {
@@ -212,20 +320,25 @@ const UserRequestLeaveScreen = () => {
         const saTime = addMinutes(now, now.getTimezoneOffset() + 120);
         const formattedReportedAt = format(saTime, "yyyy-MM-dd'T'HH:mm:ss");
 
-        const response = await fetch(`http://192.168.5.22:3001/api/report-leave`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: userId,
-            type_of_leave: leaveType.value,
-            justification,
-            start_date: startDate,
-            end_date: endDate || startDate,  // Use startDate if endDate is not set (single day)
-            reported_at: formattedReportedAt,
-          }),
-        });
+        const response = await fetch(
+          `http://192.168.5.22:3001/api/report-leave`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user_id: userId,
+              type_of_leave: leaveType.value,
+              justification,
+              start_date: startDate,
+              end_date: endDate || startDate,
+              reported_at: formattedReportedAt,
+            }),
+          }
+        );
         if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.statusText}`);
+          throw new Error(
+            `Network response was not ok: ${response.statusText}`
+          );
         }
         const result = await response.json();
         Alert.alert("Success", "Leave reported successfully.");
@@ -236,15 +349,13 @@ const UserRequestLeaveScreen = () => {
       } finally {
         setIsLoading(false);
       }
-    } else {
-      Alert.alert("Success", "Overtime request submitted.");
     }
-    setModalVisible(false);
-  };  
-  const handleModalCancel = () => {
     setModalVisible(false);
   };
 
+  const handleModalCancel = () => {
+    setModalVisible(false);
+  };
 
   const resetForm = () => {
     setStartDate(null);
@@ -253,11 +364,10 @@ const UserRequestLeaveScreen = () => {
     setJustification("");
     setLeaveType(null);
   };
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.tabContainer}>
-      
         <TouchableOpacity
           style={[styles.tabButton, selectedTab === 0 && styles.activeTab]}
           onPress={() => setSelectedTab(0)}
@@ -346,23 +456,29 @@ const UserRequestLeaveScreen = () => {
                   />
                 </Pressable>
               )}
+
               <Text style={styles.label}>Which shift did you work?</Text>
-              <DropdownComponent3
-                data={overtimeShifts}
-                onSelect={handleOvertimeShifts}
-              />
+
+              <DropdownComponent3 data={shift} onSelect={handleShiftSelect} />
+
               <Text style={styles.label}>
                 How many hours did you work overtime?
               </Text>
               <DropdownComponent3
-                data={overtimeHours}
+                data={overtimeOptions}
                 onSelect={handleOvertimeHours}
               />
+
+              {errorMessage ? (
+                <Text style={styles.errorMessage}>{errorMessage}</Text>
+              ) : null}
+
               <View style={styles.submitButtonContainer}>
                 <SmallButton text="Submit" onPress={handleModal} />
               </View>
             </View>
           )}
+
           {selectedTab === 1 && (
             <View style={styles.formContainer}>
               <Text style={styles.sectionTitle}>Select Day(s) off:</Text>
@@ -421,7 +537,7 @@ const UserRequestLeaveScreen = () => {
             <Text style={styles.modalText2}>
               Please confirm only if it has been approved.
             </Text>
-            
+
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 style={styles.modalButton}
@@ -449,6 +565,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "white",
   },
+
+  errorMessage: {
+    color: "red",
+    marginTop: 10,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+
   scrollViewContent: {
     flexGrow: 1,
     alignItems: "center",
@@ -596,7 +720,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   submitButtonContainer: {
-    marginTop: 20, // Adjust this value to increase or decrease the space
+    marginTop: 20,
   },
 });
 export default UserRequestLeaveScreen;
