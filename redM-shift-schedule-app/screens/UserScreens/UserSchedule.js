@@ -12,6 +12,7 @@ import {
 import { Calendar } from "react-native-calendars";
 import ShiftCard from "../../components/Cards/ShiftCard";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
+import DropdownComponent4 from "../../components/Dropdown/dropdownComponent4";
 import moment from "moment";
 
 const { width } = Dimensions.get("window");
@@ -200,7 +201,7 @@ const UserScheduleScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <DropdownComponent data={users} onSelect={handleSelect} />
+      <DropdownComponent4 data={users} onSelect={handleSelect} />
       
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <Calendar
