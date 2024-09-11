@@ -3,7 +3,7 @@ import { Text, View, TouchableOpacity, Modal, StyleSheet, Alert } from "react-na
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import DropdownComponent3 from "../../components/Dropdown/dropdownComponent3";
 
-const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], shiftId, onSwitchSuccess, workDate, allUsers  }) => {
+const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], shiftId, onSwitchSuccess, workDate, allUsers }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [assignedUsersList, setAssignedUsersList] = useState([]);
   const [allUsersList, setAllUsersList] = useState([]);
@@ -14,10 +14,10 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
     if (assignedUsers.length > 0 && allUsers.length > 0) {
       const firstAssignedUser = allUsers.find(user => user.value === assignedUsers[0]);
       if (firstAssignedUser) {
-        console.log("Setting initial currentUser:", firstAssignedUser);
+      
         setCurrentUser(firstAssignedUser);
       } else {
-        console.warn("Could not find matching user for:", assignedUsers[0]);
+        console.warn(assignedUsers[0]);
       }
     } else {
       console.warn("No assigned users or allUsers is empty");
@@ -26,13 +26,11 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
     fetchUsers();
   }, [assignedUsers, allUsers]);
 
-   const handleCurrentUserSelect = (selected) => {
-    console.log("Selected current user:", selected);
+  const handleCurrentUserSelect = (selected) => { 
     setCurrentUser(selected);
   };
 
   const handleNewUserSelect = (selected) => {
-    console.log("Selected new user:", selected);
     setNewUser(selected);
   };
 
@@ -68,7 +66,6 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
       Alert.alert("Error", "Failed to fetch user data. Please try again.");
     }
   };
-
 
   const handleSwitchPress = () => setModalVisible(true);
 
@@ -114,8 +111,6 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
     }
   };
 
-
-
   const handleCancel = () => {
     setModalVisible(false);
     setCurrentUser(null);
@@ -150,10 +145,14 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
             <DropdownComponent 
               data={assignedUsersList} 
               onSelect={handleCurrentUserSelect} 
-              defaultValue={currentUser}
+              defaultValue={currentUser?.value}
             />
             <Text style={styles.modalSubtitle2}>Select the user to switch with:</Text>
-            <DropdownComponent3 data={allUsersList} onSelect={handleNewUserSelect} />
+            <DropdownComponent3 
+              data={allUsersList} 
+              onSelect={handleNewUserSelect} 
+              defaultValue={newUser ? newUser.key : null} 
+            />
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity style={styles.modalButton} onPress={handleSwitch}>
                 <Text style={styles.modalButtonText}>Switch</Text>
@@ -168,6 +167,7 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
     </View>
   );
 };
+
 
 const SwitchButton = ({ onPress }) => (
   <TouchableOpacity onPress={onPress} style={styles.button}>

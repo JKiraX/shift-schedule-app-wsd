@@ -3,14 +3,20 @@ import { Text, View, StyleSheet, useWindowDimensions } from "react-native";
 import { SelectList } from "react-native-dropdown-select-list";
 import { MaterialIcons } from "@expo/vector-icons";
 
-const DropdownComponent = ({ data = [], onSelect }) => {
-  const [selected, setSelected] = useState("");
+const DropdownComponent = ({ data = [], onSelect, defaultValue = "" }) => {
+  const [selected, setSelected] = useState(defaultValue); 
   const { width: windowWidth } = useWindowDimensions();
 
   const handleSelect = (val) => {
-    setSelected(val);
-    onSelect(val);
+    const selectedUser = data.find(user => user.value === val); 
+    setSelected(val); 
+    if (selectedUser) {
+      onSelect(selectedUser);
+    } else {
+      console.warn("Selected value does not match any user:", val);
+    }
   };
+
 
   const renderPlaceholder = () => (
     <View style={styles.placeholderContainer}>
@@ -31,9 +37,11 @@ const DropdownComponent = ({ data = [], onSelect }) => {
       searchIconComponent={
         <MaterialIcons name="search" size={24} color="black" />
       }
+      defaultOption={data.find(item => item.value === defaultValue)} 
     />
   );
 };
+
 
 const styles = StyleSheet.create({
   placeholderContainer: {

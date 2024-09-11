@@ -47,7 +47,7 @@ const AdminScheduleScreen = () => {
 
       if (responseData.success && Array.isArray(responseData.data)) {
         setUsers(responseData.data.map((user) => ({
-          key: user.user_id.toString(),
+          key: user.user_id,
           value: `${user.first_name} ${user.last_name}`
         })));
       } else {
@@ -178,7 +178,7 @@ const AdminScheduleScreen = () => {
         <Text style={styles.dateHeader}>{moment(date).format("LL")}:</Text>
         {shiftData[date] && shiftData[date].length > 0 ? (
           shiftData[date].map((shift, index) => {
-            console.log("Rendering shift:", shift); // Keep this log for debugging
+            console.log("Rendering shift:", shift); 
             return (
               <ShiftCardChange
                 key={`${date}-${index}`}
