@@ -12,6 +12,7 @@ import {
 import { Calendar } from "react-native-calendars";
 import ShiftCard from "../../components/Cards/ShiftCard";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
+import DropdownComponent4 from "../../components/Dropdown/dropdownComponent4";
 import moment from "moment";
 
 const { width } = Dimensions.get("window");
@@ -167,6 +168,10 @@ const UserScheduleScreen = () => {
       return <ActivityIndicator size="large" color="#c82f2f" />;
     }
 
+    const formatTime = (time) => {
+      return moment(time, "HH:mm:ss").format("HH:mm");
+    };
+
     return Object.entries(selectedDates).map(([date, _]) => (
       <View key={date} style={styles.dateContainer}>
         <Text style={styles.dateHeader}>{moment(date).format("LL")}:</Text>
@@ -175,8 +180,8 @@ const UserScheduleScreen = () => {
             <ShiftCard
               key={`${date}-${index}`}
               shiftName={shift.shift_name}
-              startTime={shift.start_time}
-              endTime={shift.end_time}
+              startTime={formatTime(shift.start_time)} 
+                endTime={formatTime(shift.end_time)} 
               assignedUsers={
                 Array.isArray(shift.assigned_users)
                   ? shift.assigned_users.flat()
@@ -196,7 +201,7 @@ const UserScheduleScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <DropdownComponent data={users} onSelect={handleSelect} />
+      <DropdownComponent4 data={users} onSelect={handleSelect} />
       
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <Calendar

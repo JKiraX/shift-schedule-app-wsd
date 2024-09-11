@@ -8,10 +8,12 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import ShiftCardChange from "../../components/Cards/ShiftCardChange";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
+import DropdownComponent4 from "../../components/Dropdown/dropdownComponent4";
 import moment from "moment";
 
 const { width, height } = Dimensions.get("window");
@@ -46,7 +48,7 @@ const AdminScheduleScreen = () => {
 
       if (responseData.success && Array.isArray(responseData.data)) {
         setUsers(responseData.data.map((user) => ({
-          key: user.user_id.toString(),
+          key: user.user_id,
           value: `${user.first_name} ${user.last_name}`
         })));
       } else {
@@ -58,28 +60,10 @@ const AdminScheduleScreen = () => {
     }
   };
 
-  const groupShiftsByShiftName = (shifts) => {
-    if (!Array.isArray(shifts)) {
-      console.error("Shifts is not an array:", shifts);
-      return {};
-    }
-
-    return shifts.reduce((acc, shift) => {
-      if (!acc[shift.shift_name]) {
-        acc[shift.shift_name] = {
-          ...shift,
-          assigned_users: [],
-        };
-      }
-      acc[shift.shift_name].assigned_users.push(shift.assigned_users);
-      return acc;
-    }, {});
-  };
-
   const fetchShiftDataForMultipleDates = async (dates) => {
     setIsLoading(true);
     const newShiftData = {};
-
+  
     for (const date of dates) {
       try {
         const formattedDate = moment(date).format("YYYY-MM-DD");
@@ -91,14 +75,14 @@ const AdminScheduleScreen = () => {
             url += `&userId=${selectedUserObject.key}`;
           }
         }
-
+  
         console.log("Fetching data from URL:", url);
-
+  
         const response = await fetch(url);
-
+  
         if (response.ok) {
           const responseData = await response.json();
-
+  
           if (responseData.success && Array.isArray(responseData.data)) {
             const groupedShifts = groupShiftsByShiftName(responseData.data);
             newShiftData[formattedDate] = Object.values(groupedShifts);
@@ -127,10 +111,29 @@ const AdminScheduleScreen = () => {
         newShiftData[date] = [];
       }
     }
-
+  
     setShiftData(newShiftData);
     setIsLoading(false);
   };
+
+  const groupShiftsByShiftName = (shifts) => {
+    if (!Array.isArray(shifts)) {
+      console.error("Shifts is not an array:", shifts);
+      return {};
+    }
+  
+    return shifts.reduce((acc, shift) => {
+      if (!acc[shift.shift_name]) {
+        acc[shift.shift_name] = {
+          ...shift,
+          assigned_users: [],
+        };
+      }
+      acc[shift.shift_name].assigned_users.push(shift.assigned_users);
+      return acc;
+    }, {});
+  };
+  
 
   const handleSelect = (selected) => {
     console.log("Selected user:", selected);
@@ -167,23 +170,38 @@ const AdminScheduleScreen = () => {
       return <ActivityIndicator size="large" color="#c82f2f" />;
     }
 
+    const handleSwitchSuccess = (date) => {
+      fetchShiftDataForMultipleDates([date]);
+    };
+
+    const formatTime = (time) => {
+      return moment(time, "HH:mm:ss").format("HH:mm");
+    };
+  
     return Object.entries(selectedDates).map(([date, _]) => (
       <View key={date} style={styles.dateContainer}>
         <Text style={styles.dateHeader}>{moment(date).format("LL")}:</Text>
         {shiftData[date] && shiftData[date].length > 0 ? (
-          shiftData[date].map((shift, index) => (
-            <ShiftCardChange
-              key={`${date}-${index}`}
-              shiftName={shift.shift_name}
-              startTime={shift.start_time}
-              endTime={shift.end_time}
-              assignedUsers={
-                Array.isArray(shift.assigned_users)
-                  ? shift.assigned_users.flat()
-                  : []
-              }
-            />
-          ))
+          shiftData[date].map((shift, index) => {
+            console.log("Rendering shift:", shift); 
+            return (
+              <ShiftCardChange
+                key={`${date}-${index}`}
+                shiftName={shift.shift_name}
+                startTime={formatTime(shift.start_time)} 
+                endTime={formatTime(shift.end_time)} 
+                assignedUsers={
+                  Array.isArray(shift.assigned_users)
+                    ? shift.assigned_users.flat()
+                    : []
+                }
+                workDate={date}
+                shiftId={shift.shift_id} 
+                onSwitchSuccess={() => handleSwitchSuccess(date)}
+                allUsers={users}
+              />
+            );
+          })
         ) : (
           <Text style={styles.noShiftsText}>
             No shifts available for this date. 
@@ -192,11 +210,10 @@ const AdminScheduleScreen = () => {
       </View>
     ));
   };
-
-
+  
   return (
     <SafeAreaView style={styles.container}>
-      <DropdownComponent data={users} onSelect={handleSelect} />
+      <DropdownComponent4 data={users} onSelect={handleSelect} />
       
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <Calendar

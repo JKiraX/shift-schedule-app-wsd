@@ -1,7 +1,7 @@
 const express = require("express");
 const moment = require("moment-timezone");
 const bodyParser = require("body-parser");
-const db = require("./db"); // Assuming `db` is your pg-promise instance
+const db = require("./db"); 
 // const rateLimit = require("express-rate-limit");
 const sanitizeInput = require("express-sanitizer");
 const cors = require("cors");
@@ -51,7 +51,6 @@ app.get("/users", async (req, res) => {
   }
 });
 
-// GET schedules route
 app.get("/schedules", async (req, res) => {
   const { date, dates, userId } = req.query;
 
@@ -79,7 +78,7 @@ app.get("/schedules", async (req, res) => {
 
     if (userId) {
       query = `
-        SELECT s.work_date, u."firstName" AS first_name, u."lastName" AS last_name, sh.shift_name, sh.start_time, sh.end_time, s.user_id
+        SELECT s.work_date, u."firstName" AS first_name, u."lastName" AS last_name, sh.shift_name, sh.start_time, sh.end_time, s.user_id, s.shift_id
         FROM public.schedules s
         JOIN public.appuser u ON s.user_id = u."Id"
         JOIN public.shifts sh ON s.shift_id = sh.shift_id
@@ -89,7 +88,7 @@ app.get("/schedules", async (req, res) => {
       params = [dateList, userId];
     } else {
       query = `
-        SELECT s.work_date, u."firstName" AS first_name, u."lastName" AS last_name, sh.shift_name, sh.start_time, sh.end_time, s.user_id
+        SELECT s.work_date, u."firstName" AS first_name, u."lastName" AS last_name, sh.shift_name, sh.start_time, sh.end_time, s.user_id, s.shift_id
         FROM public.schedules s
         JOIN public.appuser u ON s.user_id = u."Id"
         JOIN public.shifts sh ON s.shift_id = sh.shift_id
@@ -114,12 +113,14 @@ app.get("/schedules", async (req, res) => {
       });
     }
 
-    // Map data to align with ShiftCard props
+    // Map data to align with ShiftCard props, including shift_id
     const formattedSchedules = schedules.map((schedule) => ({
       shift_name: schedule.shift_name,
       start_time: schedule.start_time,
       end_time: schedule.end_time,
       assigned_users: `${schedule.first_name} ${schedule.last_name}`,
+      shift_id: schedule.shift_id,  
+      work_date: schedule.work_date 
     }));
 
     res.json({ success: true, data: formattedSchedules });
@@ -130,7 +131,6 @@ app.get("/schedules", async (req, res) => {
       .json({ error: "Internal Server Error", details: error.message });
   }
 });
-
 // POST report leave route
 app.post("/api/report-leave", async (req, res) => {
   const { user_id, type_of_leave, justification, start_date, end_date } =
@@ -219,7 +219,7 @@ app.get("/api/shifts", async (req, res) => {
       FROM public.shifts 
       ORDER BY start_time
     `);
-    console.log("Fetched shifts:", shifts); // For debugging
+    console.log("Fetched shifts:", shifts); 
     res.json({ success: true, data: shifts });
   } catch (error) {
     console.error("Error fetching shifts:", error);
@@ -233,47 +233,58 @@ app.get("/api/shifts", async (req, res) => {
   }
 });
 
-// PUT switch schedule route
 app.put("/api/schedules/switch", async (req, res) => {
+  console.log("Received switch request with body:", req.body);
   const { work_date, shift_id, current_user_id, new_user_id } = req.body;
 
   if (!work_date || !shift_id || !current_user_id || !new_user_id) {
+    console.error("Missing required fields:", { work_date, shift_id, current_user_id, new_user_id });
     return res.status(400).json({
-      error:
-        "All fields (work_date, shift_id, current_user_id, new_user_id) are required",
+      success: false,
+      error: "All fields (work_date, shift_id, current_user_id, new_user_id) are required",
     });
   }
 
   try {
-    // Check if the shift exists
+    // Check if the shift exists in the schedules table
     const validShift = await db.oneOrNone(
       `
-      SELECT * FROM public.schedules WHERE work_date = $1 AND shift_id = $2 AND user_id = $3
+      SELECT s.work_date, s.shift_id, s.user_id 
+      FROM public.schedules s
+      JOIN public.shifts sh ON s.shift_id = sh.shift_id
+      WHERE s.work_date = $1 AND s.shift_id = $2 AND s.user_id = $3
     `,
       [work_date, shift_id, current_user_id]
     );
 
     if (!validShift) {
+      console.error("Invalid shift or current user:", { work_date, shift_id, current_user_id });
       return res.status(400).json({
-        error:
-          "Invalid shift or current user. This shift does not exist for the current user.",
+        success: false,
+        error: "Invalid shift or current user. This shift does not exist for the current user.",
       });
     }
 
     // Update the schedule with the new user
     const updatedSchedule = await db.one(
       `
-      UPDATE public.schedules SET user_id = $1 WHERE work_date = $2 AND shift_id = $3 RETURNING *;
+      UPDATE public.schedules 
+      SET user_id = $1 
+      WHERE work_date = $2 AND shift_id = $3 
+      RETURNING *;
     `,
       [new_user_id, work_date, shift_id]
     );
 
+    console.log("Successfully updated schedule:", updatedSchedule);
     res.json({ success: true, data: updatedSchedule });
   } catch (error) {
     console.error("Error switching schedule:", error);
-    res
-      .status(500)
-      .json({ error: "Internal server error", details: error.message });
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+      details: error.message
+    });
   }
 });
 
