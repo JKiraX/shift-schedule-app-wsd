@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   },
   input: {
     color: "black",
-    fontWeight: "bold",
+    fontWeight: "500",
   },
 });
 

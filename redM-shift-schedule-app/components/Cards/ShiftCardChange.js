@@ -178,13 +178,16 @@ const ShiftCardChange = ({
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Switch Shift</Text>
+            <View style={styles.dropdownContent}>
             <Text style={styles.modalSubtitle}>Select the current user:</Text>
             <DropdownComponent
               data={assignedUsersList}
               onSelect={handleCurrentUserSelect}
               defaultValue={currentUser?.value}
             />
-            <Text style={styles.modalSubtitle2}>
+            </View>
+            <View style={styles.dropdownContent}>
+            <Text style={styles.modalSubtitle}>
               Select the user to switch with:
             </Text>
             <DropdownComponent3
@@ -192,6 +195,7 @@ const ShiftCardChange = ({
               onSelect={handleNewUserSelect}
               defaultValue={newUser ? newUser.key : null}
             />
+            </View>
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 style={styles.modalButton}
@@ -235,7 +239,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.23,
     shadowRadius: 2.62,
     elevation: 4,
-    minWidth: 350,
+    minWidth: 360,
   },
   shiftName: {
     fontSize: 18,
@@ -280,29 +284,32 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.5)",
+   
   },
   modalContent: {
     backgroundColor: "#f2f2f2",
     padding: 20,
     borderRadius: 15,
-    width: "90%",
-    maxWidth: 365,
+    width: "95%",
+    maxWidth: 400,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 24,
     marginBottom: 10,
     fontWeight: "bold",
+    textAlign: "center",
   },
   modalSubtitle: {
     fontSize: 16,
     marginBottom: 10,
+    fontWeight: "500",
+   
   },
 
-  modalSubtitle2: {
-    fontSize: 16,
-    marginBottom: 10,
-    fontWeight: "bold",
-    textAlign: "center",
+  dropdownContent:{
+    minWidth: 300,
+    alignItems: 'center',
+    margin: 12,
   },
   dropdownContainer: {
     alignItems: "center",
