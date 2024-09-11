@@ -1,20 +1,37 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, TouchableOpacity, Modal, StyleSheet, Alert } from "react-native";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  Modal,
+  StyleSheet,
+  Alert,
+} from "react-native";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import DropdownComponent3 from "../../components/Dropdown/dropdownComponent3";
 
-const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], shiftId, onSwitchSuccess, workDate, allUsers }) => {
+const ShiftCardChange = ({
+  shiftName,
+  startTime,
+  endTime,
+  assignedUsers = [],
+  shiftId,
+  onSwitchSuccess,
+  workDate,
+  allUsers,
+}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [assignedUsersList, setAssignedUsersList] = useState([]);
   const [allUsersList, setAllUsersList] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [newUser, setNewUser] = useState(null);
- 
+
   useEffect(() => {
     if (assignedUsers.length > 0 && allUsers.length > 0) {
-      const firstAssignedUser = allUsers.find(user => user.value === assignedUsers[0]);
+      const firstAssignedUser = allUsers.find(
+        (user) => user.value === assignedUsers[0]
+      );
       if (firstAssignedUser) {
-      
         setCurrentUser(firstAssignedUser);
       } else {
         console.warn(assignedUsers[0]);
@@ -22,11 +39,11 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
     } else {
       console.warn("No assigned users or allUsers is empty");
     }
-  
+
     fetchUsers();
   }, [assignedUsers, allUsers]);
 
-  const handleCurrentUserSelect = (selected) => { 
+  const handleCurrentUserSelect = (selected) => {
     setCurrentUser(selected);
   };
 
@@ -48,14 +65,13 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
         setAllUsersList(allUsers);
 
         const filteredAssignedUsers = assignedUsers
-          .map(userName => allUsers.find(user => user.value === userName))
+          .map((userName) => allUsers.find((user) => user.value === userName))
           .filter(Boolean);
 
         setAssignedUsersList(filteredAssignedUsers);
 
         // Set the first assigned user as the current user
         if (filteredAssignedUsers.length > 0) {
-          console.log("Setting currentUser from fetchUsers:", filteredAssignedUsers[0]);
           setCurrentUser(filteredAssignedUsers[0]);
         } else {
           console.warn("No filtered assigned users found");
@@ -70,10 +86,23 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
   const handleSwitchPress = () => setModalVisible(true);
 
   const handleSwitch = async () => {
-    console.log("Attempting switch with currentUser:", currentUser, "and newUser:", newUser);
+    console.log(
+      "Attempting switch with currentUser:",
+      currentUser,
+      "and newUser:",
+      newUser
+    );
     if (!currentUser || !newUser || !shiftId || !workDate) {
-      console.error("Missing required fields:", { currentUser, newUser, shiftId, workDate });
-      Alert.alert("Error", "Please ensure all required fields are selected and valid.");
+      console.error("Missing required fields:", {
+        currentUser,
+        newUser,
+        shiftId,
+        workDate,
+      });
+      Alert.alert(
+        "Error",
+        "Please ensure all required fields are selected and valid."
+      );
       return;
     }
 
@@ -87,13 +116,16 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
     console.log("Sending payload:", payload);
 
     try {
-      const response = await fetch(`http://192.168.5.22:3001/api/schedules/switch`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `http://192.168.5.22:3001/api/schedules/switch`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const result = await response.json();
       if (result.success) {
@@ -103,7 +135,10 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
         if (onSwitchSuccess) onSwitchSuccess();
       } else {
         console.error("Error switching shift:", result.error);
-        Alert.alert("Error", result.error || "Failed to switch shift. Please try again.");
+        Alert.alert(
+          "Error",
+          result.error || "Failed to switch shift. Please try again."
+        );
       }
     } catch (error) {
       console.error("Error making switch request:", error.message);
@@ -129,7 +164,9 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
           ))}
         </View>
       </View>
-      <Text style={styles.time}>{startTime} - {endTime}</Text>
+      <Text style={styles.time}>
+        {startTime} - {endTime}
+      </Text>
       <SwitchButton onPress={handleSwitchPress} />
 
       <Modal
@@ -138,26 +175,34 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
         animationType="slide"
         onRequestClose={handleCancel}
       >
-         <View style={styles.modalOverlay}>
+        <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Switch Shift</Text>
             <Text style={styles.modalSubtitle}>Select the current user:</Text>
-            <DropdownComponent 
-              data={assignedUsersList} 
-              onSelect={handleCurrentUserSelect} 
+            <DropdownComponent
+              data={assignedUsersList}
+              onSelect={handleCurrentUserSelect}
               defaultValue={currentUser?.value}
             />
-            <Text style={styles.modalSubtitle2}>Select the user to switch with:</Text>
-            <DropdownComponent3 
-              data={allUsersList} 
-              onSelect={handleNewUserSelect} 
-              defaultValue={newUser ? newUser.key : null} 
+            <Text style={styles.modalSubtitle2}>
+              Select the user to switch with:
+            </Text>
+            <DropdownComponent3
+              data={allUsersList}
+              onSelect={handleNewUserSelect}
+              defaultValue={newUser ? newUser.key : null}
             />
             <View style={styles.modalButtonContainer}>
-              <TouchableOpacity style={styles.modalButton} onPress={handleSwitch}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={handleSwitch}
+              >
                 <Text style={styles.modalButtonText}>Switch</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButton} onPress={handleCancel}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={handleCancel}
+              >
                 <Text style={styles.modalButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
@@ -168,7 +213,6 @@ const ShiftCardChange = ({ shiftName, startTime, endTime, assignedUsers = [], sh
   );
 };
 
-
 const SwitchButton = ({ onPress }) => (
   <TouchableOpacity onPress={onPress} style={styles.button}>
     <Text style={styles.buttonText}>Switch</Text>
@@ -177,12 +221,12 @@ const SwitchButton = ({ onPress }) => (
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
-    flexDirection: 'column',
-    justifyContent: 'space-between',
+    flexDirection: "column",
+    justifyContent: "space-between",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -257,14 +301,12 @@ const styles = StyleSheet.create({
   modalSubtitle2: {
     fontSize: 16,
     marginBottom: 10,
-    fontWeight:"bold",
-    textAlign:"center",
-
+    fontWeight: "bold",
+    textAlign: "center",
   },
   dropdownContainer: {
     alignItems: "center",
     margin: 20,
-
   },
 
   dropdownContainerLarge: {
