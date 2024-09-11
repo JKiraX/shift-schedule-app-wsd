@@ -91,6 +91,10 @@ const UserHomeScreen = ({ navigation }) => {
     }
   };
 
+  const formatTime = (time) => {
+    return moment(time, "HH:mm:ss").format("HH:mm");
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <CalendarStrip
@@ -116,8 +120,8 @@ const UserHomeScreen = ({ navigation }) => {
               <ShiftCard
                 key={index}
                 shiftName={shift.shift_name}
-                startTime={shift.start_time}
-                endTime={shift.end_time}
+                startTime={formatTime(shift.start_time)} 
+                endTime={formatTime(shift.end_time)}
                 assignedUsers={shift.assigned_users} 
               />
             ))

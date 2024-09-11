@@ -172,6 +172,10 @@ const AdminScheduleScreen = () => {
     const handleSwitchSuccess = (date) => {
       fetchShiftDataForMultipleDates([date]);
     };
+
+    const formatTime = (time) => {
+      return moment(time, "HH:mm:ss").format("HH:mm");
+    };
   
     return Object.entries(selectedDates).map(([date, _]) => (
       <View key={date} style={styles.dateContainer}>
@@ -183,8 +187,8 @@ const AdminScheduleScreen = () => {
               <ShiftCardChange
                 key={`${date}-${index}`}
                 shiftName={shift.shift_name}
-                startTime={shift.start_time}
-                endTime={shift.end_time}
+                startTime={formatTime(shift.start_time)} 
+                endTime={formatTime(shift.end_time)} 
                 assignedUsers={
                   Array.isArray(shift.assigned_users)
                     ? shift.assigned_users.flat()
