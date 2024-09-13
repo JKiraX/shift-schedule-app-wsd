@@ -2,7 +2,7 @@ module.exports = {
     apps: [
       {
         name: 'shift-scheduler',
-        script: './server/index.js', // Path to your main server file
+        script: './server/index.js', 
         watch: true,
         env: {
           NODE_ENV: 'development',

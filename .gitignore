@@ -3,3 +3,9 @@ node_modules
 
 #Ignore .env file
 .env
+
+.expo
+.vscode
+.github
+
+ecosystem.config.js
