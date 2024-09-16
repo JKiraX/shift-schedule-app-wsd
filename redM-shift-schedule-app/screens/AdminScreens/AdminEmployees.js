@@ -45,29 +45,18 @@ const AdminEmployeeScreen = () => {
       const id = await SecureStore.getItemAsync("userId");
       setCurrentUser({ email, role, id });
     } catch (error) {
-      console.error("Error fetching current user:", error);
+      Alert.alert("Error", "Error fetching current user");
     }
   };
 
   const fetchUsers = async () => {
     try {
       const response = await apiClient.get("/api/authentication");
-      const sortedUsers = response.data.sort((a, b) =>
-        a.firstName.localeCompare(b.firstName)
-      );
+      const sortedUsers = response.data.sort((a, b) => a.firstName.localeCompare(b.firstName));
       setUsers(sortedUsers);
       setFilteredUsers(sortedUsers);
     } catch (error) {
-      console.error(
-        "Error fetching users:",
-        error.response ? error.response.data : error.message
-      );
-      Alert.alert(
-        "Error",
-        `Failed to fetch users: ${
-          error.response ? error.response.data : error.message
-        }`
-      );
+      Alert.alert("Error", `Failed to fetch users: ${error.response ? error.response.data : error.message}`);
     }
   };
 
@@ -75,9 +64,7 @@ const AdminEmployeeScreen = () => {
     setSearchQuery(query);
     if (query) {
       const filtered = users.filter((user) =>
-        `${user.firstName} ${user.lastName}`
-          .toLowerCase()
-          .includes(query.toLowerCase())
+        `${user.firstName} ${user.lastName}`.toLowerCase().includes(query.toLowerCase())
       );
       setFilteredUsers(filtered);
     } else {
@@ -104,28 +91,19 @@ const AdminEmployeeScreen = () => {
     try {
       const response = await apiClient.delete(`/api/authentication/${userToDelete.id}`);
       if (response.status === 200) {
-        fetchUsers(); // Refresh the list after deletion
+        fetchUsers();
         setModalVisible(false);
         setUserToDelete(null);
       } else if (response.status === 404) {
         Alert.alert("Error", "User not found");
       } else {
-        throw new Error("Failed to delete user");
+        Alert.alert("Error", "Failed to delete user");
       }
     } catch (error) {
-      console.error(
-        "Error deleting user:",
-        error.response ? error.response.data : error.message
-      );
-      Alert.alert(
-        "Error",
-        `Failed to delete user: ${
-          error.response ? error.response.data : error.message
-        }`
-      );
+      Alert.alert("Error", `Failed to delete user: ${error.response ? error.response.data : error.message}`);
     }
   };
-
+  
   const renderUserItem = ({ item }) => (
     <View style={styles.userItem}>
       <Text

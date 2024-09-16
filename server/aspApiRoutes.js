@@ -18,25 +18,21 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.log('Full error object:', JSON.stringify(error, null, 2));
     if (error.response) {
-      console.log('Error response:', error.response.data);
-      console.log('Error status:', error.response.status);
-      console.log('Error headers:', error.response.headers);
+   
+      const { data, status, headers } = error.response;
+    
     } else if (error.request) {
-      console.log('Error request:', JSON.stringify(error.request, null, 2));
+  
     } else {
-      console.log('Error message:', error.message);
+  
     }
-    console.log('Error config:', error.config);
     return Promise.reject(error);
   }
 );

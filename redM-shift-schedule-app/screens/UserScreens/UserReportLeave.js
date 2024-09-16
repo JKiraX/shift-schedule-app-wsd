@@ -48,42 +48,34 @@ const UserRequestLeaveScreen = () => {
       const storedUserId = await SecureStore.getItemAsync("userId");
       if (storedUserId) {
         setUserId(parseInt(storedUserId, 10));
-        console.log("Fetched user_id:", parseInt(storedUserId, 10));
       } else {
-        Alert.alert(
-          "Error",
-          "User not logged in. Please log in and try again."
-        );
+        Alert.alert("Error", "User not logged in. Please log in and try again.");
       }
-    } catch (error) {
-      console.error("Error retrieving user ID:", error);
+    } catch {
+      Alert.alert("Error", "Failed to retrieve user ID. Please try again.");
     }
   };
 
   const fetchShifts = async () => {
     setIsLoading(true);
     try {
-      console.log("Fetching shifts data...");
       const response = await fetch("http://192.168.5.22:3001/api/shifts");
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("Shifts data received:", data);
 
       if (data.success) {
         const formattedShifts = data.data.map((shift) => ({
           key: shift.shift_id.toString(),
           value: shift.shift_name,
         }));
-        console.log("Formatted shifts:", formattedShifts);
         setShifts(formattedShifts);
       } else {
         throw new Error(data.error || "Failed to fetch shifts");
       }
-    } catch (error) {
-      console.error("Error fetching shifts:", error.message);
+    } catch {
       Alert.alert("Error", "Failed to fetch shifts. Please try again.");
     } finally {
       setIsLoading(false);
@@ -91,12 +83,10 @@ const UserRequestLeaveScreen = () => {
   };
 
   const handleShiftSelect = (selected) => {
-    console.log("Selected shift:", selected);
     setSelectedShift(selected);
   };
 
   const handleOvertimeHours = (selected) => {
-    console.log("Overtime hours selected:", selected);
     setOvertimeHours(parseInt(selected.value, 10));
   };
 
@@ -123,20 +113,7 @@ const UserRequestLeaveScreen = () => {
   };
 
   const handleSubmit = async () => {
-    console.log("Submit button pressed");
-    console.log("Current state:", {
-      userId,
-      selectedShift,
-      date,
-      overtimeHours,
-    });
-
     if (!userId || !selectedShift || overtimeHours === null) {
-      console.log("Missing fields:", {
-        userId: !userId,
-        selectedShift: !selectedShift,
-        overtimeHours: overtimeHours === null,
-      });
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }
@@ -154,8 +131,6 @@ const UserRequestLeaveScreen = () => {
         overtimeHours: overtimeHours,
       };
 
-      console.log("Submitting data:", requestBody);
-
       const response = await fetch(
         "http://192.168.5.22:3001/api/update-overtime",
         {
@@ -168,19 +143,16 @@ const UserRequestLeaveScreen = () => {
       );
 
       const result = await response.json();
-      console.log("Server response:", result);
 
       if (result.success) {
         Alert.alert("Success", "Overtime hours logged successfully.");
-        // Reset form
         setDate(new Date());
         setSelectedShift(null);
         setOvertimeHours(null);
       } else {
         setErrorMessage(result.error || "Failed to update overtime");
       }
-    } catch (error) {
-      console.error("Error updating overtime:", error);
+    } catch {
       setErrorMessage("Failed to log overtime. Please try again.");
     } finally {
       setIsLoading(false);
@@ -194,7 +166,7 @@ const UserRequestLeaveScreen = () => {
     { key: "4", value: 4 },
   ];
 
-  // Leave functionality state variables
+  
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [justification, setJustification] = useState("");
@@ -212,7 +184,7 @@ const UserRequestLeaveScreen = () => {
       const selectedDate = day.dateString;
 
       if (!startDate || (startDate && endDate)) {
-        // Start a new selection
+      
         setStartDate(selectedDate);
         setEndDate(null);
         setMarkedDates({
@@ -224,9 +196,9 @@ const UserRequestLeaveScreen = () => {
           },
         });
       } else if (startDate && !endDate) {
-        // Complete the selection
+  
         if (selectedDate < startDate) {
-          // If selected date is before start date, start a new selection
+    
           setStartDate(selectedDate);
           setEndDate(null);
           setMarkedDates({
@@ -238,7 +210,7 @@ const UserRequestLeaveScreen = () => {
             },
           });
         } else {
-          // Complete the range selection
+       
           setEndDate(selectedDate);
           setMarkedDates(generateMarkedDates(startDate, selectedDate));
         }
@@ -274,7 +246,6 @@ const UserRequestLeaveScreen = () => {
       currentDate = currentDate.add(1, "day");
     }
 
-    // Allows for singular date selection
     if (start === end) {
       dateRange[start] = {
         startingDay: true,
@@ -298,10 +269,10 @@ const UserRequestLeaveScreen = () => {
   };
   const handleModalConfirm = async () => {
     if (selectedTab === 0) {
-// Overtime form submission
+
       await handleSubmit();
     } else if (selectedTab === 1) {
-// Leave form submission
+
       if (!leaveType || !startDate || !justification) {
         Alert.alert(
           "Error",
@@ -315,7 +286,7 @@ const UserRequestLeaveScreen = () => {
       }
       setIsLoading(true);
       try {
-        // Get current date and adjust for South African time zone (UTC+2)
+        
         const now = new Date();
         const saTime = addMinutes(now, now.getTimezoneOffset() + 120);
         const formattedReportedAt = format(saTime, "yyyy-MM-dd'T'HH:mm:ss");
@@ -344,7 +315,7 @@ const UserRequestLeaveScreen = () => {
         Alert.alert("Success", "Leave reported successfully.");
         resetForm();
       } catch (error) {
-        console.error("Error reporting leave:", error.message);
+     
         Alert.alert("Error", "Failed to report leave. Please try again.");
       } finally {
         setIsLoading(false);

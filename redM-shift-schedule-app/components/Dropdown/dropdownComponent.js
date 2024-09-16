@@ -8,13 +8,12 @@ const DropdownComponent = ({ data = [], onSelect, defaultValue = "" }) => {
   const { width: windowWidth } = useWindowDimensions();
 
   const handleSelect = (val) => {
-    const selectedUser = data.find(user => user.value === val); 
-    setSelected(val); 
+    const selectedUser = data.find(user => user.value === val);
+    setSelected(val);
     if (selectedUser) {
       onSelect(selectedUser);
-    } else {
-      console.warn("Selected value does not match any user:", val);
     }
+
   };
 
 
@@ -24,6 +23,20 @@ const DropdownComponent = ({ data = [], onSelect, defaultValue = "" }) => {
       <Text style={styles.placeholderText}>Select User</Text>
     </View>
   );
+
+  const renderItem = (item) => {
+    return (
+      <View style={styles.itemContainer}>
+        <Text style={styles.itemText}>{item}</Text>
+        {selected === item && (
+          <TouchableOpacity onPress={handleClear}>
+            <MaterialIcons name="close" size={24} color="black" />
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
 
   return (
     <SelectList
@@ -37,11 +50,10 @@ const DropdownComponent = ({ data = [], onSelect, defaultValue = "" }) => {
       searchIconComponent={
         <MaterialIcons name="search" size={24} color="black" />
       }
-      defaultOption={data.find(item => item.value === defaultValue)} 
+      renderItem={renderItem}
     />
   );
 };
-
 
 const styles = StyleSheet.create({
   placeholderContainer: {

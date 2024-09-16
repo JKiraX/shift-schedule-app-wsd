@@ -5,7 +5,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 
-// Screens
 import UserHomeScreen from "../../screens/UserScreens/UserHome";
 import AdminScheduleScreen from "../../screens/AdminScreens/AdminSchedule";
 import UserRequestLeaveScreen from "../../screens/UserScreens/UserReportLeave";
@@ -13,7 +12,6 @@ import UserProfileScreen from "../../screens/UserScreens/UserProfile";
 import NotificationsScreen from "../../screens/notifications";
 
 
-// Screen names
 const UserHome = "Home";
 const AdminSchedule = "Schedule";
 const UserRequestLeave = "Report Leave";

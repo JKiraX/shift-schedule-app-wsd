@@ -21,17 +21,17 @@ const EditEmployeeScreen = () => {
     email: "",
     firstName: "",
     lastName: "",
-    role: "User", // Default role is set to "User"
+    role: "User", 
   });
   const navigation = useNavigation();
   const route = useRoute();
 
   useEffect(() => {
     if (route.params?.employee) {
-      // If we're editing an existing employee, use their current role
+
       setEmployee(route.params.employee);
     } else {
-      // If it's a new employee, ensure the role is set to "User"
+    
       setEmployee(prevState => ({...prevState, role: "User"}));
     }
   }, [route.params]);
@@ -49,7 +49,6 @@ const EditEmployeeScreen = () => {
       }
     } catch (error) {
       Alert.alert("Error", "Failed to update employee details.");
-      console.error(error);
     }
   };
 

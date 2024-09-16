@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import DropdownComponent3 from "../../components/Dropdown/dropdownComponent3";
-
 const ShiftCardChange = ({
   shiftName,
   startTime,
@@ -33,11 +32,7 @@ const ShiftCardChange = ({
       );
       if (firstAssignedUser) {
         setCurrentUser(firstAssignedUser);
-      } else {
-        console.warn(assignedUsers[0]);
       }
-    } else {
-      console.warn("No assigned users or allUsers is empty");
     }
 
     fetchUsers();
@@ -70,15 +65,11 @@ const ShiftCardChange = ({
 
         setAssignedUsersList(filteredAssignedUsers);
 
-        // Set the first assigned user as the current user
         if (filteredAssignedUsers.length > 0) {
           setCurrentUser(filteredAssignedUsers[0]);
-        } else {
-          console.warn("No filtered assigned users found");
         }
       }
     } catch (error) {
-      console.error("Error fetching user data:", error.message);
       Alert.alert("Error", "Failed to fetch user data. Please try again.");
     }
   };
@@ -86,19 +77,7 @@ const ShiftCardChange = ({
   const handleSwitchPress = () => setModalVisible(true);
 
   const handleSwitch = async () => {
-    console.log(
-      "Attempting switch with currentUser:",
-      currentUser,
-      "and newUser:",
-      newUser
-    );
     if (!currentUser || !newUser || !shiftId || !workDate) {
-      console.error("Missing required fields:", {
-        currentUser,
-        newUser,
-        shiftId,
-        workDate,
-      });
       Alert.alert(
         "Error",
         "Please ensure all required fields are selected and valid."
@@ -112,8 +91,6 @@ const ShiftCardChange = ({
       current_user_id: currentUser.key,
       new_user_id: newUser.key,
     };
-
-    console.log("Sending payload:", payload);
 
     try {
       const response = await fetch(
@@ -129,19 +106,16 @@ const ShiftCardChange = ({
 
       const result = await response.json();
       if (result.success) {
-        console.log("Switch successful:", result.data);
         Alert.alert("Success", "Shift switched successfully");
         setModalVisible(false);
         if (onSwitchSuccess) onSwitchSuccess();
       } else {
-        console.error("Error switching shift:", result.error);
         Alert.alert(
           "Error",
           result.error || "Failed to switch shift. Please try again."
         );
       }
     } catch (error) {
-      console.error("Error making switch request:", error.message);
       Alert.alert("Error", "An unexpected error occurred. Please try again.");
     }
   };
@@ -239,13 +213,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.23,
     shadowRadius: 2.62,
     elevation: 4,
-    minWidth: 360,
+    minWidth: 340,
   },
   shiftName: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 6,
-    // paddingBottom: 2,
+
   },
   contentContainer: {
     flex: 1,

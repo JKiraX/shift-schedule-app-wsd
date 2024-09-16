@@ -52,8 +52,7 @@ const AddEmployeePage = () => {
         );
       }
     } catch (error) {
-      console.error("Error:", error);
-      Alert.alert("Error", "Failed to add employee: " + error.message);
+      Alert.alert("Error", "Failed to add employee: ");
     }
   };
 

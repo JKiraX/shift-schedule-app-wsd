@@ -51,14 +51,13 @@ const ChangePasswordScreen = () => {
         throw new Error("Failed to change password");
       }
     } catch (error) {
-      console.error("Change password failed:", error);
       let errorMessage = "An unexpected error occurred. Please try again.";
       if (error.response && error.response.data && error.response.data.message) {
         errorMessage = error.response.data.message;
       } else if (error.message) {
         errorMessage = error.message;
       }
-      Alert.alert("Change Password Failed", errorMessage);
+      Alert.alert("Change Password Failed");
     }
   };
 

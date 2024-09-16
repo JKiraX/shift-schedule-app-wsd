@@ -5,15 +5,12 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 
-// Screens
 import AdminHomeScreen from "../../screens/AdminScreens/AdminHome";
 import AdminScheduleScreen from "../../screens/AdminScreens/AdminSchedule";
 import AdminEmployeesScreen from "../../screens/AdminScreens/AdminEmployees";
 import AdminProfileScreen from "../../screens/AdminScreens/AdminProfile";
 import NotificationsScreen from "../../screens/notifications";
 
-
-// Screen names
 const AdminHome = "Home";
 const AdminSchedule = "Schedule";
 const AdminEmployees = "Employees";

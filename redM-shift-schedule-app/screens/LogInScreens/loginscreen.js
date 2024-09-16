@@ -29,37 +29,26 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      console.log("Sending login request with email:", email);
-  
       const response = await apiClient.post("/api/authentication/login", {
         email,
         password,
       });
-  
-      console.log("Full API response:", JSON.stringify(response, null, 2));
-  
+
       if (response.status === 200 && response.data) {
         const { id, email, token, userName, firstName, lastName, role } = response.data;
-  
-        console.log("Parsed response data:", { id, email, token, userName, firstName, lastName, role });
-  
-        // Store user data securely
-        await SecureStore.setItemAsync('userId', id.toString());
-        await SecureStore.setItemAsync('email', email);
-        await SecureStore.setItemAsync('token', token);
-        await SecureStore.setItemAsync('userName', userName);
-        await SecureStore.setItemAsync('firstName', firstName);
-        await SecureStore.setItemAsync('lastName', lastName);
-        await SecureStore.setItemAsync('role', role);
-  
-        // Navigate based on user role
+
+        await SecureStore.setItemAsync("userId", id.toString());
+        await SecureStore.setItemAsync("email", email);
+        await SecureStore.setItemAsync("token", token);
+        await SecureStore.setItemAsync("userName", userName);
+        await SecureStore.setItemAsync("firstName", firstName);
+        await SecureStore.setItemAsync("lastName", lastName);
+        await SecureStore.setItemAsync("role", role);
+
         if (navigation) {
-          let routeName;
-          if (role === 'Admin') {
-            routeName = email === 'riza.mia@redmps.com' ? 'AdminNav' : 'AdminNav1';
-          } else {
-            routeName = 'UserNav';
-          }
+          let routeName = role === "Admin" 
+            ? (email === "riza.mia@redmps.com" ? "AdminNav" : "AdminNav1") 
+            : "UserNav";
 
           navigation.dispatch(
             CommonActions.reset({
@@ -70,15 +59,11 @@ const LoginScreen = () => {
               }],
             })
           );
-        } else {
-          console.warn("Navigation object is not available. Unable to navigate.");
         }
       } else {
         throw new Error("Invalid response from server");
       }
     } catch (error) {
-      console.error("Login failed:", error);
-  
       let errorMessage = "An unexpected error occurred. Please try again.";
       if (error.response && error.response.status === 401) {
         errorMessage = "Invalid email or password!";
@@ -94,6 +79,7 @@ const LoginScreen = () => {
   const handleForgotPassword = () => {
     navigation.navigate("ForgotPassword");
   };
+
 
   return (
     <SafeAreaView style={styles.container}>

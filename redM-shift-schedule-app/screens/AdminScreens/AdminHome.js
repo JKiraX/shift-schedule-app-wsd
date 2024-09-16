@@ -43,7 +43,6 @@ const AdminHomeScreen = ({ navigation }) => {
 
   const groupShiftsByShiftName = (shifts) => {
     if (!Array.isArray(shifts)) {
-      console.error("Shifts is not an array:", shifts);
       return [];
     }
 
@@ -69,22 +68,21 @@ const AdminHomeScreen = ({ navigation }) => {
 
       if (response.ok) {
         const responseData = await response.json();
-        // console.log("Raw data from API:", responseData);
-
+    
         if (responseData.success && Array.isArray(responseData.data)) {
           const groupedShifts = groupShiftsByShiftName(responseData.data);
-          // console.log("Grouped shifts:", groupedShifts);
+      
           setShiftData(Object.values(groupedShifts));
         } else {
-          console.error("Unexpected data format:", responseData);
+       
           setShiftData([]);
         }
       } else {
-        console.error("Error fetching shift data:", response.status);
+      
         setShiftData([]);
       }
     } catch (error) {
-      console.error("Error fetching shift data:", error);
+      Alert.alert("Error fetching shift data");
       setShiftData([]);
     } finally {
       setIsLoading(false);

@@ -43,7 +43,6 @@ const ProfileScreenContent = ({ navigation, route }) => {
   
   const handleModalConfirm = async () => {
     try {
-      // Clear all stored user data
       await SecureStore.deleteItemAsync('userId');
       await SecureStore.deleteItemAsync('email');
       await SecureStore.deleteItemAsync('token');
@@ -52,7 +51,6 @@ const ProfileScreenContent = ({ navigation, route }) => {
       await SecureStore.deleteItemAsync('lastName');
       await SecureStore.deleteItemAsync('role');
 
-      // Navigate to Login screen and reset the navigation stack
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
@@ -60,7 +58,7 @@ const ProfileScreenContent = ({ navigation, route }) => {
         })
       );
     } catch (error) {
-      console.error("Logout failed:", error);
+
       Alert.alert("Logout Failed", "An unexpected error occurred. Please try again.");
     }
   };

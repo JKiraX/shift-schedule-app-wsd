@@ -16,7 +16,7 @@ const { width, height } = Dimensions.get("window");
 
 const UserHomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [shiftData, setShiftData] = useState([]) ;
+  const [shiftData, setShiftData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -43,7 +43,6 @@ const UserHomeScreen = ({ navigation }) => {
 
   const groupShiftsByShiftName = (shifts) => {
     if (!Array.isArray(shifts)) {
-      console.error("Shifts is not an array:", shifts);
       return [];
     }
 
@@ -69,31 +68,24 @@ const UserHomeScreen = ({ navigation }) => {
 
       if (response.ok) {
         const responseData = await response.json();
-        // console.log("Raw data from API:", responseData);
 
         if (responseData.success && Array.isArray(responseData.data)) {
           const groupedShifts = groupShiftsByShiftName(responseData.data);
-          // console.log("Grouped shifts:", groupedShifts);
           setShiftData(Object.values(groupedShifts));
         } else {
-          console.error("Unexpected data format:", responseData);
           setShiftData([]);
         }
       } else {
-        console.error("Error fetching shift data:", response.status);
         setShiftData([]);
       }
-    } catch (error) {
-      console.error("Error fetching shift data:", error);
+    } catch {
       setShiftData([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const formatTime = (time) => {
-    return moment(time, "HH:mm:ss").format("HH:mm");
-  };
+  const formatTime = (time) => moment(time, "HH:mm:ss").format("HH:mm")
 
   return (
     <SafeAreaView style={styles.container}>
