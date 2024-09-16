@@ -12,12 +12,10 @@ import {
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import ShiftCardChange from "../../components/Cards/ShiftCardChange";
-import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import DropdownComponent4 from "../../components/Dropdown/dropdownComponent4";
 import moment from "moment";
 
 const { width, height } = Dimensions.get("window");
-
 const AdminScheduleScreen = () => {
   const [selectedDates, setSelectedDates] = useState({});
   const [shiftData, setShiftData] = useState({});
@@ -25,7 +23,7 @@ const AdminScheduleScreen = () => {
   const [markedDates, setMarkedDates] = useState({});
   const [selectedUser, setSelectedUser] = useState("");
   const [users, setUsers] = useState([]);
-  const [selectedTab, setSelectedTab] = useState(0);
+ 
 
   useEffect(() => {
     fetchUsers();
@@ -34,6 +32,8 @@ const AdminScheduleScreen = () => {
   useEffect(() => {
     if (Object.keys(selectedDates).length > 0) {
       fetchShiftDataForMultipleDates(Object.keys(selectedDates));
+    } else {
+      setShiftData({});
     }
   }, [selectedDates, selectedUser]);
 
@@ -49,79 +49,60 @@ const AdminScheduleScreen = () => {
       if (responseData.success && Array.isArray(responseData.data)) {
         setUsers(responseData.data.map((user) => ({
           key: user.user_id,
-          value: `${user.first_name} ${user.last_name}`
+          value: `${user.first_name} ${user.last_name}`,
         })));
       } else {
-        console.error("Received data is not in the expected format:", responseData);
         setUsers([]);
       }
     } catch (error) {
-      console.error("Error fetching user data:", error.message);
+      Alert.alert("Error", "Error fetching user data");
     }
   };
 
   const fetchShiftDataForMultipleDates = async (dates) => {
     setIsLoading(true);
     const newShiftData = {};
-  
+
     for (const date of dates) {
       try {
         const formattedDate = moment(date).format("YYYY-MM-DD");
         let url = `http://192.168.5.22:3001/schedules?date=${formattedDate}`;
         
         if (selectedUser) {
-          const selectedUserObject = users.find(user => user.value === selectedUser);
+          const selectedUserObject = users.find((user) => user.value === selectedUser);
           if (selectedUserObject) {
             url += `&userId=${selectedUserObject.key}`;
           }
         }
-  
-        console.log("Fetching data from URL:", url);
-  
+
         const response = await fetch(url);
-  
+
         if (response.ok) {
           const responseData = await response.json();
-  
+
           if (responseData.success && Array.isArray(responseData.data)) {
             const groupedShifts = groupShiftsByShiftName(responseData.data);
             newShiftData[formattedDate] = Object.values(groupedShifts);
           } else {
-            console.error(
-              "Unexpected data format for date",
-              formattedDate,
-              ":",
-              responseData
-            );
             newShiftData[formattedDate] = [];
           }
         } else {
-          const errorText = await response.text();
-          console.error(
-            "Error fetching shift data for date",
-            formattedDate,
-            ":",
-            response.status,
-            errorText
-          );
           newShiftData[formattedDate] = [];
         }
       } catch (error) {
-        console.error("Error fetching shift data for date", date, ":", error);
         newShiftData[date] = [];
       }
     }
-  
+
     setShiftData(newShiftData);
     setIsLoading(false);
   };
 
   const groupShiftsByShiftName = (shifts) => {
     if (!Array.isArray(shifts)) {
-      console.error("Shifts is not an array:", shifts);
       return {};
     }
-  
+
     return shifts.reduce((acc, shift) => {
       if (!acc[shift.shift_name]) {
         acc[shift.shift_name] = {
@@ -133,10 +114,8 @@ const AdminScheduleScreen = () => {
       return acc;
     }, {});
   };
-  
 
   const handleSelect = (selected) => {
-    console.log("Selected user:", selected);
     setSelectedUser(selected);
     if (Object.keys(selectedDates).length > 0) {
       fetchShiftDataForMultipleDates(Object.keys(selectedDates));
@@ -147,10 +126,12 @@ const AdminScheduleScreen = () => {
     const dateString = day.dateString;
     const newSelectedDates = { ...selectedDates };
     const newMarkedDates = { ...markedDates };
+    const newShiftData = { ...shiftData };
 
     if (newSelectedDates[dateString]) {
       delete newSelectedDates[dateString];
       delete newMarkedDates[dateString];
+      delete newShiftData[dateString];  
     } else {
       newSelectedDates[dateString] = true;
       newMarkedDates[dateString] = {
@@ -163,11 +144,16 @@ const AdminScheduleScreen = () => {
 
     setSelectedDates(newSelectedDates);
     setMarkedDates(newMarkedDates);
+    setShiftData(newShiftData);
   };
 
   const renderShifts = () => {
     if (isLoading) {
       return <ActivityIndicator size="large" color="#c82f2f" />;
+    } 
+    
+    if (Object.keys(selectedDates).length === 0){
+      return <Text style={styles.noShiftsText}>No dates selected. Please select a date to view shifts.</Text>;
     }
 
     const handleSwitchSuccess = (date) => {
@@ -183,7 +169,7 @@ const AdminScheduleScreen = () => {
         <Text style={styles.dateHeader}>{moment(date).format("LL")}:</Text>
         {shiftData[date] && shiftData[date].length > 0 ? (
           shiftData[date].map((shift, index) => {
-            console.log("Rendering shift:", shift); 
+          
             return (
               <ShiftCardChange
                 key={`${date}-${index}`}
@@ -213,7 +199,7 @@ const AdminScheduleScreen = () => {
   
   return (
     <SafeAreaView style={styles.container}>
-      <DropdownComponent4 data={users} onSelect={handleSelect} />
+      <DropdownComponent4 data={users} onSelect={handleSelect} value={selectedUser}/>
       
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <Calendar

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
   View,
@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import ShiftCard from "../../components/Cards/ShiftCard";
-import DropdownComponent from "../../components/Dropdown/dropdownComponent";
 import DropdownComponent4 from "../../components/Dropdown/dropdownComponent4";
 import moment from "moment";
 
@@ -33,6 +32,9 @@ const UserScheduleScreen = () => {
   useEffect(() => {
     if (Object.keys(selectedDates).length > 0) {
       fetchShiftDataForMultipleDates(Object.keys(selectedDates));
+    } else {
+    
+      setShiftData({});
     }
   }, [selectedDates, selectedUser]);
 
@@ -48,20 +50,18 @@ const UserScheduleScreen = () => {
       if (responseData.success && Array.isArray(responseData.data)) {
         setUsers(responseData.data.map((user) => ({
           key: user.user_id.toString(),
-          value: `${user.first_name} ${user.last_name}`
+          value: `${user.first_name} ${user.last_name}`,
         })));
       } else {
-        console.error("Received data is not in the expected format:", responseData);
         setUsers([]);
       }
-    } catch (error) {
-      console.error("Error fetching user data:", error.message);
+    } catch {
+      Alert.alert("Error", "Failed to fetch user data. Please try again.");
     }
   };
 
   const groupShiftsByShiftName = (shifts) => {
     if (!Array.isArray(shifts)) {
-      console.error("Shifts is not an array:", shifts);
       return {};
     }
 
@@ -93,8 +93,6 @@ const UserScheduleScreen = () => {
           }
         }
 
-        console.log("Fetching data from URL:", url);
-
         const response = await fetch(url);
 
         if (response.ok) {
@@ -104,27 +102,12 @@ const UserScheduleScreen = () => {
             const groupedShifts = groupShiftsByShiftName(responseData.data);
             newShiftData[formattedDate] = Object.values(groupedShifts);
           } else {
-            console.error(
-              "Unexpected data format for date",
-              formattedDate,
-              ":",
-              responseData
-            );
             newShiftData[formattedDate] = [];
           }
         } else {
-          const errorText = await response.text();
-          console.error(
-            "Error fetching shift data for date",
-            formattedDate,
-            ":",
-            response.status,
-            errorText
-          );
           newShiftData[formattedDate] = [];
         }
-      } catch (error) {
-        console.error("Error fetching shift data for date", date, ":", error);
+      } catch {
         newShiftData[date] = [];
       }
     }
@@ -134,21 +117,25 @@ const UserScheduleScreen = () => {
   };
 
   const handleSelect = (selected) => {
-    console.log("Selected user:", selected);
     setSelectedUser(selected);
-    if (Object.keys(selectedDates).length > 0) {
+    if (selected === "") {
+      setShiftData({});
+    } else if (Object.keys(selectedDates).length > 0) {
       fetchShiftDataForMultipleDates(Object.keys(selectedDates));
     }
   };
+
 
   const handleDayPress = (day) => {
     const dateString = day.dateString;
     const newSelectedDates = { ...selectedDates };
     const newMarkedDates = { ...markedDates };
+    const newShiftData = { ...shiftData };
 
     if (newSelectedDates[dateString]) {
       delete newSelectedDates[dateString];
       delete newMarkedDates[dateString];
+      delete newShiftData[dateString];  
     } else {
       newSelectedDates[dateString] = true;
       newMarkedDates[dateString] = {
@@ -161,12 +148,18 @@ const UserScheduleScreen = () => {
 
     setSelectedDates(newSelectedDates);
     setMarkedDates(newMarkedDates);
+    setShiftData(newShiftData);
   };
 
   const renderShifts = () => {
     if (isLoading) {
       return <ActivityIndicator size="large" color="#c82f2f" />;
     }
+
+    if (Object.keys(selectedDates).length === 0){
+      return <Text style={styles.noShiftsText}> Please select a date to view shifts.</Text>;
+    }
+
 
     const formatTime = (time) => {
       return moment(time, "HH:mm:ss").format("HH:mm");
@@ -288,8 +281,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   noShiftsText: {
-    fontSize: 16,
-    color: "gray",
+    marginTop: 50,
+    color: "gray",   
+    textAlign:"center",
+    fontWeight: "normal",  
+    fontSize: 18,
   },
 });
 
