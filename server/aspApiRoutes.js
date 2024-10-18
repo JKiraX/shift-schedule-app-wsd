@@ -1,9 +1,8 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { SERVER_URL } from '@env';
 
 const apiClient = axios.create({
-  baseURL: `${SERVER_URL}`,
+  baseURL: 'http://192.168.5.22:5134',
   headers: {
     'Content-Type': 'application/json',
     'Accept': '*/*',

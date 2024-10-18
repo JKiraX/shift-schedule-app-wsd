@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { SERVER_URL } from '@env';
-
 import {
   View,
   StyleSheet,
@@ -65,7 +63,7 @@ const UserHomeScreen = ({ navigation }) => {
     try {
       const formattedDate = moment(date).format("YYYY-MM-DD");
       const response = await fetch(
-        `${SERVER_URL}/schedules?date=${formattedDate}`
+        `http://192.168.5.22:3001/schedules?date=${formattedDate}`
       );
 
       if (response.ok) {

@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { SERVER_URL } from '@env';
-
 import {
   Text,
   View,
@@ -41,7 +39,7 @@ const AdminScheduleScreen = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${SERVER_URL}/users`);
+      const response = await fetch(`http://192.168.5.22:3001/users`);
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Network response was not ok: ${response.status}, ${errorText}`);
@@ -68,7 +66,7 @@ const AdminScheduleScreen = () => {
     for (const date of dates) {
       try {
         const formattedDate = moment(date).format("YYYY-MM-DD");
-        let url = `${SERVER_URL}/schedules?date=${formattedDate}`;
+        let url = `http://192.168.5.22:3001/schedules?date=${formattedDate}`;
         
         if (selectedUser) {
           const selectedUserObject = users.find((user) => user.value === selectedUser);

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { SERVER_URL } from '@env';
 import {
   Text,
   View,
@@ -49,7 +48,7 @@ const ShiftCardChange = ({
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${SERVER_URL}/users`);
+      const response = await fetch(`http://192.168.5.22:3001/users`);
       const responseData = await response.json();
 
       if (responseData.success && Array.isArray(responseData.data)) {
@@ -95,7 +94,7 @@ const ShiftCardChange = ({
 
     try {
       const response = await fetch(
-        `${SERVER_URL}/api/schedules/switch`,
+        `http://192.168.5.22:3001/api/schedules/switch`,
         {
           method: "PUT",
           headers: {
