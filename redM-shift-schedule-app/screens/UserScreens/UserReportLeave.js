@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SERVER_URL } from '@env';
+import { SERVER_URL_APP } from '@env';
 
 import {
   Text,
@@ -61,7 +61,7 @@ const UserRequestLeaveScreen = () => {
   const fetchShifts = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${SERVER_URL}/api/shifts`);
+      const response = await fetch(`${SERVER_URL_APP}/api/shifts`);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -134,7 +134,7 @@ const UserRequestLeaveScreen = () => {
       };
 
       const response = await fetch(
-        `${SERVER_URL}/api/update-overtime `,
+        `${SERVER_URL_APP}/api/update-overtime `,
         {
           method: "PUT",
           headers: {
@@ -294,7 +294,7 @@ const UserRequestLeaveScreen = () => {
         const formattedReportedAt = format(saTime, "yyyy-MM-dd'T'HH:mm:ss");
 
         const response = await fetch(
-          `${SERVER_URL}/api/report-leave`,
+          `${SERVER_URL_APP}/api/report-leave`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

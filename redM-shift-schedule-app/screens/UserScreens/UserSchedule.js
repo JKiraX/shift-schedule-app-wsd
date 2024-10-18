@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { SERVER_URL } from '@env';
+import { SERVER_URL_APP } from '@env';
 
 import {
   Text,
@@ -42,7 +42,7 @@ const UserScheduleScreen = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${SERVER_URL}/users`);
+      const response = await fetch(`${SERVER_URL_APP}/users`);
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Network response was not ok: ${response.status}, ${errorText}`);
@@ -86,7 +86,7 @@ const UserScheduleScreen = () => {
     for (const date of dates) {
       try {
         const formattedDate = moment(date).format("YYYY-MM-DD");
-        let url = `${SERVER_URL}/schedules?date=${formattedDate}`;
+        let url = `${SERVER_URL_APP}/schedules?date=${formattedDate}`;
         
         if (selectedUser) {
           const selectedUserObject = users.find(user => user.value === selectedUser);
