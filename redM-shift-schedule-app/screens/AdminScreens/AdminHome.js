@@ -11,6 +11,8 @@ import {
 import CalendarStrip from "react-native-calendar-strip";
 import ShiftCard from "../../components/Cards/ShiftCard";
 import moment from "moment";
+import { SERVER_URL } from '@env';
+
 
 const { width, height } = Dimensions.get("window");
 
@@ -63,7 +65,7 @@ const AdminHomeScreen = ({ navigation }) => {
     try {
       const formattedDate = moment(date).format("YYYY-MM-DD");
       const response = await fetch(
-        `http://192.168.5.22:3001/schedules?date=${formattedDate}`
+        `${SERVER_URL}/schedules?date=${formattedDate}`
       );
 
       if (response.ok) {
