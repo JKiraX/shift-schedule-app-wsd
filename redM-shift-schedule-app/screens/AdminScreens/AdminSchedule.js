@@ -39,7 +39,7 @@ const AdminScheduleScreen = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`http://192.168.5.22:3001/users`);
+      const response = await fetch(`http://192.168.5.74:3001/users`);
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Network response was not ok: ${response.status}, ${errorText}`);
@@ -66,7 +66,7 @@ const AdminScheduleScreen = () => {
     for (const date of dates) {
       try {
         const formattedDate = moment(date).format("YYYY-MM-DD");
-        let url = `http://192.168.5.22:3001/schedules?date=${formattedDate}`;
+        let url = `http://192.168.5.74:3001/schedules?date=${formattedDate}`;
         
         if (selectedUser) {
           const selectedUserObject = users.find((user) => user.value === selectedUser);
