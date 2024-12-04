@@ -2,6 +2,7 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 const apiClient = axios.create({
+// linux machine IP: 192.168.6.50
   baseURL: 'http://192.168.5.22:5134',
   headers: {
     'Content-Type': 'application/json',
